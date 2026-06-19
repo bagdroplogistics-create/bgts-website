@@ -102,12 +102,20 @@ export const trackingSchema = z.object({
 export type TrackingFormData = z.infer<typeof trackingSchema>
 
 // ─── Contact page form ────────────────────────────────────────────────────
-export const contactPageSchema = z.object({ame:    z.string().min(2, 'Please enter your name'),
-  email:   z.string().email('Enter a valid email'),
-  phone:   z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit mobile number').optional().or(z.literal('')),
-  subject: z.string().min(3, 'Please enter a subject'),
-  message: z.string().min(10, 'Please write at least 10 characters'),
-  type:    z.enum(['general', 'quote', 'partnership', 'complaint', 'ekohaul']).default('general'),
+export const contactPageSchema = z.object({
+  name: z.string().min(2, 'Name is required'),
+  email: z.string().email('Valid email required'),
+  phone: z.string().optional(),
+  subject: z.string().min(1, 'Subject is required'),
+  message: z.string().min(10, 'Message is required'),
+  type: z.enum([
+    'general',
+    'quote',
+    'partnership',
+    'complaint',
+    'ekohaul',
+  ]),
 })
 
-export type ContactPageFormData = z.infer<typeof contactPageSchema>
+export type ContactPageFormData =
+  z.infer<typeof contactPageSchema>
