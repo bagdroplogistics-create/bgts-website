@@ -1,0 +1,110 @@
+import type { Branch } from '@/types'
+
+export const branches: Branch[] = [
+  {
+    city: 'Vadodara',
+    state: 'Gujarat',
+    address: 'BGTS Headquarters, Old Padra Road, Vadodara',
+    phone: '+91 63 5722 5722X',
+    email: 'vadodara@bgts.in',
+    pincode: '390015',
+    isHub: true,
+  },
+  {
+    city: 'Ahmedabad',
+    state: 'Gujarat',
+    address: 'GIDC, Naroda Industrial Area, Ahmedabad',
+    phone: '+91 63 5722 5722',
+    email: 'ahmedabad@bgts.in',
+    pincode: '382330',
+    isHub: true,
+  },
+  {
+    city: 'Surat',
+    state: 'Gujarat',
+    address: 'Sachin GIDC, Ring Road, Surat',
+    phone: '+91 63 5722 5722',
+    email: 'surat@bgts.in',
+    pincode: '394230',
+    isHub: true,
+  },
+  {
+    city: 'Rajkot',
+    state: 'Gujarat',
+    address: 'Gondal Road, Mavdi, Rajkot',
+    phone: '+91 63 5722 5722',
+    email: 'rajkot@bgts.in',
+    pincode: '360004',
+  },
+  {
+    city: 'Ankleshwar',
+    state: 'Gujarat',
+    address: 'GIDC Phase II, Ankleshwar',
+    phone: '+91 63 5722 5722',
+    email: 'ankleshwar@bgts.in',
+    pincode: '393002',
+  },
+  {
+    city: 'Bharuch',
+    state: 'Gujarat',
+    address: 'National Highway 48, Bharuch',
+    phone: '+91 63 5722 5722',
+    email: 'bharuch@bgts.in',
+    pincode: '392001',
+  },
+  {
+    city: 'Vapi',
+    state: 'Gujarat',
+    address: 'GIDC Industrial Estate, Vapi',
+    phone: '+91 63 5722 5722',
+    email: 'vapi@bgts.in',
+    pincode: '396195',
+  },
+  {
+    city: 'Halol',
+    state: 'Gujarat',
+    address: 'GIDC, Halol, Panchmahal',
+    phone: '+91 63 5722 5722',
+    email: 'halol@bgts.in',
+    pincode: '389350',
+  },
+  {
+    city: 'Mumbai',
+    state: 'Maharashtra',
+    address: 'Bhiwandi Warehouse Hub, Thane District',
+    phone: '+91 63 5722 5722',
+    email: 'mumbai@bgts.in',
+    pincode: '421302',
+    isHub: true,
+  },
+  {
+    city: 'Pune',
+    state: 'Maharashtra',
+    address: 'Chakan MIDC, Pune',
+    phone: '+91 63 5722 5722',
+    email: 'pune@bgts.in',
+    pincode: '410501',
+    isHub: true,
+  },
+  {
+    city: 'Nashik',
+    state: 'Maharashtra',
+    address: 'Satpur MIDC, Nashik',
+    phone: '+91 63 5722 5722',
+    email: 'nashik@bgts.in',
+    pincode: '422007',
+  },
+  {
+    city: 'Aurangabad',
+    state: 'Maharashtra',
+    address: 'Chikalthana MIDC, Aurangabad',
+    phone: '+91 63 5722 5722',
+    email: 'aurangabad@bgts.in',
+    pincode: '431006',
+  },
+]
+
+export const hubs = branches.filter((b) => b.isHub)
+
+export const getBranchesByState = (state: string): Branch[] =>
+  branches.filter((b) => b.state === state)
