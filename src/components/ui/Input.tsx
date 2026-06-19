@@ -1,14 +1,17 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps
+  extends Omit<
+    React.InputHTMLAttributes<HTMLInputElement>,
+    'prefix' | 'suffix'
+  > {
   label?: string
   error?: string
   hint?: string
   prefix?: React.ReactNode
   suffix?: React.ReactNode
 }
-
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
   ({ className, label, error, hint, prefix, suffix, id, ...props }, ref) => {
     const inputId = id ?? label?.toLowerCase().replace(/\s+/g, '-')
@@ -28,10 +31,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
 
         <div className="relative flex items-center">
-          {prefix && (
-            <div className="absolute left-3 text-ink-muted pointer-events-none">
-              {prefix}
-            </div>
+         { leftIcon && (
+             <div>{leftIcon}</div>
           )}
 
           <input
@@ -58,10 +59,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
 
-          {suffix && (
-            <div className="absolute right-3 text-ink-muted pointer-events-none">
-              {suffix}
-            </div>
+         {rightIcon && (
+           <div>{rightIcon}</div>
           )}
         </div>
 
