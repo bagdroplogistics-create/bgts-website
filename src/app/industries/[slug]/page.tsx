@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { Tag } from '@/components/ui/Tag'
@@ -658,7 +659,7 @@ export default async function IndustryDetailPage(
                     iconPosition="left"
                     asChild
                   >
-                    <Link href="/quote">Get a Quote</Link>
+                    <BookNowButton>Book Now</BookNowButton>
                   </Button>
                   <Button variant="secondary" size="md" asChild>
                     <a href="tel:+916357225722">Call +91 63 5722 5722</a>
@@ -744,7 +745,7 @@ export default async function IndustryDetailPage(
                   iconPosition="left"
                   asChild
                 >
-                  <Link href="/quote">Get a Quote</Link>
+                  <BookNowButton>Book Now</BookNowButton>
                 </Button>
                 <Button variant="ghost" size="md" className="w-full mt-2" asChild>
                   <a href="tel:+916357225722">Call +91 63 5722 5722</a>

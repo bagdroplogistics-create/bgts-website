@@ -3,15 +3,15 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Leaf, Zap } from 'lucide-react'
+import { Menu, X, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Button } from '@/components/ui/Button'
 
 const ekoLinks = [
-  { label: 'Plans',           href: '/ekohaul/book'   },
-  { label: 'Carbon Calculator', href: '/ekohaul/esg'  },
-  { label: 'Fleet',           href: '/ekohaul/fleet'  },
-  { label: 'About EkoHaul',   href: '/ekohaul#about'  },
+  { label: 'Plans',              href: '/ekohaul/book'   },
+  { label: 'Carbon Calculator',  href: '/ekohaul/esg'    },
+  { label: 'About BGTS EV',      href: '/ekohaul#about'  },
 ]
 
 export function EkoHaulNavbar() {
@@ -37,26 +37,26 @@ export function EkoHaulNavbar() {
         scrolled && 'shadow-nav'
       )}
     >
-      {/* EkoHaul gradient bar */}
+      {/* BGTS EV gradient bar */}
       <div className="h-[3px] bg-gradient-eko" aria-hidden="true" />
 
       <nav
         className="container-xl flex items-center justify-between"
         style={{ height: '72px' }}
-        aria-label="EkoHaul navigation"
+        aria-label="BGTS EV navigation"
       >
-        {/* EkoHaul logo */}
+        {/* BGTS EV logo */}
         <Link
           href="/ekohaul"
           className="flex items-center gap-2.5"
-          aria-label="EkoHaul — go to EkoHaul homepage"
+          aria-label="BGTS EV — go to homepage"
         >
           <div className="w-8 h-8 rounded-lg bg-gradient-eko flex items-center justify-center">
-            <Leaf size={16} className="text-white" aria-hidden="true" />
+            <Zap size={16} className="text-white" aria-hidden="true" />
           </div>
           <div>
             <span className="font-display font-black text-eko text-lg leading-none">
-              EkoHaul
+              BGTS EV
             </span>
             <div className="text-2xs text-ink-muted font-mono leading-none">
               by BGTS
@@ -98,7 +98,7 @@ export function EkoHaulNavbar() {
             iconPosition="left"
             asChild
           >
-            <Link href="/ekohaul/book">Book EV Fleet</Link>
+            <BookNowButton variant="eko" modalType="ev">Book Now</BookNowButton>
           </Button>
         </div>
 
@@ -127,7 +127,7 @@ export function EkoHaulNavbar() {
             ))}
             <div className="mt-3 pt-3 border-t border-ink-ghost/10">
               <Button variant="eko" size="md" asChild>
-                <Link href="/ekohaul/book">Book EV Fleet</Link>
+                <BookNowButton variant="eko" modalType="ev">Book Now</BookNowButton>
               </Button>
             </div>
           </nav>

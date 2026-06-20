@@ -166,7 +166,7 @@ export default async function ServiceDetailPage(
                   asChild
                 >
                   <Link href={`/quote?service=${service.slug}`}>
-                    Get Quote — {service.shortName}
+                    Book Now — {service.shortName}
                   </Link>
                 </Button>
                 <Button

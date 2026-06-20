@@ -1,4 +1,6 @@
+import Image from 'next/image'
 import Link from 'next/link'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Truck, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
@@ -6,9 +8,24 @@ export function CTABanner() {
   return (
     <section
       className="relative overflow-hidden py-20"
-      style={{ background: 'var(--gradient-energy)' }}
       aria-labelledby="cta-heading"
     >
+      {/* Background photo */}
+      <Image
+        src="/cta-bg.jpg"
+        alt=""
+        fill
+        sizes="100vw"
+        className="object-cover object-center"
+        aria-hidden="true"
+      />
+
+      {/* Dark overlay */}
+      <div
+        className="absolute inset-0 bg-black/60"
+        aria-hidden="true"
+      />
+
       {/* Arrow pattern overlay */}
       <div
         className="absolute inset-0 opacity-10"
@@ -43,7 +60,7 @@ export function CTABanner() {
             className="bg-white text-brand hover:bg-white/90 border-white"
             asChild
           >
-            <Link href="/quote">Get an Instant Quote</Link>
+            <BookNowButton variant="primary" size="lg" className="bg-white text-brand hover:bg-white/90">Book Now</BookNowButton>
           </Button>
           <Button
             variant="ghost"

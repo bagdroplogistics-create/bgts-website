@@ -15,7 +15,7 @@ interface UseInViewOptions {
  */
 export function useInView<T extends Element = HTMLDivElement>(
   options: UseInViewOptions = {}
-): [React.RefObject<T>, boolean] {
+): [React.RefObject<T | null>, boolean] {
   const { threshold = 0.15, rootMargin = '0px', once = true } = options
   const ref = useRef<T>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -48,7 +48,7 @@ export function useInView<T extends Element = HTMLDivElement>(
  * Useful when you want to control the ref yourself.
  */
 export function useIsVisible(
-  ref: React.RefObject<Element>,
+  ref: React.RefObject<Element | null>,
   options: UseInViewOptions = {}
 ): boolean {
   const { threshold = 0.15, rootMargin = '0px', once = true } = options

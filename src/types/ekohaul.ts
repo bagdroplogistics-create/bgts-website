@@ -1,4 +1,4 @@
-// ─── EkoHaul EV Fleet Types ──────────────────────────────────────────────
+// ─── BGTS EV Fleet Types ──────────────────────────────────────────────
 
 export type EkoFleetTier = 'flex-ev' | 'dedi-ev' | 'fleet-ev'
 

@@ -31,7 +31,6 @@ const SERVICE_OPTIONS = [
   { value: 'full-truck-load', label: 'Full Truck Load (FTL)' },
   { value: 'part-truck-load', label: 'Part Truck Load (PTL)' },
   { value: 'express-parcel',  label: 'Express Parcel'        },
-  { value: 'tanker-bulk',     label: 'Tanker & Bulk'         },
   { value: 'heavy-odc',       label: 'Heavy & ODC'           },
   { value: 'multimodal',      label: 'Multimodal'            },
 ]
@@ -485,7 +484,7 @@ function Step4Confirm({
           Back
         </Button>
         <Button type="submit" variant="primary" size="lg" className="flex-1" loading={isSubmitting} icon={<ArrowRight size={16} />}>
-          Get My Quote
+          Book Now
         </Button>
       </div>
 

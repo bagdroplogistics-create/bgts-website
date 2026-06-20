@@ -15,7 +15,7 @@ export const industries: Industry[] = [
     icon: 'FlaskConical',
     description:
       'ADC-compliant tanker fleet for hazardous and non-hazardous chemicals. Temperature-controlled options for pharma API and finished formulations.',
-    services: ['tanker-bulk', 'full-truck-load', 'warehousing'],
+    services: ['heavy-odc', 'full-truck-load', 'warehousing'],
   },
   {
     slug: 'fmcg',
@@ -55,7 +55,7 @@ export const industries: Industry[] = [
     icon: 'Wheat',
     description:
       "Bulk grain, edible oil tankers, and cold-chain vans for Gujarat's agri heartland. Compliance with FSSAI transport norms across the supply chain.",
-    services: ['tanker-bulk', 'part-truck-load', 'warehousing'],
+    services: ['heavy-odc', 'part-truck-load', 'warehousing'],
   },
   {
     slug: 'infrastructure',

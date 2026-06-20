@@ -31,6 +31,7 @@ export function Industries() {
             title="Deep expertise across sectors"
             subtitle="75 years of sector-specific logistics knowledge — from chemicals to e-commerce, automotive to agriculture."
             align="left"
+            titleClassName="text-5xl md:text-6xl"
           />
         </div>
 

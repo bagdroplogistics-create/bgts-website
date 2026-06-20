@@ -26,7 +26,7 @@ export default function QuotePage() {
         {/* Page header */}
         <div className="bg-white border-b border-ink-ghost/10">
           <div className="container-xl py-10 md:py-14">
-            <p className="eyebrow mb-2">Get a Quote</p>
+            <p className="eyebrow mb-2">Book Now</p>
             <h1 className="font-display font-black text-4xl md:text-5xl text-ink-strong tracking-tight mb-3">
               Instant freight estimate
             </h1>

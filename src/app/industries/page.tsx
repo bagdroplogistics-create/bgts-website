@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { Tag } from '@/components/ui/Tag'
@@ -136,7 +137,7 @@ export default function IndustriesPage() {
                 iconPosition="left"
                 asChild
               >
-                <Link href="/quote">Get a Quote</Link>
+                <BookNowButton>Book Now</BookNowButton>
               </Button>
               <Button variant="secondary" size="lg" asChild>
                 <a href="tel:+916357225722">Call +91 63 5722 5722</a>

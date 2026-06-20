@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { SectionHeading } from '@/components/ui/SectionHeading'
@@ -11,7 +12,7 @@ import { ArrowRight, Truck } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Our Services',
   description:
-    'BGTS freight services: FTL, PTL, Express Parcel, Warehousing, Tanker & Bulk, Heavy & ODC, Multimodal, and Contract Logistics across Gujarat and Maharashtra.',
+    'BGTS freight services: FTL, PTL, Express Parcel, Warehousing, Heavy & ODC, Multimodal, and Contract Logistics across Gujarat and Maharashtra.',
 }
 
 export default function ServicesPage() {
@@ -94,7 +95,7 @@ export default function ServicesPage() {
               Our team will assess your route, weight, and timeline and recommend the best option.
             </p>
             <Button variant="primary" size="lg" icon={<Truck size={16} />} iconPosition="left" asChild>
-              <Link href="/quote">Get a Quote & Recommendation</Link>
+              <BookNowButton size="lg">Book Now — Find Your Service</BookNowButton>
             </Button>
           </div>
         </div>

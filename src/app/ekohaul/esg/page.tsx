@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
@@ -114,7 +115,7 @@ export default function EkoHaulESGPage() {
           </h1>
           <p className="text-white/70 text-lg max-w-xl">
             Model your fleet's monthly carbon reduction and cost savings by switching
-            from diesel to EkoHaul EVs. Results formatted for BRSR reporting.
+            from diesel to BGTS EVs. Results formatted for BRSR reporting.
           </p>
         </div>
       </div>
@@ -398,17 +399,9 @@ export default function EkoHaulESGPage() {
 
                 {/* CTA */}
                 <div className="flex flex-wrap gap-3">
-                  <Button
-                    variant="eko"
-                    size="lg"
-                    icon={<ArrowRight size={16} />}
-                    iconPosition="right"
-                    asChild
-                  >
-                    <Link href="/ekohaul/book">
-                      Get EV Fleet Quote — {input.quantity} vehicles
-                    </Link>
-                  </Button>
+                  <BookNowButton variant="eko" size="lg" modalType="ev">
+                    Book Now — {input.quantity} vehicles
+                  </BookNowButton>
                   <Button
                     variant="ghost"
                     size="lg"

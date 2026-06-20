@@ -8,8 +8,8 @@ const footerLinks = {
     { label: 'Part Truck Load (PTL)', href: '/services/part-truck-load'  },
     { label: 'Express Parcel',         href: '/services/express-parcel'   },
     { label: 'Warehousing',            href: '/services/warehousing'      },
-    { label: 'Tanker & Bulk',         href: '/services/tanker-bulk'      },
     { label: 'Heavy & ODC',           href: '/services/heavy-odc'        },
+    { label: 'Multimodal Logistics',  href: '/services/multimodal'       },
   ],
   Company: [
     { label: 'About BGTS',    href: '/about'      },
@@ -19,8 +19,8 @@ const footerLinks = {
     { label: 'Careers',       href: '/careers'    },
     { label: 'Contact Us',    href: '/contact'    },
   ],
-  'EkoHaul EV': [
-    { label: 'EkoHaul Overview',     href: '/ekohaul'        },
+  'BGTS EV': [
+    { label: 'BGTS EV Overview',     href: '/ekohaul'        },
     { label: 'FlexEV Plan',          href: '/ekohaul/book?tier=flex-ev'  },
     { label: 'DediEV Plan',          href: '/ekohaul/book?tier=dedi-ev'  },
     { label: 'FleetEV Plan',         href: '/ekohaul/book?tier=fleet-ev' },
@@ -28,7 +28,7 @@ const footerLinks = {
     { label: 'ESG / BRSR Report',    href: '/ekohaul/esg'    },
   ],
   Tools: [
-    { label: 'Get a Quote',          href: '/quote'    },
+    { label: 'Book Now',             href: '/quote'    },
     { label: 'Track Shipment',       href: '/tracking' },
   ],
 }
@@ -53,9 +53,9 @@ export function Footer() {
               <Image
                 src="/logo-bgts-white.png"
                 alt="BGTS — Baroda Goods Transport Service"
-                width={120}
-                height={48}
-                className="h-10 w-auto object-contain"
+                width={180}
+                height={72}
+                className="h-16 w-auto object-contain"
               />
             </div>
 
@@ -100,7 +100,7 @@ export function Footer() {
                 href="/ekohaul"
                 className="text-eko text-xs font-semibold hover:underline"
               >
-                EkoHaul — Gujarat's First EV Cargo Fleet
+                BGTS EV — Gujarat's First EV Cargo Fleet
               </Link>
             </div>
           </div>

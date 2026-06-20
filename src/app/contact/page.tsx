@@ -95,7 +95,7 @@ export default function ContactPage() {
               {/* EkoHaul enquiries */}
               <div className="rounded-xl p-5 border border-eko/20 bg-eko-50">
                 <p className="text-xs font-display font-bold uppercase tracking-wider text-eko mb-2">
-                  EkoHaul EV Fleet Enquiries
+                  BGTS EV Fleet Enquiries
                 </p>
                 <a href="mailto:ekohaul@bgts.in" className="text-sm font-semibold text-eko hover:underline block">
                   ekohaul@bgts.in

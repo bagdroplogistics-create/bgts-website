@@ -5,7 +5,6 @@ export type ServiceSlug =
   | 'part-truck-load'
   | 'express-parcel'
   | 'warehousing'
-  | 'tanker-bulk'
   | 'heavy-odc'
   | 'multimodal'
   | 'contract-logistics'

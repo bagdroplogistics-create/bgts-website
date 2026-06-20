@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'BGTS — Moving India\'s goods, on time, since 1950',
     description:
-      'Technology-enabled road, rail, and multimodal logistics across Gujarat and Maharashtra. FTL, PTL, Express, Warehousing, and EkoHaul EV Fleet.',
+      'Technology-enabled road, rail, and multimodal logistics across Gujarat and Maharashtra. FTL, PTL, Express, Warehousing, and BGTS EV Fleet.',
   },
 }
 
@@ -44,7 +44,7 @@ export default function HomePage() {
       {/* 6. Industries served */}
       <Industries />
 
-      {/* 7. EkoHaul EV section — green */}
+      {/* 7. BGTS EV section — green */}
       <EkoBanner />
 
       {/* 8. CTA — energy gradient */}

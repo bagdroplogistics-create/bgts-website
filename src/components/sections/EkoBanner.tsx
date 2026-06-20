@@ -47,7 +47,7 @@ export function EkoBanner() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-pill bg-white/10 border border-white/20 mb-6">
               <span className="w-2 h-2 rounded-full bg-eko-lime animate-pulse-brand" aria-hidden="true" />
               <span className="text-eko-lime text-xs font-bold tracking-wider uppercase">
-                Now Live — Gujarat's First EV Cargo Fleet
+                Now Live — Gujarat&apos;s First EV Cargo Fleet
               </span>
             </div>
 
@@ -59,9 +59,9 @@ export function EkoBanner() {
             </h2>
 
             <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-lg">
-              EkoHaul is BGTS's EV fleet-as-a-service division — zero-emission
+              BGTS EV is our EV fleet-as-a-service division — zero-emission
               delivery vehicles at or below the cost of diesel. Built for
-              Gujarat's logistics corridors. ESG-ready from day one.
+              Gujarat&apos;s logistics corridors. ESG-ready from day one.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
@@ -72,7 +72,7 @@ export function EkoBanner() {
                 className="bg-white text-eko hover:bg-eko-50 hover:text-eko-700 shadow-none"
                 asChild
               >
-                <Link href="/ekohaul">Explore EkoHaul</Link>
+                <Link href="/ekohaul">Explore BGTS EV</Link>
               </Button>
               <Button
                 variant="ghost"
@@ -137,3 +137,4 @@ export function EkoBanner() {
     </section>
   )
 }
+

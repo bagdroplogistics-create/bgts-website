@@ -12,7 +12,7 @@ const TYPE_OPTIONS = [
   { value: 'general',     label: 'General Enquiry' },
   { value: 'quote',       label: 'Request a Quote' },
   { value: 'partnership', label: 'Partnership / B2B' },
-  { value: 'ekohaul',    label: 'EkoHaul EV Fleet' },
+  { value: 'ekohaul',    label: 'BGTS EV Fleet' },
   { value: 'complaint',   label: 'Feedback / Complaint' },
 ]
 

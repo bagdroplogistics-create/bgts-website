@@ -5,11 +5,12 @@ import { Button } from '@/components/ui/Button'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { ekoFleetPlans } from '@/data/ekohaul-vehicles'
 import { CheckCircle, Zap, Leaf, BarChart3, ArrowRight, Truck } from 'lucide-react'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 
 export const metadata: Metadata = {
-  title: "EkoHaul — Gujarat's First 100% EV Cargo Fleet",
+  title: "BGTS EV — Gujarat's First 100% EV Cargo Fleet",
   description:
-    "EkoHaul by BGTS: zero-emission commercial cargo delivery at or below diesel cost. FlexEV, DediEV, and FleetEV plans. Now operating in Ahmedabad, Surat, Vadodara.",
+    "BGTS EV: zero-emission commercial cargo delivery at or below diesel cost. FlexEV, DediEV, and FleetEV plans. Now operating in Ahmedabad, Surat, Vadodara.",
 }
 
 // ─── Static data ──────────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ const howItWorks = [
   {
     step: '02',
     title: 'We deploy your fleet',
-    desc: 'Vehicles, drivers, charging infrastructure advisory, and the EkoHaul ops dashboard — all set up within 7–14 days.',
+    desc: 'Vehicles, drivers, charging infrastructure advisory, and the BGTS EV ops dashboard — all set up within 7–14 days.',
   },
   {
     step: '03',
@@ -122,7 +123,7 @@ export default function EkoHaulPage() {
           </Tag>
 
           <h1 className="font-display font-black text-5xl md:text-7xl text-white tracking-tight leading-[1.0] mb-6">
-            Gujarat's first<br />
+            Gujarat&apos;s first<br />
             <span className="text-eko-lime">100% EV cargo</span><br />
             fleet service.
           </h1>
@@ -141,7 +142,7 @@ export default function EkoHaulPage() {
               iconPosition="left"
               asChild
             >
-              <Link href="/ekohaul/book">Get EV Fleet Quote</Link>
+              <BookNowButton variant="eko" size="lg" modalType="ev">Book Now</BookNowButton>
             </Button>
             <Button
               variant="outline"
@@ -174,7 +175,7 @@ export default function EkoHaulPage() {
           <SectionHeading
             eyebrow="Fleet Plans"
             title="The right EV plan for every scale"
-            subtitle="From single-vehicle on-demand access to full enterprise fleet digitalisation — EkoHaul scales with your business."
+            subtitle="From single-vehicle on-demand access to full enterprise fleet digitalisation — BGTS EV scales with your business."
             align="center"
             className="mb-14"
           />
@@ -225,18 +226,14 @@ export default function EkoHaulPage() {
                     )}
                   </div>
 
-                  <Button
-                    variant={isPopular ? 'eko' : 'outline'}
+                  <BookNowButton
+                  modalType="ev"
+                    variant="eko"
                     size="md"
-                    className={`w-full ${!isPopular ? 'border-eko text-eko hover:bg-eko hover:text-white' : ''}`}
-                    icon={<ArrowRight size={15} />}
-                    iconPosition="right"
-                    asChild
+                    className="w-full justify-center"
                   >
-                    <Link href={`/ekohaul/book?plan=${plan.tier}`}>
-                      Get {plan.name} Quote
-                    </Link>
-                  </Button>
+                    Get {plan.name} Quote
+                  </BookNowButton>
                 </div>
               )
             })}
@@ -298,7 +295,7 @@ export default function EkoHaulPage() {
       >
         <div className="container-xl">
           <SectionHeading
-            eyebrow="How EkoHaul Works"
+            eyebrow="How BGTS EV Works"
             title="Zero-emission in 3 steps"
             align="center"
             className="mb-14"
@@ -335,7 +332,7 @@ export default function EkoHaulPage() {
                 Real carbon data.<br />BRSR-ready reports.
               </h2>
               <p className="text-ink-muted leading-relaxed mb-8">
-                Every EkoHaul vehicle generates monthly ESG data — CO₂ avoided,
+                Every BGTS EV vehicle generates monthly ESG data — CO₂ avoided,
                 PM2.5 reduction, cost savings — formatted for your BRSR sustainability
                 report. No manual calculations, no greenwashing.
               </p>
@@ -434,7 +431,7 @@ export default function EkoHaulPage() {
               iconPosition="left"
               asChild
             >
-              <Link href="/ekohaul/book">Get EV Fleet Quote</Link>
+              <BookNowButton variant="eko" size="lg" modalType="ev">Book Now</BookNowButton>
             </Button>
             <Button
               variant="ghost"

@@ -9,7 +9,6 @@ export const RATES: Record<string, number> = {
   'full-truck-load': 68,
   'part-truck-load': 22,
   'express-parcel':  95,
-  'tanker-bulk':     78,
   'heavy-odc':       120,
   'multimodal':      45,
   'contract-logistics': 0,  // custom pricing

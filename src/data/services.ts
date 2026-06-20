@@ -87,26 +87,6 @@ export const services: Service[] = [
     transitTimeDays: 'Same-day dispatch if order by 2pm',
   },
   {
-    slug: 'tanker-bulk',
-    name: 'Tanker & Bulk Cargo',
-    shortName: 'Tanker',
-    tagline: 'Certified tanker fleet for liquid and dry bulk.',
-    description:
-      'Stainless-steel and MS tanker fleet for chemicals, edible oils, food-grade liquids, and dry bulk commodities. All vehicles are ADC-compliant with valid pollution certificates.',
-    icon: 'Droplets',
-    modes: ['road'],
-    features: [
-      'Food-grade SS tankers available',
-      'Chemical-grade MS tankers',
-      'ADC compliance certified',
-      'Dry bulk containers',
-      'Dedicated tanker operations team',
-    ],
-    idealFor: ['Chemical Industry', 'Food & Beverage', 'Agriculture'],
-    ratePerKm: 78,
-    transitTimeDays: '1–4 business days',
-  },
-  {
     slug: 'heavy-odc',
     name: 'Heavy & ODC Cargo',
     shortName: 'Heavy/ODC',

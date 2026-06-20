@@ -10,7 +10,7 @@ const modes = [
     name: 'Road',
     headline: 'Gujarat to Goa. Mumbai to Mundra.',
     description:
-      'Our primary mode: 2,000+ vehicles covering Gujarat, Maharashtra, and Pan-India corridors. FTL, PTL, Express, and Tanker services on every major NH.',
+      'Our primary mode: 2,000+ vehicles covering Gujarat, Maharashtra, and Pan-India corridors. FTL, PTL, Express, and ODC services on every major NH.',
     highlights: ['200+ route corridors', '20+ branch network', 'GPS every vehicle'],
     color: 'brand',
   },

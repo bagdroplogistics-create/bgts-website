@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Archivo, Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
+import { BookingModalProvider } from '@/contexts/BookingModalContext'
+import { BGTSBookingModal } from '@/components/forms/BGTSBookingModal'
+import { BGTSEVBookingModal } from '@/components/forms/BGTSEVBookingModal'
 
 // ─── Font loading ─────────────────────────────────────────────────────────
 const archivo = Archivo({
@@ -32,7 +35,7 @@ export const metadata: Metadata = {
     template: '%s | BGTS',
   },
   description:
-    'Baroda Goods Transport Service — India\'s trusted road, rail, and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing, and EkoHaul EV Fleet across Gujarat and Maharashtra.',
+    "Baroda Goods Transport Service — India's trusted road, rail, and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing, and BGTS EV Fleet across Gujarat and Maharashtra.",
   keywords: [
     'transport company Gujarat',
     'logistics India',
@@ -41,7 +44,7 @@ export const metadata: Metadata = {
     'Vadodara transport',
     'EV cargo fleet',
     'warehousing Gujarat',
-    'EkoHaul',
+    'BGTS EV',
     'BGTS',
     'Baroda Goods Transport',
   ],
@@ -54,13 +57,13 @@ export const metadata: Metadata = {
     siteName: 'BGTS',
     title: 'BGTS — Technology-Enabled Transport & Logistics',
     description:
-      'India\'s trusted road, rail, and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing, and EkoHaul EV Fleet across Gujarat and Maharashtra.',
+      "India's trusted road, rail, and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing, and BGTS EV Fleet across Gujarat and Maharashtra.",
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'BGTS — Moving India\'s goods, on time, since 1950',
+        alt: "BGTS — Moving India's goods, on time, since 1950",
       },
     ],
   },
@@ -68,7 +71,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'BGTS — Technology-Enabled Transport & Logistics',
     description:
-      'India\'s trusted road and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing.',
+      "India's trusted road and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing.",
     images: ['/og-image.png'],
   },
   robots: {
@@ -107,10 +110,16 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        {/* Main content — Navbar and Footer are added per-layout */}
-        <main id="main-content">
-          {children}
-        </main>
+        {/* Booking modals — available site-wide */}
+        <BookingModalProvider>
+          <BGTSBookingModal />
+          <BGTSEVBookingModal />
+
+          {/* Main content — Navbar and Footer are added per-layout */}
+          <main id="main-content">
+            {children}
+          </main>
+        </BookingModalProvider>
 
         {/* Structured data: Organisation */}
         <script

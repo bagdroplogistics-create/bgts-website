@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X, ChevronDown, Truck, Phone } from 'lucide-react'
+import { Menu, X, ChevronDown, Truck, Phone, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useBookingModal } from '@/contexts/BookingModalContext'
 import { Button } from '@/components/ui/Button'
 
 const navLinks = [
@@ -21,7 +22,6 @@ const serviceLinks = [
   { label: 'Part Truck Load (PTL)',    href: '/services/part-truck-load'  },
   { label: 'Express Parcel',           href: '/services/express-parcel'   },
   { label: 'Warehousing',              href: '/services/warehousing'      },
-  { label: 'Tanker & Bulk',           href: '/services/tanker-bulk'      },
   { label: 'Heavy & ODC',             href: '/services/heavy-odc'        },
   { label: 'Multimodal Logistics',    href: '/services/multimodal'       },
 ]
@@ -40,6 +40,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null)
   const pathname = usePathname()
+  const { openModal } = useBookingModal()
 
   // Scroll shadow
   useEffect(() => {
@@ -79,9 +80,9 @@ export function Navbar() {
           <Image
             src="/logo-bgts-color.png"
             alt="BGTS — Baroda Goods Transport Service"
-            width={120}
-            height={48}
-            className="h-10 w-auto object-contain"
+            width={140}
+            height={56}
+            className="h-12 w-auto object-contain"
             priority
           />
         </Link>
@@ -98,7 +99,7 @@ export function Navbar() {
               <Link
                 href={link.href}
                 className={cn(
-                  'flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium',
+                  'flex items-center gap-1 px-3 py-2 rounded-md text-base font-medium',
                   'transition-colors duration-fast',
                   'hover:text-brand hover:bg-brand-subtle',
                   pathname.startsWith(link.href) && link.href !== '/'
@@ -162,23 +163,20 @@ export function Navbar() {
             </li>
           ))}
 
-          {/* EkoHaul link — green accent */}
+          {/* BGTS EV link — brand pill */}
           <li>
             <Link
               href="/ekohaul"
               className={cn(
-                'flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-semibold',
-                'transition-colors duration-fast',
+                'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold',
+                'transition-all duration-200',
                 pathname.startsWith('/ekohaul')
-                  ? 'text-eko bg-eko-50'
-                  : 'text-eko hover:bg-eko-50'
+                  ? 'bg-eko text-white shadow-md shadow-eko/30'
+                  : 'bg-eko text-white hover:bg-eko-700 hover:shadow-md hover:shadow-eko/30 hover:scale-105'
               )}
             >
-              <span
-                className="w-2 h-2 rounded-full bg-eko animate-pulse-brand shrink-0"
-                aria-hidden="true"
-              />
-              EkoHaul EV
+              <Zap size={13} className="shrink-0" aria-hidden="true" />
+              BGTS EV
             </Link>
           </li>
         </ul>
@@ -199,7 +197,7 @@ export function Navbar() {
             iconPosition="left"
             asChild
           >
-            <Link href="/quote">Get Quote</Link>
+            <button type="button" onClick={openModal}>Book Now</button>
           </Button>
         </div>
 
@@ -272,15 +270,15 @@ export function Navbar() {
 
             <Link
               href="/ekohaul"
-              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold text-eko hover:bg-eko-50"
+              className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-white bg-eko hover:bg-eko-700"
             >
-              <span className="w-2 h-2 rounded-full bg-eko" />
-              EkoHaul EV Fleet
+              <Zap size={14} aria-hidden="true" />
+              BGTS EV Fleet
             </Link>
 
             <div className="mt-3 pt-3 border-t border-ink-ghost/10 flex flex-col gap-2">
               <Button variant="primary" size="md" icon={<Truck size={16} />} asChild>
-                <Link href="/quote">Get a Quote</Link>
+                <button type="button" onClick={openModal} className="w-full text-left">Book Now</button>
               </Button>
               <Button variant="secondary" size="md" asChild>
                 <Link href="/tracking">Track Consignment</Link>

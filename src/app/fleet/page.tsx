@@ -10,7 +10,7 @@ import { Truck, Leaf, Shield, Gauge } from 'lucide-react'
 export const metadata: Metadata = {
   title: 'Our Fleet',
   description:
-    'BGTS operates 2,000+ vehicles across road freight: FTL trucks, PTL vans, tankers, ODC trailers, and the EkoHaul EV cargo fleet — Gujarat and Maharashtra.',
+    'BGTS operates 2,000+ vehicles across road freight: FTL trucks, PTL vans, ODC trailers, and the BGTS EV cargo fleet — Gujarat and Maharashtra.',
 }
 
 const fleetCategories = [
@@ -47,15 +47,7 @@ const fleetCategories = [
     tag: null,
   },
   {
-    name: 'Tanker Fleet',
-    range: 'Up to 30 KL',
-    desc: 'SS food-grade and MS chemical tankers. ADC-compliant, pollution-certified.',
-    types: ['SS Tanker (Food Grade)', 'MS Tanker (Chemical)', 'Dry Bulk Container'],
-    icon: '⛽',
-    tag: null,
-  },
-  {
-    name: 'EkoHaul EV Fleet',
+    name: 'BGTS EV Fleet',
     range: '500 kg – 7 MT',
     desc: "Gujarat's first dedicated EV cargo fleet. Zero tailpipe emissions, 99.5% SLA.",
     types: ['Euler HiLoad EV', 'Tata Ace EV', 'Switch IeV3', 'Tata Ultra E.7'],
@@ -167,7 +159,7 @@ export default function FleetPage() {
               Ready to go electric?
             </h2>
             <p className="text-white/70 mb-8 max-w-lg mx-auto">
-              EkoHaul EV vehicles are available from 1 to 200+ units under FlexEV,
+              BGTS EV vehicles are available from 1 to 200+ units under FlexEV,
               DediEV, and FleetEV plans.
             </p>
             <Button
@@ -176,7 +168,7 @@ export default function FleetPage() {
               className="bg-white text-eko hover:bg-eko-50"
               asChild
             >
-              <Link href="/ekohaul">Explore EkoHaul Fleet</Link>
+              <Link href="/ekohaul">Explore BGTS EV Fleet</Link>
             </Button>
      
           </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
+import { BookNowButton } from '@/components/ui/BookNowButton'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { SectionHeading } from '@/components/ui/SectionHeading'
@@ -22,7 +24,7 @@ const milestones = [
   { year: '2008', event: 'Launched warehousing division. First WMS implementation.' },
   { year: '2015', event: 'GPS fleet tracking deployed across all vehicles.' },
   { year: '2022', event: 'Digital booking platform launched. Pan-India rail tie-ups.' },
-  { year: '2024', event: 'EkoHaul EV fleet division launched — Gujarat\'s first EV cargo fleet.' },
+  { year: '2024', event: "BGTS EV fleet division launched — Gujarat's first EV cargo fleet." },
   { year: '2025', event: '2,000+ vehicle network. 20+ branches. 99.2% SLA track record.' },
 ]
 
@@ -37,7 +39,7 @@ const values = [
   },
   {
     title: 'Deep Industry Expertise',
-    desc: '75 years across automotive, chemical, pharma, FMCG, and heavy engineering gives us sector-specific knowledge that generic logistics companies can\'t replicate.',
+    desc: "75 years across automotive, chemical, pharma, FMCG, and heavy engineering gives us sector-specific knowledge that generic logistics companies can't replicate.",
   },
   {
     title: 'Sustainability Commitment',
@@ -51,22 +53,35 @@ export default function AboutPage() {
       <Navbar />
 
       <main className="pt-header">
-        {/* Hero */}
-        <section
-          className="relative py-20 md:py-28 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #131312 0%, #21211F 100%)' }}
-        >
-          <div className="absolute inset-0 opacity-5 pointer-events-none"
-            style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '48px 48px' }}
+
+        {/* ── Hero with background image ── */}
+        <section className="relative py-24 md:py-36 overflow-hidden">
+          <Image
+            src="/hero-2.jpg"
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+            priority
             aria-hidden="true"
           />
+          {/* Dark overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.68) 60%, rgba(0,0,0,0.80) 100%)',
+            }}
+            aria-hidden="true"
+          />
+
           <div className="container-xl relative z-10">
             <Tag variant="brand" size="sm" className="mb-4">Est. 1950, Vadodara</Tag>
             <h1 className="font-display font-black text-5xl md:text-6xl text-white tracking-tight leading-tight mb-4">
               75 years of moving<br />
-              <span className="text-gradient-energy">India's goods.</span>
+              <span className="text-gradient-energy">India&apos;s goods.</span>
             </h1>
-            <p className="text-white/70 text-xl max-w-2xl leading-relaxed">
+            <p className="text-white/75 text-xl max-w-2xl leading-relaxed">
               Baroda Goods Transport Service started with one truck and one promise:
               deliver on time, every time. Seven decades later, that promise runs
               through everything we do.
@@ -74,7 +89,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Values */}
+        {/* ── Values ── */}
         <section className="section-py bg-surface-page">
           <div className="container-xl">
             <SectionHeading
@@ -95,7 +110,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Timeline */}
+        {/* ── Timeline ── */}
         <section className="section-py bg-surface-inverse" aria-labelledby="history-heading">
           <div className="container-xl">
             <SectionHeading
@@ -106,11 +121,9 @@ export default function AboutPage() {
               className="mb-12"
             />
             <div className="relative">
-              {/* Vertical line */}
               <div className="absolute left-[84px] top-0 bottom-0 w-px bg-white/10 hidden md:block" aria-hidden="true" />
-
               <ol className="space-y-6">
-                {milestones.map(({ year, event }, i) => (
+                {milestones.map(({ year, event }) => (
                   <li key={year} className="flex gap-6 md:gap-10 items-start">
                     <div className="shrink-0 w-16 text-right">
                       <span className="font-mono font-bold text-brand text-sm">{year}</span>
@@ -126,7 +139,7 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Branch network */}
+        {/* ── Branch network ── */}
         <section id="branches" className="section-py bg-surface-page" aria-labelledby="branches-heading">
           <div className="container-xl">
             <div className="mb-10">
@@ -167,7 +180,7 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* All branches */}
+            {/* Branch offices */}
             <div>
               <h3 className="text-xs font-display font-bold uppercase tracking-widest text-ink-muted mb-4">
                 Branch Offices
@@ -190,18 +203,18 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* ── CTA ── */}
         <section className="section-py bg-brand-subtle border-t border-brand/10">
           <div className="container-xl text-center">
             <h2 className="font-display font-black text-3xl md:text-4xl text-ink-strong mb-3">
               Ready to work with us?
             </h2>
             <p className="text-ink-muted mb-8 max-w-md mx-auto">
-              75 years of relationships, built one shipment at a time. Let's start yours.
+              75 years of relationships, built one shipment at a time. Let&apos;s start yours.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button variant="primary" size="lg" asChild>
-                <Link href="/quote">Get a Quote</Link>
+                <BookNowButton>Book Now</BookNowButton>
               </Button>
               <Button variant="secondary" size="lg" asChild>
                 <Link href="/contact">Contact Us <ArrowRight size={14} /></Link>
@@ -209,6 +222,7 @@ export default function AboutPage() {
             </div>
           </div>
         </section>
+
       </main>
 
       <Footer />
