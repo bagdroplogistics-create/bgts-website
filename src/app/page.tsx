@@ -13,9 +13,9 @@ import { Modes } from '@/components/sections/Modes'
 export const metadata: Metadata = {
   title: 'BGTS — Technology-Enabled Transport & Logistics | Gujarat, Maharashtra',
   description:
-    'Baroda Goods Transport Service — India\'s trusted road, rail, and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing across Gujarat and Maharashtra.',
+    "Baroda Goods Transport Service — India's trusted road, rail, and multimodal logistics company since 1950. FTL, PTL, Express, Warehousing across Gujarat and Maharashtra.",
   openGraph: {
-    title: 'BGTS — Moving India\'s goods, on time, since 1950',
+    title: "BGTS — Moving India's goods, on time, since 1950",
     description:
       'Technology-enabled road, rail, and multimodal logistics across Gujarat and Maharashtra. FTL, PTL, Express, Warehousing, and BGTS EV Fleet.',
   },
@@ -26,10 +26,10 @@ export default function HomePage() {
     <>
       <Navbar />
 
-      {/* 1. Hero — dark, full-height, with Gujarat route map */}
+      {/* 1. Hero */}
       <Hero />
 
-      {/* 2. Trust strip — client logos marquee */}
+      {/* 2. Trust strip — industry logos marquee */}
       <TrustStrip />
 
       {/* 3. Stats — animated counters */}

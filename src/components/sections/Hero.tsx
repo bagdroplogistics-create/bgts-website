@@ -2,10 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { Truck, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
-import { useBookingModal } from '@/contexts/BookingModalContext'
-import { Button } from '@/components/ui/Button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const slides = [
@@ -19,7 +16,6 @@ const slides = [
 const AUTO_INTERVAL = 5000
 
 export function Hero() {
-  const { openModal } = useBookingModal()
   const [current, setCurrent] = useState(0)
   const [fading, setFading] = useState(false)
 
@@ -46,7 +42,7 @@ export function Hero() {
 
   return (
     <section
-      className="relative w-full overflow-hidden h-[60vh] sm:h-[65vh] md:h-[70vh] lg:h-[78vh]"
+      className="relative w-full overflow-hidden h-[58vh] sm:h-[62vh] md:h-[68vh] lg:h-[74vh]"
       aria-label="BGTS — India's Trusted Freight Partner"
     >
       {/* Slides */}
@@ -70,20 +66,20 @@ export function Hero() {
         </div>
       ))}
 
-      {/* Dark overlay — stronger at bottom and left for text readability */}
+      {/* Dark overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.58) 65%, rgba(0,0,0,0.72) 100%)',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.78) 100%)',
         }}
         aria-hidden="true"
       />
 
-      {/* ── Centered content overlay ── */}
+      {/* Centered content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
 
         {/* Eyebrow */}
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/20 border border-brand/40 mb-5">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand/20 border border-brand/40 mb-8">
           <span className="w-2 h-2 rounded-full bg-brand animate-pulse" aria-hidden="true" />
           <span className="text-brand text-xs font-bold tracking-widest uppercase">
             Est. 1950 · Trusted Across India
@@ -91,50 +87,10 @@ export function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white tracking-tight leading-[1.0] mb-5 max-w-4xl">
+        <h1 className="font-display font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl text-white tracking-tight leading-[0.95] max-w-5xl">
           Move Freight.<br />
           Move <span className="text-brand">India.</span>
         </h1>
-
-        {/* Sub */}
-        <p className="text-white/80 text-base sm:text-lg md:text-xl leading-relaxed mb-8 max-w-2xl">
-          2,000+ vehicles. 340+ routes. FTL, PTL, Express & EV Fleet —
-          delivered on time, every time across Gujarat and Maharashtra.
-        </p>
-
-        {/* CTAs */}
-        <div className="flex flex-wrap gap-4 justify-center mb-10">
-          <button
-            type="button"
-            onClick={openModal}
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-brand text-white font-bold text-sm hover:bg-brand-600 transition-all shadow-lg shadow-brand/30 hover:shadow-brand/50 hover:-translate-y-0.5 active:translate-y-0"
-          >
-            <Truck size={16} />
-            Book Now
-          </button>
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/40 text-white font-bold text-sm hover:bg-white/10 transition-all"
-          >
-            Explore Services
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-
-        {/* Trust stats */}
-        <div className="flex flex-wrap gap-6 sm:gap-10 justify-center">
-          {[
-            { value: '75+',    label: 'Years' },
-            { value: '2,000+', label: 'Vehicles' },
-            { value: '340+',   label: 'Routes' },
-            { value: '99.2%',  label: 'On-Time' },
-          ].map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <p className="font-display font-black text-2xl sm:text-3xl text-brand leading-none">{value}</p>
-              <p className="text-xs text-white/60 mt-0.5">{label}</p>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Prev arrow */}
@@ -158,7 +114,7 @@ export function Hero() {
       </button>
 
       {/* Dot indicators */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
         {slides.map((_, i) => (
           <button
             key={i}

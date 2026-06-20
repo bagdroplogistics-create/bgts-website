@@ -1,18 +1,12 @@
 // Server component — no animation needed (CSS handles it)
 
 const clients = [
-  'Mafatlal Industries',
   'Zydus Healthcare',
   'Torrent Power',
   'L&T ECC',
   'Reliance Industries',
-  'Asian Paints',
-  'Pidilite Industries',
-  'Adani Group',
-  'Tata Chemicals',
   'ONGC',
   'GSFC',
-  'V-Mart Retail',
 ]
 
 export function TrustStrip() {
@@ -24,7 +18,7 @@ export function TrustStrip() {
       className="py-8 bg-surface-card border-y border-ink-ghost/10 overflow-hidden"
       aria-label="Trusted by leading companies"
     >
-      <p className="text-center text-xs text-ink-muted uppercase tracking-widest mb-5 font-display font-semibold">
+      <p className="text-center text-sm sm:text-base text-ink-strong uppercase tracking-widest mb-5 font-display font-black">
         Trusted by Gujarat's leading industries
       </p>
 
@@ -52,7 +46,7 @@ export function TrustStrip() {
                 className="w-5 h-5 rounded border border-brand/30 inline-flex items-center justify-center text-brand text-2xs font-black"
                 aria-hidden="true"
               >
-                ▶
+                &#9654;
               </span>
               {name}
               <span className="mx-4 text-ink-ghost" aria-hidden="true">·</span>
