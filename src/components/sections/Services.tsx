@@ -10,8 +10,8 @@ import { useInView } from '@/hooks/useInView'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { cn } from '@/lib/utils'
-import { useBookingModal } from '@/contexts/BookingModalContext'
 import { PTLBookingModal } from '@/components/forms/PTLBookingModal'
+import { ServiceInquiryModal } from '@/components/forms/ServiceInquiryModal'
 import { services } from '@/data/services'
 
 const iconMap: Record<string, React.ElementType> = {
@@ -19,13 +19,36 @@ const iconMap: Record<string, React.ElementType> = {
   Building2, Network, Handshake,
 }
 
-// Remove Express (same as FTL for user's purposes)
+// Services that use the ServiceInquiryModal (slug → true)
+const SERVICE_INQUIRY_SLUGS = new Set([
+  'full-truck-load',
+  'warehousing',
+  'heavy-odc',
+  'multimodal',
+  'contract-logistics',
+])
+
+// Remove Express Parcel
 const displayServices = services.filter(s => s.slug !== 'express-parcel')
 
 export function Services() {
   const [ref, isVisible] = useInView<HTMLDivElement>({ threshold: 0.05, once: true })
-  const { openModal } = useBookingModal()
+
+  // PTL modal (5-step wizard)
   const [ptlOpen, setPtlOpen] = useState(false)
+
+  // Service inquiry modal
+  const [inquirySlug, setInquirySlug] = useState<string | null>(null)
+  const openInquiry = (slug: string) => setInquirySlug(slug)
+  const closeInquiry = () => setInquirySlug(null)
+
+  function handleBookNow(slug: string) {
+    if (slug === 'part-truck-load') {
+      setPtlOpen(true)
+    } else if (SERVICE_INQUIRY_SLUGS.has(slug)) {
+      openInquiry(slug)
+    }
+  }
 
   return (
     <section
@@ -49,7 +72,7 @@ export function Services() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {displayServices.map((service, i) => {
             const Icon = iconMap[service.icon] ?? Truck
-            const isPTL = service.slug === 'part-truck-load'
+            const hasBooking = service.slug === 'part-truck-load' || SERVICE_INQUIRY_SLUGS.has(service.slug)
 
             return (
               <div
@@ -94,13 +117,22 @@ export function Services() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-1 border-t border-ink-ghost/10">
-                  <button
-                    type="button"
-                    onClick={() => isPTL ? setPtlOpen(true) : openModal()}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand/90 transition-all shadow-sm hover:shadow-brand/30 hover:-translate-y-0.5 active:translate-y-0"
-                  >
-                    <Truck size={12} /> Book Now
-                  </button>
+                  {hasBooking ? (
+                    <button
+                      type="button"
+                      onClick={() => handleBookNow(service.slug)}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand text-white text-xs font-bold hover:bg-brand/90 transition-all shadow-sm hover:shadow-brand/30 hover:-translate-y-0.5 active:translate-y-0"
+                    >
+                      <Truck size={12} /> Book Now
+                    </button>
+                  ) : (
+                    <Link
+                      href={`/services/${service.slug}`}
+                      className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-brand/10 text-brand text-xs font-bold hover:bg-brand/20 transition-all"
+                    >
+                      Learn More
+                    </Link>
+                  )}
                   <Link
                     href={`/services/${service.slug}`}
                     className="flex items-center gap-1 text-xs text-ink-muted hover:text-brand font-medium transition-colors"
@@ -125,8 +157,15 @@ export function Services() {
         </div>
       </div>
 
-      {/* PTL-specific booking modal */}
+      {/* PTL modal */}
       <PTLBookingModal open={ptlOpen} onClose={() => setPtlOpen(false)} />
+
+      {/* Service inquiry modal — shared, service pre-selected */}
+      <ServiceInquiryModal
+        serviceSlug={inquirySlug}
+        open={inquirySlug !== null}
+        onClose={closeInquiry}
+      />
     </section>
   )
 }

@@ -6,30 +6,28 @@ const footerLinks = {
   Services: [
     { label: 'Full Truck Load (FTL)',  href: '/services/full-truck-load'  },
     { label: 'Part Truck Load (PTL)', href: '/services/part-truck-load'  },
-    { label: 'Express Parcel',         href: '/services/express-parcel'   },
     { label: 'Warehousing',            href: '/services/warehousing'      },
     { label: 'Heavy & ODC',           href: '/services/heavy-odc'        },
     { label: 'Multimodal Logistics',  href: '/services/multimodal'       },
   ],
   Company: [
-    { label: 'About BGTS',    href: '/about'      },
-    { label: 'Our Fleet',     href: '/fleet'      },
-    { label: 'Industries',    href: '/industries' },
+    { label: 'About BGTS',    href: '/about'          },
+    { label: 'Our Fleet',     href: '/fleet'          },
+    { label: 'Industries',    href: '/industries'     },
     { label: 'Branches',      href: '/about#branches' },
-    { label: 'Careers',       href: '/careers'    },
-    { label: 'Contact Us',    href: '/contact'    },
+    { label: 'Careers',       href: '/careers'        },
+    { label: 'Contact Us',    href: '/contact'        },
   ],
   'BGTS EV': [
-    { label: 'BGTS EV Overview',     href: '/ekohaul'        },
-    { label: 'FlexEV Plan',          href: '/ekohaul/book?tier=flex-ev'  },
-    { label: 'DediEV Plan',          href: '/ekohaul/book?tier=dedi-ev'  },
-    { label: 'FleetEV Plan',         href: '/ekohaul/book?tier=fleet-ev' },
-    { label: 'Carbon Calculator',    href: '/ekohaul/esg'    },
-    { label: 'ESG / BRSR Report',    href: '/ekohaul/esg'    },
+    { label: 'BGTS EV Overview',  href: '/ekohaul'                    },
+    { label: 'FlexEV Plan',       href: '/ekohaul/book?tier=flex-ev'  },
+    { label: 'DediEV Plan',       href: '/ekohaul/book?tier=dedi-ev'  },
+    { label: 'FleetEV Plan',      href: '/ekohaul/book?tier=fleet-ev' },
+    { label: 'Carbon Calculator', href: '/ekohaul/esg'                },
+    { label: 'ESG / BRSR Report', href: '/ekohaul/esg'                },
   ],
   Tools: [
-    { label: 'Book Now',             href: '/quote'    },
-    { label: 'Track Shipment',       href: '/tracking' },
+    { label: 'Book Now', href: '/quote' },
   ],
 }
 
@@ -48,7 +46,6 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="lg:col-span-2">
-            {/* Logo */}
             <div className="mb-6">
               <Image
                 src="/logo-bgts-white.png"
@@ -65,22 +62,17 @@ export function Footer() {
               logistics since 1950. Est. Vadodara, Gujarat.
             </p>
 
-            {/* Contact */}
             <ul className="space-y-3 text-sm" role="list">
               <li>
-                <a
-                  href="tel:+916357225722"
-                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-                >
+                <a href="tel:+916357225722"
+                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
                   <Phone size={14} className="shrink-0 text-brand" aria-hidden="true" />
                   +91 63 5722 5722
                 </a>
               </li>
               <li>
-                <a
-                  href="mailto:info@bgts.in"
-                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors"
-                >
+                <a href="mailto:info@bgts.in"
+                  className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
                   <Mail size={14} className="shrink-0 text-brand" aria-hidden="true" />
                   info@bgts.in
                 </a>
@@ -93,13 +85,9 @@ export function Footer() {
               </li>
             </ul>
 
-            {/* EkoHaul badge */}
             <div className="mt-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-pill bg-eko/10 border border-eko/20">
               <span className="w-2 h-2 rounded-full bg-eko animate-pulse-brand" aria-hidden="true" />
-              <Link
-                href="/ekohaul"
-                className="text-eko text-xs font-semibold hover:underline"
-              >
+              <Link href="/ekohaul" className="text-eko text-xs font-semibold hover:underline">
                 BGTS EV — Gujarat's First EV Cargo Fleet
               </Link>
             </div>
@@ -140,15 +128,13 @@ export function Footer() {
           <nav aria-label="Legal links">
             <ul className="flex items-center gap-6" role="list">
               {[
-                { label: 'Privacy Policy', href: '/legal/privacy'  },
-                { label: 'Terms of Service', href: '/legal/terms'  },
-                { label: 'Cookie Policy',  href: '/legal/cookies'  },
+                { label: 'Privacy Policy',   href: '/legal/privacy'  },
+                { label: 'Terms of Service', href: '/legal/terms'    },
+                { label: 'Cookie Policy',    href: '/legal/cookies'  },
               ].map((link) => (
                 <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-xs text-white/40 hover:text-white/70 transition-colors"
-                  >
+                  <Link href={link.href}
+                    className="text-xs text-white/40 hover:text-white/70 transition-colors">
                     {link.label}
                   </Link>
                 </li>

@@ -13,14 +13,12 @@ const navLinks = [
   { label: 'Services',  href: '/services',  hasDropdown: true  },
   { label: 'Fleet',     href: '/fleet',     hasDropdown: false },
   { label: 'Industries', href: '/industries', hasDropdown: true },
-  { label: 'Tracking',  href: '/tracking',  hasDropdown: false },
   { label: 'About',     href: '/about',     hasDropdown: false },
 ]
 
 const serviceLinks = [
   { label: 'Full Truck Load (FTL)',    href: '/services/full-truck-load'  },
   { label: 'Part Truck Load (PTL)',    href: '/services/part-truck-load'  },
-  { label: 'Express Parcel',           href: '/services/express-parcel'   },
   { label: 'Warehousing',              href: '/services/warehousing'      },
   { label: 'Heavy & ODC',             href: '/services/heavy-odc'        },
   { label: 'Multimodal Logistics',    href: '/services/multimodal'       },
@@ -279,9 +277,6 @@ export function Navbar() {
             <div className="mt-3 pt-3 border-t border-ink-ghost/10 flex flex-col gap-2">
               <Button variant="primary" size="md" icon={<Truck size={16} />} asChild>
                 <button type="button" onClick={openModal} className="w-full text-left">Book Now</button>
-              </Button>
-              <Button variant="secondary" size="md" asChild>
-                <Link href="/tracking">Track Consignment</Link>
               </Button>
             </div>
           </nav>
