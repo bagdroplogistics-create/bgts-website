@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -108,6 +108,14 @@ const GOODS_TYPES = [
 const WEIGHT_RANGES = [
   'Under 50 KG', '50–200 KG', '200–500 KG', '500 KG–1 Ton', 'Above 1 Ton',
 ]
+
+// Auto-lock weight range to vehicle capacity — mirrors BGTSEVBookingModal logic
+const VEHICLE_WEIGHT_AUTO: Record<string, string> = {
+  'mini-ev':    '200–400 KG',
+  'pickup-ev':  '500–800 KG',
+  'van-ev':     '1,000–1,500 KG',
+  'truck-ev':   '3,000–7,000 KG',
+}
 
 const TIME_SLOTS = [
   '06:00 AM', '07:00 AM', '08:00 AM', '09:00 AM', '10:00 AM',
@@ -342,7 +350,7 @@ function StepPickup({ control, errors }: any) {
   )
 }
 
-// ─── Page wrapper (standalone /ekohaul/book route) ─────────────────────────
+// ─── Page wrapper (standalone /BGTSEV/book route) ─────────────────────────
 
 export function BookingWizard() {
   return (
@@ -400,7 +408,17 @@ function StepDelivery({ control, errors }: any) {
   )
 }
 
-function StepShipment({ control, errors }: any) {
+function StepShipment({ control, errors, watch, setValue }: any) {
+  const selectedVehicle = watch('vehicle')
+  const autoWeight = VEHICLE_WEIGHT_AUTO[selectedVehicle] ?? null
+
+  // Auto-populate weight when vehicle has a fixed capacity
+  useEffect(() => {
+    if (autoWeight) {
+      setValue('weightRange', autoWeight, { shouldValidate: true })
+    }
+  }, [autoWeight, setValue])
+
   return (
     <div>
       <h2 className="font-display font-black text-2xl text-ink-strong mb-2">Shipment Details</h2>
@@ -414,9 +432,21 @@ function StepShipment({ control, errors }: any) {
         </div>
         <div>
           <FieldLabel required>Weight Range</FieldLabel>
-          <Controller name="weightRange" control={control} render={({ field }) => (
-            <SelectField value={field.value} onChange={field.onChange} options={WEIGHT_RANGES} placeholder="Select weight range" error={errors.weightRange?.message} />
-          )} />
+          {autoWeight ? (
+            // Locked chip — vehicle capacity is fixed
+            <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-eko/30 bg-eko/5">
+              <Weight size={15} className="text-eko shrink-0" aria-hidden="true" />
+              <span className="text-sm font-semibold text-eko">{autoWeight}</span>
+              <span className="ml-auto text-2xs text-eko/70 font-medium bg-eko/10 px-2 py-0.5 rounded-full">
+                Auto · Vehicle capacity
+              </span>
+            </div>
+          ) : (
+            <Controller name="weightRange" control={control} render={({ field }) => (
+              <SelectField value={field.value} onChange={field.onChange} options={WEIGHT_RANGES} placeholder="Select weight range" error={errors.weightRange?.message} />
+            )} />
+          )}
+          {errors.weightRange && !autoWeight && <FieldError msg={errors.weightRange.message} />}
         </div>
         <div>
           <FieldLabel required>Package Size</FieldLabel>
@@ -649,7 +679,7 @@ function Confirmation({ bookingRef, watch }: { bookingRef: string; watch: any })
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="primary" asChild>
-          <Link href="/ekohaul">Back to BGTS EV</Link>
+          <Link href="/BGTSEV">Back to BGTS EV</Link>
         </Button>
         <Button variant="secondary" asChild>
           <Link href="/tracking">Track My Shipment</Link>
@@ -679,7 +709,7 @@ export function BookingWizardContent({ onComplete }: { onComplete?: () => void }
   const [bookingRef] = useState(genRef)
 
   const {
-    control, watch, trigger, formState: { errors },
+    control, watch, trigger, setValue, formState: { errors },
     handleSubmit,
   } = useForm<BookingFormData>({
     resolver: zodResolver(bookingSchema),
@@ -805,7 +835,7 @@ export function BookingWizardContent({ onComplete }: { onComplete?: () => void }
                   {step === 0 && <StepVehicle control={control} errors={errors} watch={watch} />}
                   {step === 1 && <StepPickup control={control} errors={errors} />}
                   {step === 2 && <StepDelivery control={control} errors={errors} />}
-                  {step === 3 && <StepShipment control={control} errors={errors} />}
+                  {step === 3 && <StepShipment control={control} errors={errors} watch={watch} setValue={setValue} />}
                   {step === 4 && <StepContact control={control} errors={errors} />}
                   {step === 5 && <StepSummary watch={watch} />}
                 </motion.div>
@@ -823,7 +853,7 @@ export function BookingWizardContent({ onComplete }: { onComplete?: () => void }
                   <ArrowLeft size={16} /> Back
                 </button>
               ) : (
-                <Link href="/ekohaul" className="flex items-center gap-2 text-sm font-semibold text-ink-muted hover:text-ink-strong transition-colors">
+                <Link href="/BGTSEV" className="flex items-center gap-2 text-sm font-semibold text-ink-muted hover:text-ink-strong transition-colors">
                   <ArrowLeft size={16} /> BGTS EV
                 </Link>
               )}

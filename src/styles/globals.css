@@ -120,7 +120,7 @@
 
   /* Layout */
   --container-xl: 1280px;
-  --header-h: 72px;
+  --header-h: 93px;
 }
 
 /* ─── EkoHaul sub-brand override ───────────────────────────────────────── */
@@ -227,6 +227,11 @@
       padding-top: 6rem;
       padding-bottom: 6rem;
     }
+  }
+
+  /* Header offset — matches fixed nav height (90px) + accent bar (3px) */
+  .pt-header {
+    padding-top: var(--header-h); /* 93px */
   }
 
   /* Energy gradient text */

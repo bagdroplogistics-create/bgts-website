@@ -30,8 +30,8 @@ export function EkoHaulFooter() {
           <nav aria-label="BGTS EV footer links">
             <ul className="flex flex-wrap gap-x-8 gap-y-2">
               {[
-                { label: 'BGTS EV Plans',       href: '/ekohaul/book'   },
-                { label: 'Carbon Calculator',   href: '/ekohaul/esg'    },
+                { label: 'BGTS EV Plans',       href: '/BGTSEV/book'   },
+                { label: 'Carbon Calculator',   href: '/BGTSEV/esg'    },
                 { label: 'Back to BGTS',        href: '/'               },
               ].map((link) => (
                 <li key={link.href}>

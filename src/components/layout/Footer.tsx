@@ -19,12 +19,12 @@ const footerLinks = {
     { label: 'Contact Us',    href: '/contact'        },
   ],
   'BGTS EV': [
-    { label: 'BGTS EV Overview',  href: '/ekohaul'                    },
-    { label: 'FlexEV Plan',       href: '/ekohaul/book?tier=flex-ev'  },
-    { label: 'DediEV Plan',       href: '/ekohaul/book?tier=dedi-ev'  },
-    { label: 'FleetEV Plan',      href: '/ekohaul/book?tier=fleet-ev' },
-    { label: 'Carbon Calculator', href: '/ekohaul/esg'                },
-    { label: 'ESG / BRSR Report', href: '/ekohaul/esg'                },
+    { label: 'BGTS EV Overview',  href: '/BGTSEV'                    },
+    { label: 'FlexEV Plan',       href: '/BGTSEV/book?tier=flex-ev'  },
+    { label: 'DediEV Plan',       href: '/BGTSEV/book?tier=dedi-ev'  },
+    { label: 'FleetEV Plan',      href: '/BGTSEV/book?tier=fleet-ev' },
+    { label: 'Carbon Calculator', href: '/BGTSEV/esg'                },
+    { label: 'ESG / BRSR Report', href: '/BGTSEV/esg'                },
   ],
   Tools: [
     { label: 'Book Now', href: '/quote' },
@@ -87,7 +87,7 @@ export function Footer() {
 
             <div className="mt-8 inline-flex items-center gap-2 px-3 py-1.5 rounded-pill bg-eko/10 border border-eko/20">
               <span className="w-2 h-2 rounded-full bg-eko animate-pulse-brand" aria-hidden="true" />
-              <Link href="/ekohaul" className="text-eko text-xs font-semibold hover:underline">
+              <Link href="/BGTSEV" className="text-eko text-xs font-semibold hover:underline">
                 BGTS EV — Gujarat's First EV Cargo Fleet
               </Link>
             </div>

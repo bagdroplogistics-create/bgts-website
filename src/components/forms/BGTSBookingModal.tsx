@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { X, ChevronDown, ArrowLeft, ArrowRight, Check, CheckCircle, Hash, Truck } from 'lucide-react'
+import { X, ChevronDown, ArrowLeft, ArrowRight, Check, CheckCircle, Hash, Truck, Weight } from 'lucide-react'
 import { useBookingModal } from '@/contexts/BookingModalContext'
 import { cn } from '@/lib/utils'
 
@@ -43,7 +43,7 @@ const VEHICLES: Vehicle[] = [
   { id: 'container-20ft',         name: 'CONTAINER 20 FT',         category: 'Container', emoji: '📦', householdCapacity: '4 BHK', maxLoad: '6.5 Ton' },
   { id: 'container-32ft-sxl',     name: 'CONTAINER 32 FT SXL',     category: 'Container', emoji: '📦', householdCapacity: '5 BHK', maxLoad: '7 Ton' },
   { id: 'container-32ft-mxl',     name: 'CONTAINER 32 FT MXL',     category: 'Container', emoji: '📦', maxLoad: '14 Ton' },
-  { id: 'container-32ft-hq',      name: 'CONTAINER 32 FT HQ',      category: 'Container', emoji: '📦', maxLoad: '7/14 Ton' },
+  { id: 'container-32ft-hq',      name: 'CONTAINER 32 FT HQ',      category: 'Container', emoji: '📦', maxLoad: '14 Ton' },
   // ODC
   { id: 'odc-20ft',               name: '20 FT OPEN ODC',          category: 'ODC',       emoji: '🏗️', maxLoad: '7 Ton' },
   { id: 'odc-28-32ft-jcb',        name: '28–32 FT JCB ODC',        category: 'ODC',       emoji: '🏗️', maxLoad: '8 Ton' },
@@ -51,7 +51,31 @@ const VEHICLES: Vehicle[] = [
   { id: 'odc-40ft-trailer',       name: '40 FT OPEN TRAILER ODC',  category: 'ODC',       emoji: '🏗️', maxLoad: '32 Ton' },
 ]
 
-// ─── Step 1 — Compact flat grid (5 per row) ─────────────────────────────
+// Auto-lock weight range from vehicle max load
+const VEHICLE_WEIGHT_AUTO: Record<string, string> = {
+  'tata-ace':               'Under 1 Ton',
+  'ashok-leyland-dost':     'Under 1 Ton',
+  'mahindra-bolero-pickup': '1–5 Ton',
+  'tata-407':               '1–5 Ton',
+  'eicher-14ft':            '1–5 Ton',
+  'eicher-17ft':            '1–5 Ton',
+  'eicher-19ft':            '5–10 Ton',
+  'tata-22ft':              '5–10 Ton',
+  'tata-truck-6tyre':       '5–10 Ton',
+  'taurus-16t':             '10–20 Ton',
+  'taurus-21t':             'Above 20 Ton',
+  'taurus-25t':             'Above 20 Ton',
+  'container-20ft':         '5–10 Ton',
+  'container-32ft-sxl':     '5–10 Ton',
+  'container-32ft-mxl':     '10–20 Ton',
+  'container-32ft-hq':      '10–20 Ton',
+  'odc-20ft':               '5–10 Ton',
+  'odc-28-32ft-jcb':        '5–10 Ton',
+  'odc-32ft-trailer':       'Above 20 Ton',
+  'odc-40ft-trailer':       'Above 20 Ton',
+}
+
+// ─── Category colours ──────────────────────────────────────────────────────
 
 const CAT_DOT: Record<VehicleCategory, string> = {
   'Small':     'bg-blue-500',
@@ -69,25 +93,27 @@ const CAT_BADGE: Record<VehicleCategory, string> = {
   'ODC':       'bg-red-100 text-red-700',
 }
 
+// ─── Step 1 — Vehicle grid (4 per row on desktop) ─────────────────────────
+
 function StepVehicle({ selected, onSelect, onNext, onClose }: {
   selected: string; onSelect: (id: string) => void; onNext: () => void; onClose: () => void
 }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
-            <Truck size={15} className="text-white" />
+          <div className="w-7 h-7 rounded-lg bg-brand flex items-center justify-center">
+            <Truck size={13} className="text-white" />
           </div>
           <div>
-            <p className="font-display font-black text-sm text-gray-900 leading-none">Step 1 of 3 — BGTS Transport</p>
-            <p className="text-xs text-gray-500">Select your vehicle · 20 vehicles</p>
+            <p className="font-display font-black text-sm text-gray-900 leading-none">Step 1 of 3 — Select Vehicle</p>
+            <p className="text-[11px] text-gray-500">20 vehicles across 5 categories</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           {/* Category legend */}
-          <div className="hidden sm:flex items-center gap-3 text-[10px] text-gray-500">
+          <div className="hidden md:flex items-center gap-3 text-[10px] text-gray-500">
             {(['Small','Medium','Heavy','Container','ODC'] as VehicleCategory[]).map(cat => (
               <span key={cat} className="flex items-center gap-1">
                 <span className={cn('w-2 h-2 rounded-full shrink-0', CAT_DOT[cat])} />
@@ -96,21 +122,21 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
             ))}
           </div>
           <button type="button" onClick={onClose} aria-label="Close"
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-            <X size={15} className="text-gray-500" />
+            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+            <X size={14} className="text-gray-500" />
           </button>
         </div>
       </div>
 
-      {/* Body — flat 5-col grid, no scroll needed */}
-      <div className="flex-1 px-5 py-4 overflow-y-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+      {/* Body — 4-col grid, compact cards */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {VEHICLES.map(v => {
             const active = selected === v.id
             const tooltip = [
               v.size && `Size: ${v.size}`,
               v.householdCapacity && `Capacity: ${v.householdCapacity}`,
-              `Category: ${v.category}`,
+              `Max Load: ${v.maxLoad}`,
             ].filter(Boolean).join(' · ')
 
             return (
@@ -120,7 +146,7 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
                 onClick={() => onSelect(v.id)}
                 title={tooltip}
                 className={cn(
-                  'relative text-left rounded-xl border-2 px-2.5 py-2.5 transition-all duration-150',
+                  'relative text-left rounded-xl border-2 px-2.5 py-2 transition-all duration-150',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand',
                   'hover:shadow-md hover:-translate-y-0.5',
                   active
@@ -128,10 +154,10 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
                     : 'border-gray-200 bg-white hover:border-brand/40'
                 )}
               >
-                {/* Category dot — top-left */}
+                {/* Category dot */}
                 <span className={cn('absolute top-2 left-2 w-1.5 h-1.5 rounded-full', CAT_DOT[v.category])} />
 
-                {/* Checkmark — top-right when active */}
+                {/* Checkmark when active */}
                 {active && (
                   <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center">
                     <Check size={8} className="text-white" />
@@ -139,24 +165,24 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
                 )}
 
                 {/* Emoji */}
-                <div className="text-2xl mb-1.5 mt-1 ml-1">{v.emoji}</div>
+                <div className="text-xl mb-1 mt-0.5 ml-0.5">{v.emoji}</div>
 
-                {/* Name */}
+                {/* Name — larger + bolder */}
                 <div className={cn(
-                  'text-[10px] font-bold leading-tight mb-1',
+                  'text-xs font-black leading-tight mb-1',
                   active ? 'text-brand' : 'text-gray-800'
                 )}>
                   {v.name}
                 </div>
 
                 {/* Max load */}
-                <div className="text-[10px] text-gray-500 font-medium">
+                <div className="text-[10px] text-gray-500 font-semibold">
                   Max {v.maxLoad}
                 </div>
 
-                {/* Category badge — shown on hover via group, always visible on mobile */}
+                {/* Category badge */}
                 <div className={cn(
-                  'mt-1.5 inline-block text-[9px] px-1.5 py-0.5 rounded-full font-bold',
+                  'mt-1 inline-block text-[9px] px-1.5 py-0.5 rounded-full font-bold',
                   active ? 'bg-brand/10 text-brand' : CAT_BADGE[v.category]
                 )}>
                   {v.category}
@@ -168,20 +194,20 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3.5 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
+      <div className="px-5 py-3 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
         <p className="text-xs text-gray-500">
           {selected
             ? <span className="text-brand font-semibold">✓ {VEHICLES.find(v => v.id === selected)?.name}</span>
-            : 'Hover a card to see full details · Click to select'}
+            : 'Click a card to select · Hover for specs'}
         </p>
         <button type="button" onClick={onNext} disabled={!selected}
           className={cn(
-            'inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all',
+            'inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all',
             selected
               ? 'bg-brand text-white hover:bg-brand/90 shadow-md shadow-brand/20 hover:-translate-y-0.5'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
           )}>
-          Continue <ArrowRight size={15} />
+          Continue <ArrowRight size={14} />
         </button>
       </div>
     </div>
@@ -214,8 +240,7 @@ const GOODS_TYPES = [
   'Pharma & Healthcare', 'Textiles & Apparel', 'Auto Parts', 'Other',
 ]
 const WEIGHT_RANGES = [
-  'Under 50 KG', '50–200 KG', '200–500 KG', '500 KG–1 Ton',
-  '1–5 Ton', '5–10 Ton', '10–20 Ton', 'Above 20 Ton',
+  'Under 1 Ton', '1–5 Ton', '5–10 Ton', '10–20 Ton', 'Above 20 Ton',
 ]
 const TIME_SLOTS = [
   '06:00 AM','07:00 AM','08:00 AM','09:00 AM','10:00 AM',
@@ -249,43 +274,48 @@ function Err({ msg }: { msg?: string }) {
 
 // ─── Step 2 — Booking form ────────────────────────────────────────────────
 
-function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
-  control: any; register: any; errors: any
+function StepForm({ control, register, errors, selectedId, setValue, onBack, onNext }: {
+  control: any; register: any; errors: any; setValue: any
   selectedId: string; onBack: () => void; onNext: () => void
 }) {
-  const vehicle = VEHICLES.find(v => v.id === selectedId)
+  const vehicle   = VEHICLES.find(v => v.id === selectedId)
+  const autoWeight = VEHICLE_WEIGHT_AUTO[selectedId] ?? null
+
+  // Auto-populate weight range based on vehicle selection
+  useEffect(() => {
+    if (autoWeight) {
+      setValue('weightRange', autoWeight, { shouldValidate: true })
+    }
+  }, [autoWeight, setValue])
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack}
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" aria-label="Back">
-            <ArrowLeft size={15} className="text-gray-500" />
+            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" aria-label="Back">
+            <ArrowLeft size={14} className="text-gray-500" />
           </button>
           <div className="flex items-center gap-2">
-            {vehicle && <span className="text-xl">{vehicle.emoji}</span>}
+            {vehicle && <span className="text-lg">{vehicle.emoji}</span>}
             <div>
-              <p className="font-display font-black text-sm text-gray-900 leading-none">Step 2 of 3 — BGTS Transport</p>
-              <p className="text-xs text-gray-500">{vehicle?.name} · Max {vehicle?.maxLoad}</p>
+              <p className="font-display font-black text-sm text-gray-900 leading-none">Step 2 of 3 — Shipment Details</p>
+              <p className="text-[11px] text-gray-500">{vehicle?.name} · Max {vehicle?.maxLoad}</p>
             </div>
           </div>
         </div>
         <Dialog.Close asChild>
           <button type="button" aria-label="Close"
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-            <X size={15} className="text-gray-500" />
+            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+            <X size={14} className="text-gray-500" />
           </button>
         </Dialog.Close>
       </div>
 
       {/* Body */}
-      <div className="flex-1 px-6 py-5 overflow-y-auto">
-        <h2 className="font-display font-black text-xl text-gray-900 mb-1">Shipment Details</h2>
-        <p className="text-sm text-gray-500 mb-5">Fill in your route, cargo, and contact details.</p>
-
-        <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+        <div className="grid md:grid-cols-2 gap-x-5 gap-y-3.5">
           <div>
             <Label req>Origin City</Label>
             <input {...register('pickupCity')} placeholder="Enter origin city" className={inputCls} />
@@ -331,17 +361,28 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
           </div>
           <div>
             <Label req>Weight Range</Label>
-            <Controller name="weightRange" control={control} render={({ field: f }) => (
-              <div className="relative">
-                <select value={f.value} onChange={e => f.onChange(e.target.value)}
-                  className={cn(selectCls, !f.value && 'text-gray-400')}>
-                  <option value="">Select weight</option>
-                  {WEIGHT_RANGES.map(w => <option key={w} value={w}>{w}</option>)}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            {autoWeight ? (
+              // Locked chip — derived from vehicle capacity
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-brand/30 bg-brand/5">
+                <Weight size={14} className="text-brand shrink-0" aria-hidden="true" />
+                <span className="text-sm font-semibold text-brand">{autoWeight}</span>
+                <span className="ml-auto text-[10px] text-brand/70 font-bold bg-brand/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+                  Auto · Vehicle capacity
+                </span>
               </div>
-            )} />
-            <Err msg={errors.weightRange?.message} />
+            ) : (
+              <Controller name="weightRange" control={control} render={({ field: f }) => (
+                <div className="relative">
+                  <select value={f.value} onChange={e => f.onChange(e.target.value)}
+                    className={cn(selectCls, !f.value && 'text-gray-400')}>
+                    <option value="">Select weight</option>
+                    {WEIGHT_RANGES.map(w => <option key={w} value={w}>{w}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              )} />
+            )}
+            {errors.weightRange && !autoWeight && <Err msg={errors.weightRange?.message} />}
           </div>
           <div>
             <Label>No. of Packages</Label>
@@ -380,10 +421,10 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-100 bg-white flex justify-end shrink-0">
+      <div className="px-5 py-3.5 border-t border-gray-100 bg-white flex justify-end shrink-0">
         <button type="button" onClick={onNext}
-          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-brand text-white text-sm font-bold hover:bg-brand-700 shadow-md shadow-brand/20 hover:-translate-y-0.5 transition-all">
-          Review Booking <ArrowRight size={15} />
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand text-white text-sm font-bold hover:bg-brand/90 shadow-md shadow-brand/20 hover:-translate-y-0.5 transition-all">
+          Review Booking <ArrowRight size={14} />
         </button>
       </div>
     </div>
@@ -415,36 +456,35 @@ function StepSummary({ data, onBack, onSubmit, submitting }: {
   ]
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack}
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" aria-label="Back">
-            <ArrowLeft size={15} className="text-gray-500" />
+            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" aria-label="Back">
+            <ArrowLeft size={14} className="text-gray-500" />
           </button>
           <div>
-            <p className="font-display font-black text-sm text-gray-900 leading-none">Step 3 of 3 — BGTS Transport</p>
-            <p className="text-xs text-gray-500">Review and confirm your booking</p>
+            <p className="font-display font-black text-sm text-gray-900 leading-none">Step 3 of 3 — Confirm Booking</p>
+            <p className="text-[11px] text-gray-500">Review and confirm your booking</p>
           </div>
         </div>
         <Dialog.Close asChild>
           <button type="button" aria-label="Close"
-            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-            <X size={15} className="text-gray-500" />
+            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+            <X size={14} className="text-gray-500" />
           </button>
         </Dialog.Close>
       </div>
 
       {/* Body */}
-      <div className="flex-1 px-6 py-5 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
         <h2 className="font-display font-black text-xl text-gray-900 mb-1">Booking Summary</h2>
-        <p className="text-sm text-gray-500 mb-5">Please review before confirming.</p>
-
+        <p className="text-sm text-gray-500 mb-4">Please review before confirming.</p>
         <div className="rounded-xl border border-gray-200 overflow-hidden">
           {rows.map(([k, v], i) => (
             <div key={k} className={cn('flex px-4 py-2.5 text-sm', i % 2 === 0 ? 'bg-white' : 'bg-gray-50')}>
-              <span className="w-28 shrink-0 text-gray-500 font-medium text-xs uppercase tracking-wide mt-0.5">{k}</span>
+              <span className="w-24 shrink-0 text-gray-500 font-medium text-xs uppercase tracking-wide mt-0.5">{k}</span>
               <span className="text-gray-900 font-medium">{v}</span>
             </div>
           ))}
@@ -452,10 +492,10 @@ function StepSummary({ data, onBack, onSubmit, submitting }: {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
+      <div className="px-5 py-3.5 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
         <p className="text-xs text-gray-400">Response within 30 min · GST invoice guaranteed</p>
         <button type="submit" disabled={submitting}
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-brand text-white font-bold text-sm hover:bg-brand-700 transition-all disabled:opacity-60 shadow-lg shadow-brand/20 hover:-translate-y-0.5">
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-brand text-white font-bold text-sm hover:bg-brand/90 transition-all disabled:opacity-60 shadow-lg shadow-brand/20 hover:-translate-y-0.5">
           {submitting ? 'Submitting…' : 'Confirm Booking →'}
         </button>
       </div>
@@ -468,7 +508,7 @@ function StepSummary({ data, onBack, onSubmit, submitting }: {
 function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data: FormData; onClose: () => void }) {
   const vehicle = VEHICLES.find(v => v.id === data.vehicleId)
   return (
-    <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
+    <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
       <div className="w-16 h-16 rounded-full bg-brand/10 flex items-center justify-center mb-5">
         <CheckCircle size={32} className="text-brand" />
       </div>
@@ -489,7 +529,7 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
         <div className="flex justify-between"><span className="text-gray-500">Pickup</span><span className="font-semibold">{data.pickupDate} · {data.pickupTime}</span></div>
       </div>
       <button type="button" onClick={onClose}
-        className="px-8 py-3 rounded-xl bg-brand text-white font-bold text-sm hover:bg-brand-700 transition-colors shadow-md shadow-brand/20">
+        className="px-8 py-3 rounded-xl bg-brand text-white font-bold text-sm hover:bg-brand/90 transition-colors shadow-md shadow-brand/20">
         Close
       </button>
     </div>
@@ -526,7 +566,6 @@ export function BGTSBookingModal() {
     setTimeout(() => { setStep(1); setSubmitted(false); setSubmitting(false); reset() }, 300)
   }, [closeModal, reset])
 
-  // Step 2 → 3: validate then show summary
   const goToSummary = handleSubmit(data => {
     setSummaryData(data)
     setStep(3)
@@ -558,11 +597,11 @@ export function BGTSBookingModal() {
         <Dialog.Overlay className="fixed inset-0 z-[100] bg-black/65 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
         <Dialog.Content
           className={cn(
-            'fixed z-[101] flex flex-col bg-[#FAFAF8] shadow-2xl outline-none',
+            'fixed z-[101] flex flex-col bg-[#FAFAF8] shadow-2xl outline-none overflow-hidden',
             'inset-0 rounded-none',
             'sm:inset-auto sm:rounded-2xl',
             'sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2',
-            'sm:w-[90vw] sm:max-w-[1400px] sm:h-[92vh]',
+            'sm:w-[92vw] sm:max-w-[1100px] sm:h-[88vh]',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:zoom-out-95',
@@ -585,7 +624,8 @@ export function BGTSBookingModal() {
             <form noValidate className="flex flex-col h-full min-h-0">
               <StepForm
                 control={control} register={register} errors={errors}
-                selectedId={selectedId} onBack={() => setStep(1)} onNext={goToSummary}
+                selectedId={selectedId} setValue={setValue}
+                onBack={() => setStep(1)} onNext={goToSummary}
               />
             </form>
           ) : summaryData ? (

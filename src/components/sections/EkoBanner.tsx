@@ -72,7 +72,7 @@ export function EkoBanner() {
                 className="bg-white text-eko hover:bg-eko-50 hover:text-eko-700 shadow-none"
                 asChild
               >
-                <Link href="/ekohaul">Explore BGTS EV</Link>
+                <Link href="/BGTSEV">Explore BGTS EV</Link>
               </Button>
               <Button
                 variant="ghost"
@@ -82,7 +82,7 @@ export function EkoBanner() {
                 className="text-white hover:bg-white/10 border border-white/20"
                 asChild
               >
-                <Link href="/ekohaul/esg">Carbon Calculator</Link>
+                <Link href="/BGTSEV/esg">Carbon Calculator</Link>
               </Button>
             </div>
           </div>

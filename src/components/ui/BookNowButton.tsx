@@ -9,6 +9,7 @@ interface BookNowButtonProps {
   variant?: 'primary' | 'eko' | 'ghost-white'
   size?: 'sm' | 'md' | 'lg'
   modalType?: 'bgts' | 'ev'
+  evPlan?: string              // 'flex-ev' | 'dedi-ev' | 'fleet-ev'
 }
 
 const variantClasses = {
@@ -29,12 +30,13 @@ export function BookNowButton({
   variant = 'primary',
   size = 'md',
   modalType = 'bgts',
+  evPlan,
 }: BookNowButtonProps) {
   const { openModal, openEVModal } = useBookingModal()
   return (
     <button
       type="button"
-      onClick={modalType === 'ev' ? openEVModal : openModal}
+      onClick={modalType === 'ev' ? () => openEVModal(evPlan) : openModal}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-xl font-bold transition-all',
         'hover:-translate-y-0.5 active:translate-y-0',

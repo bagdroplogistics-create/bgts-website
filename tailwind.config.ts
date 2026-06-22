@@ -178,7 +178,7 @@ const config: Config = {
       },
 
       height: {
-        header: '72px',       // --header-h
+        header: '93px',       // --header-h (90px nav + 3px accent bar)
         'header-mobile': '60px',
       },
 

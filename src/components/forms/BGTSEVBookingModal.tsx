@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -9,14 +9,14 @@ import { X, ChevronDown, ArrowLeft, ArrowRight, Check, CheckCircle, Hash, Zap } 
 import { useBookingModal } from '@/contexts/BookingModalContext'
 import { cn } from '@/lib/utils'
 
-// ─── EV Vehicles (4 only) ─────────────────────────────────────────────────
+// ─── EV Vehicles ──────────────────────────────────────────────────────────
 
 const EV_VEHICLES = [
   {
     id: 'ev-3w',
     emoji: '🛺',
     name: '3-Wheeler Cargo EV',
-    capacity: 'Up to 400 kg',
+    capacity: 'Up to 400 KG',
     evCost: '₹8–9/km',
     dieselEquiv: '₹11–13/km',
     badge: 'City Delivery',
@@ -25,7 +25,7 @@ const EV_VEHICLES = [
     id: 'ev-mini',
     emoji: '🚐',
     name: 'Mini Truck 1–2 MT EV',
-    capacity: '500 kg – 2 Ton',
+    capacity: '500 KG – 2 Ton',
     evCost: '₹10–12/km',
     dieselEquiv: '₹15–18/km',
     badge: 'Urban Freight',
@@ -34,7 +34,7 @@ const EV_VEHICLES = [
     id: 'ev-scv',
     emoji: '🚛',
     name: 'SCV 2–4 MT EV',
-    capacity: '2,000 – 4,000 kg',
+    capacity: '2,000 – 4,000 KG',
     evCost: '₹13–16/km',
     dieselEquiv: '₹19–24/km',
     badge: 'Enclosed Cargo',
@@ -43,12 +43,23 @@ const EV_VEHICLES = [
     id: 'ev-icv',
     emoji: '🚛',
     name: 'ICV 5–7.5 MT EV',
-    capacity: '5,000 – 7,500 kg',
+    capacity: '5,000 – 7,500 KG',
     evCost: '₹22–28/km',
     dieselEquiv: '₹30–38/km',
     badge: 'Heavy Freight',
   },
 ]
+
+// All EV vehicle IDs have their weight auto-locked to vehicle capacity
+const VEHICLE_WEIGHT_AUTO: Record<string, string> = {
+  'ev-3w':   'Up to 400 KG',
+  'ev-mini': '500 KG – 2 Ton',
+  'ev-scv':  '2,000 – 4,000 KG',
+  'ev-icv':  '5,000 – 7,500 KG',
+}
+
+// Plans that do NOT need a pickup date (dedicated / enterprise)
+const PLANS_WITHOUT_DATE = new Set(['dedi-ev', 'fleet-ev'])
 
 // ─── Schema ───────────────────────────────────────────────────────────────
 
@@ -56,7 +67,7 @@ const schema = z.object({
   vehicleId:           z.string().min(1, 'Please select a vehicle'),
   pickupCity:          z.string().min(2, 'Enter origin city'),
   deliveryCity:        z.string().min(2, 'Enter destination city'),
-  pickupDate:          z.string().min(1, 'Select pickup date'),
+  pickupDate:          z.string().optional(),
   pickupTime:          z.string().min(1, 'Select pickup time'),
   goodsType:           z.string().min(1, 'Select goods type'),
   weightRange:         z.string().min(1, 'Select weight range'),
@@ -114,7 +125,6 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
 }) {
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-eko flex items-center justify-center">
@@ -131,12 +141,10 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
         </button>
       </div>
 
-      {/* Body */}
       <div className="flex-1 px-6 py-6 overflow-y-auto">
         <h2 className="font-display font-black text-2xl text-gray-900 mb-1">Choose Your EV Vehicle</h2>
         <p className="text-sm text-gray-500 mb-6">Zero-emission freight · Rates shown are per km estimates</p>
 
-        {/* 2×2 grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {EV_VEHICLES.map(v => {
             const active = selected === v.id
@@ -149,13 +157,11 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
                     ? 'border-eko bg-eko/5 shadow-md shadow-eko/10'
                     : 'border-gray-200 bg-white hover:border-eko/40'
                 )}>
-                {/* Badge */}
                 <span className={cn(
                   'absolute top-3 right-3 text-xs px-2 py-0.5 rounded-full font-bold',
                   active ? 'bg-eko text-white' : 'bg-eko/10 text-eko'
                 )}>{v.badge}</span>
 
-                {/* Checkmark */}
                 {active && (
                   <div className="absolute top-3 left-3 w-5 h-5 rounded-full bg-eko flex items-center justify-center">
                     <Check size={11} className="text-white" />
@@ -168,7 +174,6 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
                 </div>
                 <div className="text-sm text-gray-500 mb-3">{v.capacity}</div>
 
-                {/* Cost comparison */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-gray-500">⚡ EV Rate</span>
@@ -185,7 +190,6 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
         <p className="text-xs text-gray-500">
           {selected
@@ -208,15 +212,16 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
 
 // ─── Step 2 — Booking form ────────────────────────────────────────────────
 
-function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
+function StepForm({ control, register, errors, selectedId, showPickupDate, onBack, onNext }: {
   control: any; register: any; errors: any
-  selectedId: string; onBack: () => void; onNext: () => void
+  selectedId: string; showPickupDate: boolean
+  onBack: () => void; onNext: () => void
 }) {
-  const vehicle = EV_VEHICLES.find(v => v.id === selectedId)
+  const vehicle    = EV_VEHICLES.find(v => v.id === selectedId)
+  const autoWeight = VEHICLE_WEIGHT_AUTO[selectedId]
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack}
@@ -240,12 +245,12 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
         </Dialog.Close>
       </div>
 
-      {/* Body */}
       <div className="flex-1 px-6 py-5 overflow-y-auto">
         <h2 className="font-display font-black text-xl text-gray-900 mb-1">Booking Details</h2>
         <p className="text-sm text-gray-500 mb-5">Fill in your shipment and contact details.</p>
 
         <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
+          {/* Route */}
           <div>
             <Label req>Origin City</Label>
             <input {...register('pickupCity')} placeholder="Enter origin city" className={inputCls} />
@@ -256,11 +261,17 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
             <input {...register('deliveryCity')} placeholder="Enter destination city" className={inputCls} />
             <Err msg={errors.deliveryCity?.message} />
           </div>
-          <div>
-            <Label req>Pickup Date</Label>
-            <input type="date" {...register('pickupDate')} className={inputCls} />
-            <Err msg={errors.pickupDate?.message} />
-          </div>
+
+          {/* Pickup Date — shown only for FlexEV or no specific plan */}
+          {showPickupDate && (
+            <div>
+              <Label req>Pickup Date</Label>
+              <input type="date" {...register('pickupDate')} className={inputCls} />
+              <Err msg={errors.pickupDate?.message} />
+            </div>
+          )}
+
+          {/* Pickup Time */}
           <div>
             <Label req>Pickup Time</Label>
             <Controller name="pickupTime" control={control} render={({ field: f }) => (
@@ -271,10 +282,12 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
                   {TIME_SLOTS.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <Err msg={errors.pickupTime?.message} />
               </div>
             )} />
+            <Err msg={errors.pickupTime?.message} />
           </div>
+
+          {/* Goods type */}
           <div>
             <Label req>Goods Type</Label>
             <Controller name="goodsType" control={control} render={({ field: f }) => (
@@ -285,24 +298,35 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
                   {GOODS_TYPES.map(g => <option key={g} value={g}>{g}</option>)}
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <Err msg={errors.goodsType?.message} />
               </div>
             )} />
+            <Err msg={errors.goodsType?.message} />
           </div>
+
+          {/* Weight Range — auto-locked for 3-Wheeler, dropdown for others */}
           <div>
             <Label req>Weight Range</Label>
-            <Controller name="weightRange" control={control} render={({ field: f }) => (
-              <div className="relative">
-                <select value={f.value} onChange={e => f.onChange(e.target.value)}
-                  className={cn(selectCls, !f.value && 'text-gray-400')}>
-                  <option value="">Select weight</option>
-                  {WEIGHT_RANGES.map(w => <option key={w} value={w}>{w}</option>)}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <Err msg={errors.weightRange?.message} />
+            {autoWeight ? (
+              <div className={cn(inputCls, 'bg-eko/5 border-eko/30 text-gray-700 flex items-center justify-between cursor-not-allowed select-none')}>
+                <span>{autoWeight}</span>
+                <span className="text-xs font-bold text-eko ml-2 shrink-0">Auto · Vehicle capacity</span>
               </div>
-            )} />
+            ) : (
+              <Controller name="weightRange" control={control} render={({ field: f }) => (
+                <div className="relative">
+                  <select value={f.value} onChange={e => f.onChange(e.target.value)}
+                    className={cn(selectCls, !f.value && 'text-gray-400')}>
+                    <option value="">Select weight</option>
+                    {WEIGHT_RANGES.map(w => <option key={w} value={w}>{w}</option>)}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                </div>
+              )} />
+            )}
+            <Err msg={errors.weightRange?.message} />
           </div>
+
+          {/* Contact */}
           <div>
             <Label req>Full Name</Label>
             <input {...register('fullName')} placeholder="Your full name" className={inputCls} />
@@ -331,7 +355,6 @@ function StepForm({ control, register, errors, selectedId, onBack, onNext }: {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="px-6 py-4 border-t border-gray-100 bg-white flex justify-end shrink-0">
         <button type="button" onClick={onNext}
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-eko text-white text-sm font-bold hover:bg-eko-700 shadow-md shadow-eko/20 hover:-translate-y-0.5 transition-all">
@@ -350,24 +373,23 @@ function StepSummary({ data, selectedId, onBack, onSubmit, submitting }: {
 }) {
   const vehicle = EV_VEHICLES.find(v => v.id === selectedId)
   const rows: [string, string][] = [
-    ['Vehicle',   `${vehicle?.emoji ?? ''} ${vehicle?.name ?? ''}`],
-    ['EV Rate',   vehicle?.evCost ?? ''],
-    ['From',      data.pickupCity],
-    ['To',        data.deliveryCity],
-    ['Date',      data.pickupDate],
-    ['Time',      data.pickupTime],
-    ['Goods',     data.goodsType],
-    ['Weight',    data.weightRange],
-    ['Name',      data.fullName],
-    ['Mobile',    data.mobile],
-    ['Email',     data.email],
+    ['Vehicle',  `${vehicle?.emoji ?? ''} ${vehicle?.name ?? ''}`],
+    ['EV Rate',  vehicle?.evCost ?? ''],
+    ['From',     data.pickupCity],
+    ['To',       data.deliveryCity],
+    ...(data.pickupDate ? [['Date', data.pickupDate] as [string, string]] : []),
+    ['Time',     data.pickupTime],
+    ['Goods',    data.goodsType],
+    ['Weight',   data.weightRange],
+    ['Name',     data.fullName],
+    ['Mobile',   data.mobile],
+    ['Email',    data.email],
     ...(data.companyName ? [['Company', data.companyName] as [string, string]] : []),
     ...(data.specialInstructions ? [['Notes', data.specialInstructions] as [string, string]] : []),
   ]
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-white shrink-0">
         <div className="flex items-center gap-3">
           <button type="button" onClick={onBack}
@@ -387,7 +409,6 @@ function StepSummary({ data, selectedId, onBack, onSubmit, submitting }: {
         </Dialog.Close>
       </div>
 
-      {/* Body */}
       <div className="flex-1 px-6 py-5 overflow-y-auto">
         <h2 className="font-display font-black text-xl text-gray-900 mb-1">Booking Summary</h2>
         <p className="text-sm text-gray-500 mb-5">Please review your details before confirming.</p>
@@ -406,7 +427,6 @@ function StepSummary({ data, selectedId, onBack, onSubmit, submitting }: {
         </div>
       </div>
 
-      {/* Footer */}
       <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
         <p className="text-xs text-gray-400">Response within 30 min · GST invoice guaranteed</p>
         <button type="submit" disabled={submitting}
@@ -439,9 +459,22 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
         </div>
       </div>
       <div className="bg-gray-50 rounded-xl p-4 w-full max-w-xs text-left mb-6 space-y-2 text-sm">
-        {vehicle && <div className="flex justify-between"><span className="text-gray-500">Vehicle</span><span className="font-semibold">{vehicle.emoji} {vehicle.name}</span></div>}
-        <div className="flex justify-between"><span className="text-gray-500">Route</span><span className="font-semibold">{data.pickupCity} → {data.deliveryCity}</span></div>
-        <div className="flex justify-between"><span className="text-gray-500">Pickup</span><span className="font-semibold">{data.pickupDate} · {data.pickupTime}</span></div>
+        {vehicle && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Vehicle</span>
+            <span className="font-semibold">{vehicle.emoji} {vehicle.name}</span>
+          </div>
+        )}
+        <div className="flex justify-between">
+          <span className="text-gray-500">Route</span>
+          <span className="font-semibold">{data.pickupCity} → {data.deliveryCity}</span>
+        </div>
+        {data.pickupDate && (
+          <div className="flex justify-between">
+            <span className="text-gray-500">Pickup</span>
+            <span className="font-semibold">{data.pickupDate} · {data.pickupTime}</span>
+          </div>
+        )}
       </div>
       <button type="button" onClick={onClose}
         className="px-8 py-3 rounded-xl bg-eko text-white font-bold text-sm hover:bg-eko-700 transition-colors shadow-md shadow-eko/20">
@@ -454,13 +487,16 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
 // ─── Main modal ────────────────────────────────────────────────────────────
 
 export function BGTSEVBookingModal() {
-  const { isOpen, modalType, closeModal } = useBookingModal()
+  const { isOpen, modalType, evPlan, closeModal } = useBookingModal()
   const open = isOpen && modalType === 'ev'
 
-  const [step, setStep]           = useState<1 | 2 | 3>(1)
-  const [submitted, setSubmitted] = useState(false)
+  // Show pickup date unless plan is DediEV or FleetEV
+  const showPickupDate = !PLANS_WITHOUT_DATE.has(evPlan ?? '')
+
+  const [step, setStep]             = useState<1 | 2 | 3>(1)
+  const [submitted, setSubmitted]   = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [bookingRef]              = useState(genRef)
+  const [bookingRef]                = useState(genRef)
   const [summaryData, setSummaryData] = useState<FormData | null>(null)
 
   const { control, register, handleSubmit, reset, setValue, watch,
@@ -475,12 +511,25 @@ export function BGTSEVBookingModal() {
 
   const selectedId = watch('vehicleId')
 
+  // Auto-populate weight range for 3-Wheeler (and clear when switching away)
+  useEffect(() => {
+    const autoWeight = VEHICLE_WEIGHT_AUTO[selectedId]
+    if (autoWeight) {
+      setValue('weightRange', autoWeight, { shouldValidate: true })
+    } else if (selectedId) {
+      // Switching from 3-Wheeler to another vehicle — clear auto value
+      const current = watch('weightRange')
+      if (Object.values(VEHICLE_WEIGHT_AUTO).includes(current)) {
+        setValue('weightRange', '', { shouldValidate: false })
+      }
+    }
+  }, [selectedId, setValue, watch])
+
   const handleClose = useCallback(() => {
     closeModal()
     setTimeout(() => { setStep(1); setSubmitted(false); setSubmitting(false); reset() }, 300)
   }, [closeModal, reset])
 
-  // Step 2 → 3: validate then show summary
   const goToSummary = handleSubmit(data => {
     setSummaryData(data)
     setStep(3)
@@ -497,6 +546,7 @@ export function BGTSEVBookingModal() {
         body: JSON.stringify({
           ...summaryData,
           bookingRef,
+          evPlan: evPlan ?? 'general',
           serviceType: 'BGTS EV Booking',
           vehicleType: vehicle ? `${vehicle.emoji} ${vehicle.name} — EV ${vehicle.evCost}` : summaryData.vehicleId,
         }),
@@ -504,7 +554,7 @@ export function BGTSEVBookingModal() {
     } catch { /* silent */ }
     setSubmitting(false)
     setSubmitted(true)
-  }, [summaryData, bookingRef])
+  }, [summaryData, bookingRef, evPlan])
 
   return (
     <Dialog.Root open={open} onOpenChange={o => !o && handleClose()}>
@@ -539,7 +589,8 @@ export function BGTSEVBookingModal() {
             <form noValidate className="flex flex-col h-full min-h-0">
               <StepForm
                 control={control} register={register} errors={errors}
-                selectedId={selectedId} onBack={() => setStep(1)} onNext={goToSummary}
+                selectedId={selectedId} showPickupDate={showPickupDate}
+                onBack={() => setStep(1)} onNext={goToSummary}
               />
             </form>
           ) : summaryData ? (

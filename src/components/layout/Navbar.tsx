@@ -66,7 +66,7 @@ export function Navbar() {
 
       <nav
         className="container-xl flex items-center justify-between"
-        style={{ height: '72px' }}
+        style={{ height: '90px' }}
         aria-label="Main navigation"
       >
         {/* Logo */}
@@ -80,7 +80,7 @@ export function Navbar() {
             alt="BGTS — Baroda Goods Transport Service"
             width={140}
             height={56}
-            className="h-12 w-auto object-contain"
+            className="h-20 w-auto object-contain"
             priority
           />
         </Link>
@@ -97,7 +97,7 @@ export function Navbar() {
               <Link
                 href={link.href}
                 className={cn(
-                  'flex items-center gap-1 px-3 py-2 rounded-md text-base font-medium',
+                  'flex items-center gap-1 px-3 py-2 rounded-md text-[1.2rem] font-medium',
                   'transition-colors duration-fast',
                   'hover:text-brand hover:bg-brand-subtle',
                   pathname.startsWith(link.href) && link.href !== '/'
@@ -164,11 +164,11 @@ export function Navbar() {
           {/* BGTS EV link — brand pill */}
           <li>
             <Link
-              href="/ekohaul"
+              href="/BGTSEV"
               className={cn(
                 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold',
                 'transition-all duration-200',
-                pathname.startsWith('/ekohaul')
+                pathname.startsWith('/BGTSEV')
                   ? 'bg-eko text-white shadow-md shadow-eko/30'
                   : 'bg-eko text-white hover:bg-eko-700 hover:shadow-md hover:shadow-eko/30 hover:scale-105'
               )}
@@ -267,7 +267,7 @@ export function Navbar() {
             ))}
 
             <Link
-              href="/ekohaul"
+              href="/BGTSEV"
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-white bg-eko hover:bg-eko-700"
             >
               <Zap size={14} aria-hidden="true" />

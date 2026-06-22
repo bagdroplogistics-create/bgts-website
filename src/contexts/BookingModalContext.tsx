@@ -7,8 +7,9 @@ type ModalType = 'bgts' | 'ev'
 interface BookingModalContextValue {
   isOpen: boolean
   modalType: ModalType
-  openModal: () => void      // opens BGTS Transport modal
-  openEVModal: () => void    // opens BGTS EV modal
+  evPlan: string | null           // 'flex-ev' | 'dedi-ev' | 'fleet-ev' | null
+  openModal: () => void
+  openEVModal: (plan?: string) => void
   closeModal: () => void
 }
 
@@ -17,13 +18,18 @@ const BookingModalContext = createContext<BookingModalContextValue | null>(null)
 export function BookingModalProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen]       = useState(false)
   const [modalType, setModalType] = useState<ModalType>('bgts')
+  const [evPlan, setEvPlan]       = useState<string | null>(null)
 
-  const openModal   = useCallback(() => { setModalType('bgts'); setIsOpen(true)  }, [])
-  const openEVModal = useCallback(() => { setModalType('ev');   setIsOpen(true)  }, [])
-  const closeModal  = useCallback(() => setIsOpen(false), [])
+  const openModal   = useCallback(() => { setModalType('bgts'); setIsOpen(true) }, [])
+  const openEVModal = useCallback((plan?: string) => {
+    setEvPlan(plan ?? null)
+    setModalType('ev')
+    setIsOpen(true)
+  }, [])
+  const closeModal  = useCallback(() => { setIsOpen(false); setEvPlan(null) }, [])
 
   return (
-    <BookingModalContext.Provider value={{ isOpen, modalType, openModal, openEVModal, closeModal }}>
+    <BookingModalContext.Provider value={{ isOpen, modalType, evPlan, openModal, openEVModal, closeModal }}>
       {children}
     </BookingModalContext.Provider>
   )
