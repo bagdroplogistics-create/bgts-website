@@ -8,7 +8,7 @@ export type {
   CarbonCalcInput,
   CarbonCalcResult,
   EkoBookingForm,
-} from './BGTSEV'
+} from './ekohaul'
 
 // ─── Shared / Generic ───────────────────────────────────────────────────
 
