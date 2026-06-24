@@ -684,7 +684,7 @@ function StepSummary({ data, onBack, onSubmit, submitting }: {
 
 // ─── Success ──────────────────────────────────────────────────────────────
 
-function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data: FormData; onClose: () => void }) {
+function SuccessScreen({ bookingRef, data, emailWarning, onClose }: { bookingRef: string; data: FormData; emailWarning?: boolean; onClose: () => void }) {
   const vehicle = VEHICLES.find(v => v.id === data.vehicleId)
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
@@ -692,9 +692,14 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
         <CheckCircle size={32} className="text-brand" />
       </div>
       <h3 className="font-display font-black text-2xl text-gray-900 mb-2">Booking Confirmed!</h3>
-      <p className="text-gray-500 text-sm mb-6 max-w-md">
+      <p className="text-gray-500 text-sm mb-4 max-w-md">
         Thank you for booking with BGTS. Our team will confirm within 30 minutes on {data.email}.
       </p>
+      {emailWarning && (
+        <div className="mb-4 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs max-w-sm text-center">
+          ⚠️ Booking saved but notification email could not be sent. Please call <strong>+91 63 5722 5722</strong> to confirm.
+        </div>
+      )}
       <div className="inline-flex items-center gap-3 bg-brand/5 border border-brand/20 rounded-xl px-6 py-3.5 mb-6">
         <Hash size={16} className="text-brand" />
         <div className="text-left">
@@ -742,7 +747,7 @@ export function BGTSBookingModal() {
 
   const handleClose = useCallback(() => {
     closeModal()
-    setTimeout(() => { setStep(1); setSubmitted(false); setSubmitting(false); reset() }, 300)
+    setTimeout(() => { setStep(1); setSubmitted(false); setSubmitting(false); setEmailWarning(false); reset() }, 300)
   }, [closeModal, reset])
 
   const goToSummary = handleSubmit(data => {
@@ -750,12 +755,14 @@ export function BGTSBookingModal() {
     setStep(3)
   })
 
+  const [emailWarning, setEmailWarning] = useState(false)
+
   const confirmSubmit = useCallback(async () => {
     if (!summaryData) return
     setSubmitting(true)
     const vehicle = VEHICLES.find(v => v.id === summaryData.vehicleId)
     try {
-      await fetch('/api/booking', {
+      const res = await fetch('/api/booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -765,7 +772,15 @@ export function BGTSBookingModal() {
           vehicleType: vehicle ? `${vehicle.name} (Max ${vehicle.maxLoad})` : summaryData.vehicleId,
         }),
       })
-    } catch { /* silent */ }
+      const json = await res.json().catch(() => ({}))
+      if (!res.ok || json.success === false) {
+        console.error('[booking] API error:', json.error)
+        setEmailWarning(true)
+      }
+    } catch (err) {
+      console.error('[booking] fetch error:', err)
+      setEmailWarning(true)
+    }
     setSubmitting(false)
     setSubmitted(true)
   }, [summaryData, bookingRef])
@@ -791,7 +806,7 @@ export function BGTSBookingModal() {
           <Dialog.Title className="sr-only">BGTS Transport Booking</Dialog.Title>
 
           {submitted && summaryData ? (
-            <SuccessScreen bookingRef={bookingRef} data={summaryData} onClose={handleClose} />
+            <SuccessScreen bookingRef={bookingRef} data={summaryData} emailWarning={emailWarning} onClose={handleClose} />
           ) : step === 1 ? (
             <StepVehicle
               selected={selectedId}

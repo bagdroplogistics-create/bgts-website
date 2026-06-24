@@ -91,7 +91,7 @@ function buildConfirmationHtml(data: Record<string, unknown>): string {
         <div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">BGTS Contact</div>
         <p style="font-size:13px;color:#6b7280;margin:0 0 4px">📞 +91 63 5722 5722</p>
         <p style="font-size:13px;color:#6b7280;margin:0 0 4px">✉️ bgtspl@gmail.com</p>
-        <p style="font-size:13px;color:#6b7280;margin:0">📍 Old Padra Road, Vadodara — 390015, Gujarat, India</p>
+        <p style="font-size:13px;color:#6b7280;margin:0">📍 Nr Natraj Cinema, Pratapgunj Naka, Vadodara — 390002, Gujarat, India</p>
       </div>
     </div>
     <div style="padding:16px 32px;background:#f8fafb;border-top:1px solid #e5e7eb">
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   const SMTP_PASS = process.env.SMTP_PASS
   const SMTP_HOST = process.env.SMTP_HOST ?? 'smtp.gmail.com'
   const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587)
-  const INQUIRY_EMAIL = process.env.SERVICE_INQUIRY_EMAIL ?? SMTP_USER
+  const INQUIRY_EMAIL = process.env.TO_EMAIL ?? process.env.SERVICE_INQUIRY_EMAIL ?? SMTP_USER
 
   if (!SMTP_USER || !SMTP_PASS) {
     return NextResponse.json({ success: false, error: 'Email not configured' }, { status: 500 })
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
     host:   SMTP_HOST,
     port:   SMTP_PORT,
     secure: false,
-    auth:   { user: SMTP_USER, pass: SMTP_PASS },
+    auth:   { user: SMTP_USER, pass: SMTP_PASS.replace(/\s/g, '') },
     tls:    { rejectUnauthorized: false },
   })
 
@@ -134,8 +134,9 @@ export async function POST(req: NextRequest) {
   const refNo       = String(body.refNo ?? '')
   const customerEmail = String(body.email ?? '')
 
-  // 1 — Send inquiry notification to BGTS
+  // 1 — Verify SMTP, then send inquiry notification to BGTS
   try {
+    await transporter.verify()
     const info = await transporter.sendMail({
       from:    `"BGTS Inquiries" <${SMTP_USER}>`,
       to:      INQUIRY_EMAIL,
