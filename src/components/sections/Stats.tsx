@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 
 const stats = [
   { value: 75,   suffix: '+',  label: 'Years of trusted operations',  description: 'Serving India since 1950' },
-  { value: 20,   suffix: '+',  label: 'Branch offices',               description: 'Gujarat & Maharashtra' },
+  { value: 24,   suffix: '/7', label: 'Logistics Support',             description: 'Always Available' },
   { value: 992,  suffix: '/1000', label: 'Consignments on time',      description: '99.2% on-time delivery SLA' },
   { value: 2000, suffix: '+', label: 'Vehicles managed',              description: 'Road · Rail · Air network' },
 ]
