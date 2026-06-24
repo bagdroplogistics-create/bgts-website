@@ -74,9 +74,6 @@ export function CTABanner() {
           </Button>
         </div>
 
-        <p className="mt-8 text-white/60 text-sm">
-          No registration required · Response within 2 hours · GST invoice guaranteed
-        </p>
       </div>
     </section>
   )

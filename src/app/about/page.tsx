@@ -7,8 +7,7 @@ import { Footer } from '@/components/layout/Footer'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Button } from '@/components/ui/Button'
 import { Tag } from '@/components/ui/Tag'
-import { branches, hubs } from '@/data/branches'
-import { MapPin, Phone, Mail, ArrowRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'About BGTS',
@@ -25,7 +24,7 @@ const milestones = [
   { year: '2015', event: 'GPS fleet tracking deployed across all vehicles.' },
   { year: '2022', event: 'Digital booking platform launched. Pan-India rail tie-ups.' },
   { year: '2024', event: "BGTS EV fleet division launched — Gujarat's first EV cargo fleet." },
-  { year: '2025', event: '2,000+ vehicle network. 20+ branches. 99.2% SLA track record.' },
+  { year: '2025', event: 'BGTS EV fleet goes carbon-neutral. Gujarat’s first EV cargo carbon calculator launched, enabling clients to measure, report, and offset freight emissions.' },
 ]
 
 const values = [
@@ -139,69 +138,6 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* ── Branch network ── */}
-        <section id="branches" className="section-py bg-surface-page" aria-labelledby="branches-heading">
-          <div className="container-xl">
-            <div className="mb-10">
-              <SectionHeading
-                eyebrow="Our Network"
-                title="20+ branches across West India"
-                subtitle="Gujarat and Maharashtra covered, with 5 major hub facilities handling consolidation and distribution."
-                align="left"
-              />
-            </div>
-
-            {/* Hubs */}
-            <div className="mb-8">
-              <h3 className="text-xs font-display font-bold uppercase tracking-widest text-ink-muted mb-4">
-                Hub Facilities
-              </h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {hubs.map((b) => (
-                  <div key={b.city} className="bg-white rounded-xl border border-brand/20 p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Tag variant="brand" size="sm">Hub</Tag>
-                      <span className="font-display font-bold text-ink-strong">{b.city}</span>
-                      <span className="text-xs text-ink-muted">{b.state}</span>
-                    </div>
-                    <p className="text-xs text-ink-muted mb-3">{b.address}</p>
-                    <div className="flex flex-col gap-1.5">
-                      <a href={`tel:${b.phone}`} className="flex items-center gap-1.5 text-xs text-ink-body hover:text-brand">
-                        <Phone size={11} className="text-brand" aria-hidden="true" />
-                        {b.phone}
-                      </a>
-                      <a href={`mailto:${b.email}`} className="flex items-center gap-1.5 text-xs text-ink-body hover:text-brand">
-                        <Mail size={11} className="text-brand" aria-hidden="true" />
-                        {b.email}
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Branch offices */}
-            <div>
-              <h3 className="text-xs font-display font-bold uppercase tracking-widest text-ink-muted mb-4">
-                Branch Offices
-              </h3>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {branches.filter((b) => !b.isHub).map((b) => (
-                  <div key={b.city} className="bg-white rounded-xl border border-ink-ghost/10 p-4">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <MapPin size={12} className="text-brand shrink-0" aria-hidden="true" />
-                      <span className="font-semibold text-sm text-ink-strong">{b.city}</span>
-                    </div>
-                    <p className="text-xs text-ink-muted">{b.state}</p>
-                    <a href={`tel:${b.phone}`} className="mt-2 block text-xs text-ink-muted hover:text-brand font-mono">
-                      {b.phone}
-                    </a>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* ── CTA ── */}
         <section className="section-py bg-brand-subtle border-t border-brand/10">

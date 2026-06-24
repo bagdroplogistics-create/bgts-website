@@ -166,7 +166,7 @@ export function Navbar() {
             <Link
               href="/BGTSEV"
               className={cn(
-                'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold',
+                'flex items-center gap-1.5 px-4 py-2 rounded-lg text-[1.2rem] font-bold',
                 'transition-all duration-200',
                 pathname.startsWith('/BGTSEV')
                   ? 'bg-eko text-white shadow-md shadow-eko/30'
@@ -193,6 +193,7 @@ export function Navbar() {
             size="sm"
             icon={<Truck size={14} />}
             iconPosition="left"
+            className="text-[1.2rem]"
             asChild
           >
             <button type="button" onClick={openModal}>Book Now</button>

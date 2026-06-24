@@ -9,7 +9,7 @@ import { X, ChevronDown, ArrowLeft, ArrowRight, Check, CheckCircle, Hash, Truck,
 import { useBookingModal } from '@/contexts/BookingModalContext'
 import { cn } from '@/lib/utils'
 
-// ─── Transport Vehicles (20) ───────────────────────────────────────────────
+// ─── Transport Vehicles (18) ───────────────────────────────────────────────
 
 type VehicleCategory = 'Small' | 'Medium' | 'Heavy' | 'Container' | 'ODC'
 
@@ -17,62 +17,56 @@ interface Vehicle {
   id: string
   name: string
   category: VehicleCategory
-  emoji: string
   maxLoad: string
   size?: string
-  householdCapacity?: string
 }
 
 const VEHICLES: Vehicle[] = [
   // Small
-  { id: 'tata-ace',               name: 'TATA ACE',               category: 'Small',     emoji: '🛺', size: '7×4.8×4.8 ft', householdCapacity: '1 BHK',   maxLoad: '850 Kgs' },
-  { id: 'ashok-leyland-dost',     name: 'ASHOK LEYLAND DOST',     category: 'Small',     emoji: '🚐', size: '7×4.8×4.8 ft', householdCapacity: '1 BHK',   maxLoad: '1 Ton' },
-  { id: 'mahindra-bolero-pickup', name: 'MAHINDRA BOLERO PICKUP',  category: 'Small',     emoji: '🛻', size: '8×4.8×4.8 ft', householdCapacity: '1 BHK',   maxLoad: '1.5 Ton' },
+  { id: '4-wheeler-pickup',    name: '4 Wheeler Pickup',       category: 'Small',     size: '8×4.8 ft',  maxLoad: '1.5 Ton' },
   // Medium
-  { id: 'tata-407',               name: 'TATA 407',                category: 'Medium',    emoji: '🚚', householdCapacity: '1.5 BHK', maxLoad: '2.5 Ton' },
-  { id: 'eicher-14ft',            name: 'EICHER 14 FEET',          category: 'Medium',    emoji: '🚛', householdCapacity: '2 BHK',   maxLoad: '4 Ton' },
-  { id: 'eicher-17ft',            name: 'EICHER 17 FEET',          category: 'Medium',    emoji: '🚛', householdCapacity: '2.5 BHK', maxLoad: '5 Ton' },
-  { id: 'eicher-19ft',            name: 'EICHER 19 FEET',          category: 'Medium',    emoji: '🚛', householdCapacity: '2.5 BHK', maxLoad: '7–9 Ton' },
-  { id: 'tata-22ft',              name: 'TATA 22 FEET',            category: 'Medium',    emoji: '🚛', householdCapacity: '3 BHK',   maxLoad: '10 Ton' },
+  { id: 'tata-407',            name: 'TATA 407',               category: 'Medium',    size: '10×5.5 ft', maxLoad: '2.5 Ton' },
+  { id: 'vehicle-14ft',        name: 'Vehicle 14 FEET',        category: 'Medium',    size: '14×7 ft',   maxLoad: '4 Ton'   },
+  { id: 'vehicle-17ft',        name: 'Vehicle 17 FEET',        category: 'Medium',    size: '17×7 ft',   maxLoad: '5 Ton'   },
+  { id: 'vehicle-19ft',        name: 'Vehicle 19 FEET',        category: 'Medium',    size: '19×7.5 ft', maxLoad: '7–9 Ton' },
+  { id: 'vehicle-22ft',        name: 'Vehicle 22 FEET',        category: 'Medium',    size: '22×7.5 ft', maxLoad: '10 Ton'  },
   // Heavy
-  { id: 'tata-truck-6tyre',       name: 'TATA TRUCK 6 TYRE',       category: 'Heavy',     emoji: '🚚', maxLoad: '9 Ton' },
-  { id: 'taurus-16t',             name: 'TAURUS 16T 10 TYRE',      category: 'Heavy',     emoji: '🚛', maxLoad: '16 Ton' },
-  { id: 'taurus-21t',             name: 'TAURUS 21T 12 TYRE',      category: 'Heavy',     emoji: '🚛', maxLoad: '21 Ton' },
-  { id: 'taurus-25t',             name: 'TAURUS 25T 14 TYRE',      category: 'Heavy',     emoji: '🚛', maxLoad: '25 Ton' },
+  { id: 'vehicle-9t',          name: 'Vehicle 9T',             category: 'Heavy',     maxLoad: '9 Ton'   },
+  { id: 'vehicle-16t',         name: 'Vehicle 16T',            category: 'Heavy',     maxLoad: '16 Ton'  },
+  { id: 'vehicle-21t',         name: 'Vehicle 21T',            category: 'Heavy',     maxLoad: '21 Ton'  },
+  { id: 'vehicle-25t',         name: 'Vehicle 25T',            category: 'Heavy',     maxLoad: '25 Ton'  },
   // Container
-  { id: 'container-20ft',         name: 'CONTAINER 20 FT',         category: 'Container', emoji: '📦', householdCapacity: '4 BHK', maxLoad: '6.5 Ton' },
-  { id: 'container-32ft-sxl',     name: 'CONTAINER 32 FT SXL',     category: 'Container', emoji: '📦', householdCapacity: '5 BHK', maxLoad: '7 Ton' },
-  { id: 'container-32ft-mxl',     name: 'CONTAINER 32 FT MXL',     category: 'Container', emoji: '📦', maxLoad: '14 Ton' },
-  { id: 'container-32ft-hq',      name: 'CONTAINER 32 FT HQ',      category: 'Container', emoji: '📦', maxLoad: '14 Ton' },
+  { id: 'container-20ft',      name: 'Container 20 FT',        category: 'Container', size: '20×8 ft',   maxLoad: '6.5 Ton' },
+  { id: 'container-32ft-sxl',  name: 'Container 32 FT SXL',   category: 'Container', size: '32×8 ft',   maxLoad: '7 Ton'   },
+  { id: 'container-32ft-mxl',  name: 'Container 32 FT MXL',   category: 'Container', size: '32×8.5 ft', maxLoad: '14 Ton'  },
+  { id: 'container-32ft-hq',   name: 'Container 32 FT HQ',    category: 'Container', size: '32×9.5 ft', maxLoad: '14 Ton'  },
   // ODC
-  { id: 'odc-20ft',               name: '20 FT OPEN ODC',          category: 'ODC',       emoji: '🏗️', maxLoad: '7 Ton' },
-  { id: 'odc-28-32ft-jcb',        name: '28–32 FT JCB ODC',        category: 'ODC',       emoji: '🏗️', maxLoad: '8 Ton' },
-  { id: 'odc-32ft-trailer',       name: '32 FT TRAILER ODC',       category: 'ODC',       emoji: '🏗️', maxLoad: '25 Ton' },
-  { id: 'odc-40ft-trailer',       name: '40 FT OPEN TRAILER ODC',  category: 'ODC',       emoji: '🏗️', maxLoad: '32 Ton' },
+  { id: 'odc-20ft',            name: '20 FT Open ODC',         category: 'ODC',       size: '20×8 ft',   maxLoad: '7 Ton'   },
+  { id: 'odc-32ft-trailer',    name: '32 FT Trailer ODC',      category: 'ODC',       size: '32×8 ft',   maxLoad: '25 Ton'  },
+  { id: 'odc-40ft-trailer',    name: '40 FT Open Trailer ODC', category: 'ODC',       size: '40×8 ft',   maxLoad: '32 Ton'  },
+  { id: 'vehicle-max-42t',     name: 'Vehicle Max 42T',        category: 'ODC',       size: '40+ ft',    maxLoad: '42 Ton'  },
 ]
 
 // Auto-lock weight range from vehicle max load
 const VEHICLE_WEIGHT_AUTO: Record<string, string> = {
-  'tata-ace':               'Under 1 Ton',
-  'ashok-leyland-dost':     'Under 1 Ton',
-  'mahindra-bolero-pickup': '1–5 Ton',
-  'tata-407':               '1–5 Ton',
-  'eicher-14ft':            '1–5 Ton',
-  'eicher-17ft':            '1–5 Ton',
-  'eicher-19ft':            '5–10 Ton',
-  'tata-22ft':              '5–10 Ton',
-  'tata-truck-6tyre':       '5–10 Ton',
-  'taurus-16t':             '10–20 Ton',
-  'taurus-21t':             'Above 20 Ton',
-  'taurus-25t':             'Above 20 Ton',
-  'container-20ft':         '5–10 Ton',
-  'container-32ft-sxl':     '5–10 Ton',
-  'container-32ft-mxl':     '10–20 Ton',
-  'container-32ft-hq':      '10–20 Ton',
-  'odc-20ft':               '5–10 Ton',
-  'odc-28-32ft-jcb':        '5–10 Ton',
-  'odc-32ft-trailer':       'Above 20 Ton',
-  'odc-40ft-trailer':       'Above 20 Ton',
+  '4-wheeler-pickup':   '1–5 Ton',
+  'tata-407':           '1–5 Ton',
+  'vehicle-14ft':       '1–5 Ton',
+  'vehicle-17ft':       '1–5 Ton',
+  'vehicle-19ft':       '5–10 Ton',
+  'vehicle-22ft':       '5–10 Ton',
+  'vehicle-9t':         '5–10 Ton',
+  'vehicle-16t':        '10–20 Ton',
+  'vehicle-21t':        'Above 20 Ton',
+  'vehicle-25t':        'Above 20 Ton',
+  'container-20ft':     '5–10 Ton',
+  'container-32ft-sxl': '5–10 Ton',
+  'container-32ft-mxl': '10–20 Ton',
+  'container-32ft-hq':  '10–20 Ton',
+  'odc-20ft':           '5–10 Ton',
+  'odc-32ft-trailer':   'Above 20 Ton',
+  'odc-40ft-trailer':   'Above 20 Ton',
+  'vehicle-max-42t':    'Above 20 Ton',
 }
 
 // ─── Category colours ──────────────────────────────────────────────────────
@@ -86,106 +80,288 @@ const CAT_DOT: Record<VehicleCategory, string> = {
 }
 
 const CAT_BADGE: Record<VehicleCategory, string> = {
-  'Small':     'bg-blue-100 text-blue-700',
-  'Medium':    'bg-emerald-100 text-emerald-700',
-  'Heavy':     'bg-orange-100 text-orange-700',
-  'Container': 'bg-purple-100 text-purple-700',
-  'ODC':       'bg-red-100 text-red-700',
+  'Small':     'bg-blue-50 text-blue-700',
+  'Medium':    'bg-emerald-50 text-emerald-700',
+  'Heavy':     'bg-orange-50 text-orange-700',
+  'Container': 'bg-purple-50 text-purple-700',
+  'ODC':       'bg-red-50 text-red-700',
 }
 
-// ─── Step 1 — Vehicle grid (4 per row on desktop) ─────────────────────────
+// ─── Category tab data ──────────────────────────────────────────────────────
+
+const TABS = [
+  {
+    id: 'pickup',
+    label: 'Pickup',
+    short: 'Pickup',
+    color: 'from-blue-600 to-blue-400',
+    dot: 'bg-blue-500',
+    ids: ['4-wheeler-pickup', 'tata-407'],
+  },
+  {
+    id: 'light',
+    label: 'Light Commercial',
+    short: 'Light',
+    color: 'from-emerald-600 to-emerald-400',
+    dot: 'bg-emerald-500',
+    ids: ['vehicle-14ft', 'vehicle-17ft', 'vehicle-19ft', 'vehicle-22ft'],
+  },
+  {
+    id: 'heavy',
+    label: 'Heavy Commercial',
+    short: 'Heavy',
+    color: 'from-orange-600 to-orange-400',
+    dot: 'bg-orange-500',
+    ids: ['vehicle-9t', 'vehicle-16t', 'vehicle-21t', 'vehicle-25t'],
+  },
+  {
+    id: 'container',
+    label: 'Container',
+    short: 'Container',
+    color: 'from-purple-600 to-purple-400',
+    dot: 'bg-purple-500',
+    ids: ['container-20ft', 'container-32ft-sxl', 'container-32ft-mxl', 'container-32ft-hq'],
+  },
+  {
+    id: 'odc',
+    label: 'ODC / Specialized',
+    short: 'ODC',
+    color: 'from-rose-600 to-rose-400',
+    dot: 'bg-rose-500',
+    ids: ['odc-20ft', 'odc-32ft-trailer', 'odc-40ft-trailer', 'vehicle-max-42t'],
+  },
+] as const
+
+// ─── Per-vehicle SVG illustrations ─────────────────────────────────────────
+
+function VehicleSVG({ id, className }: { id: string; className?: string }) {
+  // Pickup / small van
+  if (id === '4-wheeler-pickup' || id === 'tata-407') {
+    return (
+      <svg viewBox="0 0 120 56" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="22" width="64" height="22" rx="3" fill="white" fillOpacity="0.25"/>
+        <rect x="30" y="12" width="38" height="14" rx="3" fill="white" fillOpacity="0.35"/>
+        <circle cx="24" cy="45" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="24" cy="45" r="4" fill="white" fillOpacity="0.4"/>
+        <circle cx="80" cy="45" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="80" cy="45" r="4" fill="white" fillOpacity="0.4"/>
+        <rect x="70" y="22" width="30" height="18" rx="2" fill="white" fillOpacity="0.2"/>
+        <rect x="74" y="26" width="8" height="8" rx="1" fill="white" fillOpacity="0.5"/>
+        <rect x="94" y="30" width="14" height="4" rx="1" fill="white" fillOpacity="0.3"/>
+        <line x1="8" y1="44" x2="14" y2="44" stroke="white" strokeOpacity="0.4" strokeWidth="1.5"/>
+        <line x1="34" y1="44" x2="66" y2="44" stroke="white" strokeOpacity="0.4" strokeWidth="1.5"/>
+        <line x1="90" y1="44" x2="110" y2="44" stroke="white" strokeOpacity="0.4" strokeWidth="1.5"/>
+      </svg>
+    )
+  }
+  // Light/Medium truck (14–22ft body)
+  if (['vehicle-14ft','vehicle-17ft','vehicle-19ft','vehicle-22ft'].includes(id)) {
+    const bodyW = id === 'vehicle-14ft' ? 52 : id === 'vehicle-17ft' ? 60 : id === 'vehicle-19ft' ? 66 : 72
+    return (
+      <svg viewBox="0 0 140 56" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="6" y="20" width={bodyW} height="24" rx="2" fill="white" fillOpacity="0.25"/>
+        <rect x={bodyW+6} y="20" width="30" height="20" rx="3" fill="white" fillOpacity="0.30"/>
+        <rect x={bodyW+10} y="24" width="10" height="10" rx="1" fill="white" fillOpacity="0.5"/>
+        <circle cx="22" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="22" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <circle cx={bodyW+20} cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx={bodyW+20} cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <rect x={bodyW+38} y="32" width="16" height="6" rx="1" fill="white" fillOpacity="0.25"/>
+      </svg>
+    )
+  }
+  // Heavy truck (multi-axle)
+  if (['vehicle-9t','vehicle-16t','vehicle-21t','vehicle-25t'].includes(id)) {
+    return (
+      <svg viewBox="0 0 150 56" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="18" width="80" height="26" rx="2" fill="white" fillOpacity="0.22"/>
+        <rect x="84" y="20" width="34" height="22" rx="3" fill="white" fillOpacity="0.30"/>
+        <rect x="88" y="24" width="12" height="12" rx="1" fill="white" fillOpacity="0.50"/>
+        <circle cx="18" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="18" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <circle cx="36" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="36" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <circle cx="98" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="98" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <circle cx="116" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="116" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <rect x="120" y="32" width="20" height="6" rx="1" fill="white" fillOpacity="0.22"/>
+      </svg>
+    )
+  }
+  // Container truck
+  if (id.startsWith('container')) {
+    return (
+      <svg viewBox="0 0 160 56" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="14" width="96" height="28" rx="2" fill="white" fillOpacity="0.22"/>
+        {/* container lines */}
+        <line x1="28" y1="14" x2="28" y2="42" stroke="white" strokeOpacity="0.2" strokeWidth="1"/>
+        <line x1="52" y1="14" x2="52" y2="42" stroke="white" strokeOpacity="0.2" strokeWidth="1"/>
+        <line x1="76" y1="14" x2="76" y2="42" stroke="white" strokeOpacity="0.2" strokeWidth="1"/>
+        <rect x="100" y="20" width="34" height="22" rx="3" fill="white" fillOpacity="0.30"/>
+        <rect x="104" y="24" width="12" height="12" rx="1" fill="white" fillOpacity="0.50"/>
+        <circle cx="20" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="20" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <circle cx="60" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="60" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <circle cx="116" cy="46" r="8" fill="white" fillOpacity="0.9"/>
+        <circle cx="116" cy="46" r="4" fill="white" fillOpacity="0.35"/>
+        <rect x="136" y="32" width="18" height="6" rx="1" fill="white" fillOpacity="0.22"/>
+      </svg>
+    )
+  }
+  // ODC flatbed/trailer
+  return (
+    <svg viewBox="0 0 170 56" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Trailer flatbed */}
+      <rect x="4" y="30" width="110" height="10" rx="2" fill="white" fillOpacity="0.22"/>
+      {/* Cargo block */}
+      <rect x="10" y="16" width="60" height="14" rx="2" fill="white" fillOpacity="0.18"/>
+      <line x1="25" y1="16" x2="25" y2="30" stroke="white" strokeOpacity="0.15" strokeWidth="1"/>
+      <line x1="40" y1="16" x2="40" y2="30" stroke="white" strokeOpacity="0.15" strokeWidth="1"/>
+      <line x1="55" y1="16" x2="55" y2="30" stroke="white" strokeOpacity="0.15" strokeWidth="1"/>
+      {/* Cab */}
+      <rect x="116" y="20" width="32" height="22" rx="3" fill="white" fillOpacity="0.30"/>
+      <rect x="120" y="24" width="11" height="11" rx="1" fill="white" fillOpacity="0.50"/>
+      {/* Wheels */}
+      <circle cx="18" cy="44" r="8" fill="white" fillOpacity="0.9"/>
+      <circle cx="18" cy="44" r="4" fill="white" fillOpacity="0.35"/>
+      <circle cx="40" cy="44" r="8" fill="white" fillOpacity="0.9"/>
+      <circle cx="40" cy="44" r="4" fill="white" fillOpacity="0.35"/>
+      <circle cx="80" cy="44" r="8" fill="white" fillOpacity="0.9"/>
+      <circle cx="80" cy="44" r="4" fill="white" fillOpacity="0.35"/>
+      <circle cx="130" cy="44" r="8" fill="white" fillOpacity="0.9"/>
+      <circle cx="130" cy="44" r="4" fill="white" fillOpacity="0.35"/>
+      <circle cx="148" cy="44" r="8" fill="white" fillOpacity="0.9"/>
+      <circle cx="148" cy="44" r="4" fill="white" fillOpacity="0.35"/>
+      <rect x="150" y="32" width="14" height="5" rx="1" fill="white" fillOpacity="0.22"/>
+    </svg>
+  )
+}
+
+// ─── Step 1 — Vehicle selection with category tabs ────────────────────────
 
 function StepVehicle({ selected, onSelect, onNext, onClose }: {
   selected: string; onSelect: (id: string) => void; onNext: () => void; onClose: () => void
 }) {
+  const [activeTab, setActiveTab] = useState<typeof TABS[number]['id']>('pickup')
+
+  // Auto-switch tab to show the selected vehicle
+  const tab = TABS.find(t => (t.ids as readonly string[]).includes(selected))
+  const displayTab = activeTab
+
+  const currentTab    = TABS.find(t => t.id === displayTab)!
+  const tabVehicles   = VEHICLES.filter(v => (currentTab.ids as readonly string[]).includes(v.id))
+  const gradientClass = currentTab.color
+
   return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-white shrink-0">
+    <div className="flex flex-col bg-gray-50">
+      {/* ── Top header ── */}
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-200 bg-white shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-brand flex items-center justify-center">
-            <Truck size={13} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center">
+            <Truck size={15} className="text-white" />
           </div>
           <div>
-            <p className="font-display font-black text-sm text-gray-900 leading-none">Step 1 of 3 — Select Vehicle</p>
-            <p className="text-[11px] text-gray-500">20 vehicles across 5 categories</p>
+            <p className="font-display font-black text-sm text-gray-900 leading-none">Select Your Vehicle</p>
+            <p className="text-[11px] text-gray-500 mt-0.5">Step 1 of 3 · 18 vehicles across 5 categories</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {/* Category legend */}
-          <div className="hidden md:flex items-center gap-3 text-[10px] text-gray-500">
-            {(['Small','Medium','Heavy','Container','ODC'] as VehicleCategory[]).map(cat => (
-              <span key={cat} className="flex items-center gap-1">
-                <span className={cn('w-2 h-2 rounded-full shrink-0', CAT_DOT[cat])} />
-                {cat}
-              </span>
-            ))}
-          </div>
-          <button type="button" onClick={onClose} aria-label="Close"
-            className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
-            <X size={14} className="text-gray-500" />
-          </button>
+        <button type="button" onClick={onClose} aria-label="Close"
+          className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors">
+          <X size={15} className="text-gray-500" />
+        </button>
+      </div>
+
+      {/* ── Category tabs ── */}
+      {/* ── Category tabs ── */}
+      <div className="shrink-0 bg-gray-50 border-b border-gray-200 px-4 py-3">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-0.5">
+          {TABS.map(t => {
+            const isActive = t.id === displayTab
+            const hasSelected = (t.ids as readonly string[]).includes(selected)
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTab(t.id)}
+                className={cn(
+                  'shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-bold transition-all duration-150 whitespace-nowrap',
+                  isActive
+                    ? 'bg-brand text-white border-brand shadow-md shadow-brand/25'
+                    : 'bg-white text-gray-600 border-gray-300 hover:border-brand hover:text-brand hover:bg-brand/5 hover:shadow-sm'
+                )}
+              >
+                <span className={cn(
+                  'w-2 h-2 rounded-full shrink-0',
+                  isActive ? 'bg-white/70' : t.dot
+                )} />
+                <span className="hidden sm:inline">{t.label}</span>
+                <span className="sm:hidden">{t.short}</span>
+                {hasSelected && !isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand shrink-0" />
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Body — 4-col grid, compact cards */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-          {VEHICLES.map(v => {
-            const active = selected === v.id
-            const tooltip = [
-              v.size && `Size: ${v.size}`,
-              v.householdCapacity && `Capacity: ${v.householdCapacity}`,
-              `Max Load: ${v.maxLoad}`,
-            ].filter(Boolean).join(' · ')
-
+      {/* ── Vehicle cards ── */}
+      <div className="px-4 py-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {tabVehicles.map(v => {
+            const isSelected = selected === v.id
             return (
               <button
                 key={v.id}
                 type="button"
                 onClick={() => onSelect(v.id)}
-                title={tooltip}
                 className={cn(
-                  'relative text-left rounded-xl border-2 px-2.5 py-2 transition-all duration-150',
+                  'relative text-left rounded-2xl border-2 overflow-hidden transition-all duration-200',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand',
-                  'hover:shadow-md hover:-translate-y-0.5',
-                  active
-                    ? 'border-brand bg-brand/5 shadow-sm shadow-brand/10'
-                    : 'border-gray-200 bg-white hover:border-brand/40'
+                  'hover:shadow-lg hover:-translate-y-1',
+                  isSelected
+                    ? 'border-brand shadow-md shadow-brand/20 scale-[1.02]'
+                    : 'border-gray-200 bg-white hover:border-brand/50'
                 )}
               >
-                {/* Category dot */}
-                <span className={cn('absolute top-2 left-2 w-1.5 h-1.5 rounded-full', CAT_DOT[v.category])} />
-
-                {/* Checkmark when active */}
-                {active && (
-                  <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand flex items-center justify-center">
-                    <Check size={8} className="text-white" />
-                  </div>
-                )}
-
-                {/* Emoji */}
-                <div className="text-xl mb-1 mt-0.5 ml-0.5">{v.emoji}</div>
-
-                {/* Name — larger + bolder */}
+                {/* Gradient illustration area */}
                 <div className={cn(
-                  'text-xs font-black leading-tight mb-1',
-                  active ? 'text-brand' : 'text-gray-800'
+                  'relative w-full bg-gradient-to-br px-3 pt-6 pb-3',
+                  gradientClass
                 )}>
-                  {v.name}
+                  <VehicleSVG id={v.id} className="w-full h-14" />
+                  {/* Selected check badge */}
+                  {isSelected && (
+                    <div className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-md">
+                      <Check size={12} className="text-brand" />
+                    </div>
+                  )}
                 </div>
 
-                {/* Max load */}
-                <div className="text-[10px] text-gray-500 font-semibold">
-                  Max {v.maxLoad}
-                </div>
-
-                {/* Category badge */}
+                {/* Card body */}
                 <div className={cn(
-                  'mt-1 inline-block text-[9px] px-1.5 py-0.5 rounded-full font-bold',
-                  active ? 'bg-brand/10 text-brand' : CAT_BADGE[v.category]
+                  'px-3 py-3 bg-white',
+                  isSelected && 'bg-brand/[0.03]'
                 )}>
-                  {v.category}
+                  <p className={cn(
+                    'font-display font-black text-base leading-tight mb-1',
+                    isSelected ? 'text-brand' : 'text-gray-900'
+                  )}>
+                    {v.name}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium">
+                    Max {v.maxLoad}
+                  </p>
+                  {v.size && (
+                    <p className="text-[10px] text-gray-400 mt-0.5">{v.size}</p>
+                  )}
+                  {isSelected && (
+                    <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-bold text-brand bg-brand/10 px-2 py-0.5 rounded-full">
+                      <Check size={8} /> Selected
+                    </span>
+                  )}
                 </div>
               </button>
             )
@@ -193,20 +369,28 @@ function StepVehicle({ selected, onSelect, onNext, onClose }: {
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="px-5 py-3 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
-        <p className="text-xs text-gray-500">
+      {/* ── Footer ── */}
+      <div className="px-5 py-3.5 border-t border-gray-200 bg-white flex items-center justify-between shrink-0">
+        <p className="text-sm text-gray-500">
           {selected
-            ? <span className="text-brand font-semibold">✓ {VEHICLES.find(v => v.id === selected)?.name}</span>
-            : 'Click a card to select · Hover for specs'}
+            ? <span className="text-brand font-semibold flex items-center gap-1.5">
+                <Check size={13} className="shrink-0" />
+                {VEHICLES.find(v => v.id === selected)?.name}
+              </span>
+            : <span className="text-gray-400">No vehicle selected yet</span>
+          }
         </p>
-        <button type="button" onClick={onNext} disabled={!selected}
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={!selected}
           className={cn(
-            'inline-flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all',
+            'inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all',
             selected
               ? 'bg-brand text-white hover:bg-brand/90 shadow-md shadow-brand/20 hover:-translate-y-0.5'
               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-          )}>
+          )}
+        >
           Continue <ArrowRight size={14} />
         </button>
       </div>
@@ -278,10 +462,9 @@ function StepForm({ control, register, errors, selectedId, setValue, onBack, onN
   control: any; register: any; errors: any; setValue: any
   selectedId: string; onBack: () => void; onNext: () => void
 }) {
-  const vehicle   = VEHICLES.find(v => v.id === selectedId)
+  const vehicle    = VEHICLES.find(v => v.id === selectedId)
   const autoWeight = VEHICLE_WEIGHT_AUTO[selectedId] ?? null
 
-  // Auto-populate weight range based on vehicle selection
   useEffect(() => {
     if (autoWeight) {
       setValue('weightRange', autoWeight, { shouldValidate: true })
@@ -297,12 +480,9 @@ function StepForm({ control, register, errors, selectedId, setValue, onBack, onN
             className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors" aria-label="Back">
             <ArrowLeft size={14} className="text-gray-500" />
           </button>
-          <div className="flex items-center gap-2">
-            {vehicle && <span className="text-lg">{vehicle.emoji}</span>}
-            <div>
-              <p className="font-display font-black text-sm text-gray-900 leading-none">Step 2 of 3 — Shipment Details</p>
-              <p className="text-[11px] text-gray-500">{vehicle?.name} · Max {vehicle?.maxLoad}</p>
-            </div>
+          <div>
+            <p className="font-display font-black text-sm text-gray-900 leading-none">Step 2 of 3 — Shipment Details</p>
+            <p className="text-[11px] text-gray-500">{vehicle?.name} · Max {vehicle?.maxLoad}</p>
           </div>
         </div>
         <Dialog.Close asChild>
@@ -362,7 +542,6 @@ function StepForm({ control, register, errors, selectedId, setValue, onBack, onN
           <div>
             <Label req>Weight Range</Label>
             {autoWeight ? (
-              // Locked chip — derived from vehicle capacity
               <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg border border-brand/30 bg-brand/5">
                 <Weight size={14} className="text-brand shrink-0" aria-hidden="true" />
                 <span className="text-sm font-semibold text-brand">{autoWeight}</span>
@@ -438,21 +617,21 @@ function StepSummary({ data, onBack, onSubmit, submitting }: {
 }) {
   const vehicle = VEHICLES.find(v => v.id === data.vehicleId)
   const rows: [string, string][] = [
-    ['Vehicle',    `${vehicle?.emoji ?? ''} ${vehicle?.name ?? ''}`],
-    ['Max Load',   vehicle?.maxLoad ?? ''],
-    ['From',       data.pickupCity],
-    ['To',         data.deliveryCity],
-    ['Date',       data.pickupDate],
-    ['Time',       data.pickupTime],
-    ['Goods',      data.goodsType],
-    ['Weight',     data.weightRange],
-    ...(data.numberOfPackages   ? [['Packages',   data.numberOfPackages]   as [string,string]] : []),
-    ...(data.additionalServices ? [['Add-ons',    data.additionalServices] as [string,string]] : []),
-    ['Name',       data.fullName],
-    ['Mobile',     data.mobile],
-    ['Email',      data.email],
-    ...(data.companyName          ? [['Company',     data.companyName]          as [string,string]] : []),
-    ...(data.specialInstructions  ? [['Notes',       data.specialInstructions]  as [string,string]] : []),
+    ['Vehicle',  vehicle?.name ?? ''],
+    ['Max Load', vehicle?.maxLoad ?? ''],
+    ['From',     data.pickupCity],
+    ['To',       data.deliveryCity],
+    ['Date',     data.pickupDate],
+    ['Time',     data.pickupTime],
+    ['Goods',    data.goodsType],
+    ['Weight',   data.weightRange],
+    ...(data.numberOfPackages   ? [['Packages', data.numberOfPackages]   as [string,string]] : []),
+    ...(data.additionalServices ? [['Add-ons',  data.additionalServices] as [string,string]] : []),
+    ['Name',     data.fullName],
+    ['Mobile',   data.mobile],
+    ['Email',    data.email],
+    ...(data.companyName         ? [['Company', data.companyName]         as [string,string]] : []),
+    ...(data.specialInstructions ? [['Notes',   data.specialInstructions] as [string,string]] : []),
   ]
 
   return (
@@ -524,7 +703,7 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
         </div>
       </div>
       <div className="bg-gray-50 rounded-xl p-4 w-full max-w-xs text-left mb-6 space-y-2 text-sm">
-        {vehicle && <div className="flex justify-between"><span className="text-gray-500">Vehicle</span><span className="font-semibold">{vehicle.emoji} {vehicle.name}</span></div>}
+        {vehicle && <div className="flex justify-between"><span className="text-gray-500">Vehicle</span><span className="font-semibold">{vehicle.name}</span></div>}
         <div className="flex justify-between"><span className="text-gray-500">Route</span><span className="font-semibold">{data.pickupCity} → {data.deliveryCity}</span></div>
         <div className="flex justify-between"><span className="text-gray-500">Pickup</span><span className="font-semibold">{data.pickupDate} · {data.pickupTime}</span></div>
       </div>
@@ -583,7 +762,7 @@ export function BGTSBookingModal() {
           ...summaryData,
           bookingRef,
           serviceType: 'BGTS Transport Booking',
-          vehicleType: vehicle ? `${vehicle.emoji} ${vehicle.name} (Max ${vehicle.maxLoad})` : summaryData.vehicleId,
+          vehicleType: vehicle ? `${vehicle.name} (Max ${vehicle.maxLoad})` : summaryData.vehicleId,
         }),
       })
     } catch { /* silent */ }
@@ -601,7 +780,7 @@ export function BGTSBookingModal() {
             'inset-0 rounded-none',
             'sm:inset-auto sm:rounded-2xl',
             'sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2',
-            'sm:w-[92vw] sm:max-w-[1100px] sm:h-[88vh]',
+            'sm:w-[92vw] sm:max-w-[1100px] sm:max-h-[90vh]',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'sm:data-[state=open]:zoom-in-95 sm:data-[state=closed]:zoom-out-95',

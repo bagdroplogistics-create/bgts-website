@@ -86,7 +86,7 @@ export function EkoHaulNavbar() {
             variant="eko"
             size="sm"
             modalType="ev"
-            className="flex items-center gap-1.5 font-bold"
+            className="flex items-center gap-1.5 font-bold text-[1.2rem]"
           >
             <Zap size={14} aria-hidden="true" />
             Book Now

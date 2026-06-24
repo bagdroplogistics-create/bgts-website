@@ -16,7 +16,7 @@ const contactDetails = [
     label: 'Phone',
     value: '+91 63 5722 5722',
     href: 'tel:+916357225722',
-    note: 'Mon–Sat, 8am–8pm',
+    note: 'Mon–Sat, 9am–8pm',
   },
   {
     icon: Mail,
@@ -28,14 +28,14 @@ const contactDetails = [
   {
     icon: MapPin,
     label: 'Head Office',
-    value: 'Old Padra Road, Vadodara — 390015',
+    value: 'Nr Natraj Cinema, Pratapgunj Naka, Vadodara — 390002',
     href: 'https://maps.google.com',
     note: 'Gujarat, India',
   },
   {
     icon: Clock,
     label: 'Office Hours',
-    value: 'Mon–Sat: 8:00 AM – 8:00 PM',
+    value: 'Mon–Sat: 9:00 AM – 8:00 PM',
     href: undefined,
     note: 'Operations 24×7',
   },
@@ -97,8 +97,8 @@ export default function ContactPage() {
                 <p className="text-xs font-display font-bold uppercase tracking-wider text-eko mb-2">
                   BGTS EV Fleet Enquiries
                 </p>
-                <a href="mailto:ekohaul@bgts.in" className="text-sm font-semibold text-eko hover:underline block">
-                  ekohaul@bgts.in
+                <a href="mailto:info@bgts.in" className="text-sm font-semibold text-eko hover:underline block">
+                  info@bgts.in
                 </a>
                 <p className="text-xs text-ink-muted mt-1">Dedicated EV fleet sales team</p>
               </div>

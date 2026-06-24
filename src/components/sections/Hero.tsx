@@ -33,11 +33,11 @@ const slides: Slide[] = [
   },
   {
     src: '/bgts-hero-3.jpg',
-    alt: 'BGTS cargo loading and freight operations',
-    eyebrow: 'FTL · PTL · Multimodal · Warehousing',
-    line1: 'End-to-End Freight.',
-    line2: 'Zero ',
-    accent: 'Compromises.',
+    alt: 'BGTS hazardous chemical freight — hydrogen and chlorine transport',
+    eyebrow: 'ADR Certified · Hazardous Cargo Specialists',
+    line1: 'Hydrogen. Chlorine.',
+    line2: 'Moved ',
+    accent: 'Safely.',
   },
   {
     src: '/bgts-hero-4.jpg',
@@ -46,6 +46,14 @@ const slides: Slide[] = [
     line1: 'Your Cargo.',
     line2: 'Our ',
     accent: 'Commitment.',
+  },
+  {
+    src: '/bgts-hero-5.jpg',
+    alt: 'BGTS fleet — 3-wheeler to trailer, every load covered',
+    eyebrow: '3-Wheeler to 40 FT Trailer · Full Fleet',
+    line1: 'Every Vehicle.',
+    line2: 'Every ',
+    accent: 'Load.',
   },
 ]
 

@@ -1,12 +1,31 @@
 // Server component — no animation needed (CSS handles it)
 
 const clients = [
-  'Zydus Healthcare',
-  'Torrent Power',
-  'L&T ECC',
-  'Reliance Industries',
-  'ONGC',
+  'Zydus Cadila',
   'GSFC',
+  'Sarabhai Group of Companies',
+  'GSIC Ltd — Consignment Agent of SAIL',
+  'GE Board',
+  'PWD Kadana',
+  'Dhuvaran Thermal Power Station',
+  'Sun Pharmaceutical Industries',
+  'GSEC — Gandhinagar',
+  'Rajkot Municipal Corporation',
+  'GSEC — Ukai',
+  'GSEC — GTPS',
+  'GSEC — WTPS',
+  'BLTPS — Bhavnagar',
+  'NTPC Limited',
+  'Alembic',
+  'Ester India',
+  'Asense Pharma',
+  'Zenex Pharmaceuticals',
+  'Amerikan Steels Pvt Ltd',
+  'Gujarat State Fertilizers & Chemicals Ltd',
+  'Gujarat Alkalies & Chemical Ltd',
+  'GSEC — Wanakbori',
+  'Waaree Energies Pvt Ltd',
+  'Subandhu Pakrite',
 ]
 
 export function TrustStrip() {

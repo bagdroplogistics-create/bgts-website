@@ -157,11 +157,11 @@ export function EVHeroSlider() {
         {/* Single static CTA — Carbon Calculator */}
         <div>
           <Link
-            href="/BGTSEV/esg"
+            href="/BGTSEV/book"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl bg-eko text-white font-bold text-sm hover:bg-eko-700 transition-all shadow-lg shadow-eko/30 hover:-translate-y-0.5 active:translate-y-0"
           >
-            <BarChart3 size={15} aria-hidden="true" />
-            Carbon Calculator
+            <Zap size={15} aria-hidden="true" />
+            Book Now
           </Link>
         </div>
       </div>
