@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Archivo, Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { BookingModalProvider } from '@/contexts/BookingModalContext'
@@ -157,6 +158,29 @@ export default function RootLayout({
             }),
           }}
         />
+      {/* ── Google Ads Tag (AW-18267437854) ── */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=AW-18267437854"
+        strategy="afterInteractive"
+      />
+      <Script id="google-ads-tag" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'AW-18267437854');
+        `}
+      </Script>
+      {/* ── Google Ads Conversion — Submit lead form ── */}
+      <Script id="google-ads-conversion" strategy="afterInteractive">
+        {`
+          gtag('event', 'conversion', {
+            'send_to': 'AW-18267437854/96quCNSL0cQcEJ72y4ZE',
+            'value': 1.0,
+            'currency': 'INR'
+          });
+        `}
+      </Script>
       </body>
     </html>
   )
