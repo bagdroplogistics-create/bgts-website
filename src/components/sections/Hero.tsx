@@ -16,7 +16,16 @@ interface Slide {
 
 const slides: Slide[] = [
   {
-    // Slide 1 — National logistics capability
+    // Slide 1 — 75-year legacy (lead with heritage)
+    src: '/bgts-hero-6.jpg',
+    alt: 'BGTS Vadodara depot — 75 years of Gujarat to Maharashtra logistics',
+    eyebrow: '75 Years · Gujarat to Maharashtra',
+    line1: '75 Years of Trust.',
+    line2: 'Built on Every ',
+    accent: 'Route.',
+  },
+  {
+    // Slide 2 — National logistics capability
     src: '/bgts-hero-1.jpg',
     alt: 'BGTS freight trucks on national highway',
     eyebrow: 'Est. 1950 · Trusted Across India',
@@ -25,7 +34,7 @@ const slides: Slide[] = [
     accent: 'India.',
   },
   {
-    // Slide 2 — Fleet versatility
+    // Slide 3 — Fleet versatility
     src: '/bgts-hero-2.jpg',
     alt: 'BGTS fleet — 3-wheeler to trailer, every load covered',
     eyebrow: '3-Wheeler to 40 FT Trailer · Full Fleet',
@@ -34,7 +43,7 @@ const slides: Slide[] = [
     accent: 'Load.',
   },
   {
-    // Slide 3 — PSU credibility
+    // Slide 4 — PSU credibility
     src: '/bgts-hero-3.jpg',
     alt: 'BGTS PSU & Government industrial logistics — trusted by RMC, GSECL, NTPC, GACL',
     eyebrow: 'ADR Certified · PSU Trusted · Since 1995',
@@ -43,7 +52,7 @@ const slides: Slide[] = [
     accent: 'PSUs.',
   },
   {
-    // Slide 4 — Hazardous goods expertise
+    // Slide 5 — Hazardous goods expertise
     src: '/bgts-hero-4.jpg',
     alt: 'BGTS hazardous chemical freight — hydrogen and chlorine transport',
     eyebrow: 'ADR Certified · Hazardous Cargo Specialists',
@@ -52,22 +61,13 @@ const slides: Slide[] = [
     accent: 'Safely.',
   },
   {
-    // Slide 5 — Customer commitment
+    // Slide 6 — Customer commitment
     src: '/bgts-hero-5.jpg',
     alt: 'BGTS fleet covering routes across India — 340+ routes, 99.2% on-time',
     eyebrow: '340+ Routes · 99.2% On-Time',
     line1: 'Your Cargo.',
     line2: 'Our ',
     accent: 'Commitment.',
-  },
-  {
-    // Slide 6 — 75-year legacy
-    src: '/bgts-hero-6.jpg',
-    alt: 'BGTS Vadodara depot — 75 years of Gujarat to Maharashtra logistics',
-    eyebrow: '75 Years · Gujarat to Maharashtra',
-    line1: '75 Years of Trust.',
-    line2: 'Built on Every ',
-    accent: 'Route.',
   },
 ]
 

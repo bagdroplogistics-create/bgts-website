@@ -30,29 +30,29 @@ export default function HomePage() {
       {/* 1. Hero */}
       <Hero />
 
-      {/* 2. Trust strip — industry logos marquee */}
-      <TrustStrip />
-
-      {/* 3. Stats — animated counters */}
+      {/* 2. Stats — animated counters */}
       <Stats />
 
-      {/* 4. Services grid */}
+      {/* 3. Services grid */}
       <Services />
 
-      {/* 5. Transport modes — Road, Rail, Air */}
+      {/* 4. Transport modes — Road, Rail, Air */}
       <Modes />
 
-      {/* 6. Industrial & Hazardous Goods — PSU Trust section */}
+      {/* 5. Industrial & Hazardous Goods — PSU Trust section */}
       <IndustrialHazmat />
 
-      {/* 7. Industries served */}
+      {/* 6. Industries served */}
       <Industries />
 
-      {/* 8. BGTS EV section — green */}
+      {/* 7. BGTS EV section — green */}
       <EkoBanner />
 
-      {/* 9. CTA — energy gradient */}
+      {/* 8. CTA — energy gradient */}
       <CTABanner />
+
+      {/* 9. Trust strip — industry logos marquee */}
+      <TrustStrip />
 
       <Footer />
     </>

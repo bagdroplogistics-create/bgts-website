@@ -13,7 +13,7 @@ const HAZMAT_STATS = [
     sub: 'Since 1995',
   },
   {
-    value: '6,22,730',
+    value: '7,98,110',
     label: 'KM Hazardous Cargo Transported',
     sub: 'Post-2020 document-verified · Pre-2020 conservatively estimated',
   },
@@ -32,48 +32,12 @@ const HAZMAT_STATS = [
 // ─── PSU Clients ───────────────────────────────────────────────────────────
 
 const PSU_CLIENTS = [
-  {
-    abbr: 'RMC',
-    name: 'Rajkot Municipal Corporation',
-    type: 'Govt. of Gujarat',
-    highlight: '30+ years · Liquid Chlorine hauls · ₹1.49 Cr done',
-    color: 'bg-blue-600',
-  },
-  {
-    abbr: 'GSECL',
-    name: 'Gujarat State Electricity Corp.',
-    type: 'Gujarat PSU',
-    highlight: '4 contracts · ₹84 L+ · Extended to May 2027',
-    color: 'bg-orange-600',
-  },
-  {
-    abbr: 'NTPC',
-    name: 'NTPC Ltd. — Jhanor Gandhar',
-    type: 'Govt. of India PSU',
-    highlight: 'Compressed Hydrogen · CMVR compliant · 24 trips',
-    color: 'bg-green-700',
-  },
-  {
-    abbr: 'GACL',
-    name: 'Gujarat Alkalies & Chemicals',
-    type: 'Gujarat PSU',
-    highlight: '50+ service lines · Bulk chemicals · Active contract',
-    color: 'bg-purple-700',
-  },
-  {
-    abbr: 'IR',
-    name: 'Indian Railways — Western Rly.',
-    type: 'Govt. of India',
-    highlight: '731 trips · BRC-DDR · ₹46 L contract · 2022–24',
-    color: 'bg-sky-700',
-  },
-  {
-    abbr: 'SP',
-    name: 'Sun Pharmaceutical Ind.',
-    type: 'Fortune 500 — Listed',
-    highlight: 'Pharma-grade transport · Ankleshwar API Plant',
-    color: 'bg-red-700',
-  },
+  { abbr: 'RMC',   name: 'Rajkot Municipal Corporation',   type: 'Govt. of Gujarat',      color: 'bg-blue-600'   },
+  { abbr: 'GSECL', name: 'Gujarat State Electricity Corp.', type: 'Gujarat PSU',           color: 'bg-orange-600' },
+  { abbr: 'NTPC',  name: 'NTPC Ltd. — Jhanor Gandhar',     type: 'Govt. of India PSU',    color: 'bg-green-700'  },
+  { abbr: 'GACL',  name: 'Gujarat Alkalies & Chemicals',   type: 'Gujarat PSU',           color: 'bg-purple-700' },
+  { abbr: 'IR',    name: 'Indian Railways — Western Rly.', type: 'Govt. of India',        color: 'bg-sky-700'    },
+  { abbr: 'SP',    name: 'Sun Pharmaceutical Ind.',        type: 'Fortune 500 — Listed',  color: 'bg-red-700'    },
 ]
 
 // ─── Hazmat Materials ─────────────────────────────────────────────────────
@@ -285,8 +249,7 @@ export function IndustrialHazmat() {
                   </div>
                   <div className="min-w-0">
                     <p className="font-display font-bold text-ink-strong text-sm leading-tight">{c.name}</p>
-                    <p className="text-xs text-ink-muted mt-0.5 mb-2">{c.type}</p>
-                    <p className="text-xs text-ink-body leading-relaxed">{c.highlight}</p>
+                    <p className="text-xs text-ink-muted mt-0.5">{c.type}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-1.5">
