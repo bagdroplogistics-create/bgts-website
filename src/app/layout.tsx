@@ -171,16 +171,6 @@ export default function RootLayout({
           gtag('config', 'AW-18267437854');
         `}
       </Script>
-      {/* ── Google Ads Conversion — Submit lead form ── */}
-      <Script id="google-ads-conversion" strategy="afterInteractive">
-        {`
-          gtag('event', 'conversion', {
-            'send_to': 'AW-18267437854/96quCNSL0cQcEJ72y4ZE',
-            'value': 1.0,
-            'currency': 'INR'
-          });
-        `}
-      </Script>
       </body>
     </html>
   )

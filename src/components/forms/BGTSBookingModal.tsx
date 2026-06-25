@@ -781,6 +781,14 @@ export function BGTSBookingModal() {
       console.error('[booking] fetch error:', err)
       setEmailWarning(true)
     }
+    // Fire Google Ads conversion on successful booking
+    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+      ;(window as any).gtag('event', 'conversion', {
+        send_to:  'AW-18267437854/96quCNSL0cQcEJ72y4ZE',
+        value:    1.0,
+        currency: 'INR',
+      })
+    }
     setSubmitting(false)
     setSubmitted(true)
   }, [summaryData, bookingRef])
