@@ -1,0 +1,21 @@
+{
+  "name": "BGTS — Baroda Goods Transport Service",
+  "short_name": "BGTS",
+  "description": "Technology-enabled road, rail, and multimodal logistics since 1950.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#C2410C",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
