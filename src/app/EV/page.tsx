@@ -286,7 +286,7 @@ export default function EkoHaulPage() {
                 iconPosition="left"
                 asChild
               >
-                <Link href="/BGTSEV/esg">
+                <Link href="/EV/esg">
                   Try the Carbon Calculator
                 </Link>
               </Button>

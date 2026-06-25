@@ -9,9 +9,9 @@ import { cn } from '@/lib/utils'
 import { BookNowButton } from '@/components/ui/BookNowButton'
 
 const ekoLinks = [
-  { label: 'Plans',             href: '/BGTSEV/book'  },
-  { label: 'Carbon Calculator', href: '/BGTSEV/esg'   },
-  { label: 'About BGTS EV',     href: '/BGTSEV#about' },
+  { label: 'Plans',             href: '/EV/book'  },
+  { label: 'Carbon Calculator', href: '/EV/esg'   },
+  { label: 'About BGTS EV',     href: '/EV#about' },
 ]
 
 export function EkoHaulNavbar() {
@@ -44,7 +44,7 @@ export function EkoHaulNavbar() {
         aria-label="BGTS EV navigation"
       >
         {/* Logo — same as main Navbar */}
-        <Link href="/BGTSEV" aria-label="BGTS EV — go to homepage">
+        <Link href="/EV" aria-label="BGTS EV — go to homepage">
           <Image
             src="/logo-bgts-color.png"
             alt="BGTS logo"

@@ -15,9 +15,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/quote`,    lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.95 },
     { url: `${BASE_URL}/contact`,  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7  },
     // EkoHaul
-    { url: `${BASE_URL}/BGTSEV`,      lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9  },
-    { url: `${BASE_URL}/BGTSEV/esg`,  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8  },
-    { url: `${BASE_URL}/BGTSEV/book`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
+    { url: `${BASE_URL}/EV`,      lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9  },
+    { url: `${BASE_URL}/EV/esg`,  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8  },
+    { url: `${BASE_URL}/EV/book`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.85 },
   ]
 
   const servicePages: MetadataRoute.Sitemap = services.map((s) => ({

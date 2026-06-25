@@ -1,2 +1,2 @@
 import { redirect } from 'next/navigation'
-export default function Page() { redirect('/BGTSEV') }
+export default function Page() { redirect('/EV') }

@@ -41,6 +41,11 @@ const nextConfig: NextConfig = {
         destination: '/ekohaul',
         permanent: true,
       },
+      // Rename BGTSEV → EV
+      { source: '/BGTSEV',          destination: '/EV',          permanent: true },
+      { source: '/BGTSEV/book',     destination: '/EV/book',     permanent: true },
+      { source: '/BGTSEV/esg',      destination: '/EV/esg',      permanent: true },
+      { source: '/BGTSEV/:path*',   destination: '/EV/:path*',   permanent: true },
     ]
   },
 

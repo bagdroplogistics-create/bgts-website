@@ -55,6 +55,14 @@ const slides: Slide[] = [
     line2: 'Every ',
     accent: 'Load.',
   },
+  {
+    src: '/bgts-hero-3.jpg',
+    alt: 'BGTS PSU & Government industrial logistics — hazardous cargo specialists',
+    eyebrow: 'ADR Certified · PSU Trusted · Since 1995',
+    line1: "Trusted by India's",
+    line2: 'Largest ',
+    accent: 'PSUs.',
+  },
 ]
 
 const AUTO_INTERVAL = 6000

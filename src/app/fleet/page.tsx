@@ -168,7 +168,7 @@ export default function FleetPage() {
               className="bg-white text-eko hover:bg-eko-50"
               asChild
             >
-              <Link href="/BGTSEV">Explore BGTS EV Fleet</Link>
+              <Link href="/EV">Explore BGTS EV Fleet</Link>
             </Button>
      
           </div>

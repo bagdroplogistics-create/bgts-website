@@ -1,5 +1,5 @@
 // ─── EkoHaul Carbon Calculator ───────────────────────────────────────────
-// Exact methodology from: ui_kits/BGTSEV_esg/index.html
+// Exact methodology from: ui_kits/EV_esg/index.html
 // ALL coefficients must match the source — do not adjust without DS update
 
 import type { CarbonCalcInput, CarbonCalcResult } from '@/types/ekohaul'

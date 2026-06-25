@@ -9,6 +9,7 @@ import { CTABanner } from '@/components/sections/CTABanner'
 import { TrustStrip } from '@/components/sections/TrustStrip'
 import { Industries } from '@/components/sections/Industries'
 import { Modes } from '@/components/sections/Modes'
+import { IndustrialHazmat } from '@/components/sections/IndustrialHazmat'
 
 export const metadata: Metadata = {
   title: 'BGTS — Technology-Enabled Transport & Logistics | Gujarat, Maharashtra',
@@ -41,13 +42,16 @@ export default function HomePage() {
       {/* 5. Transport modes — Road, Rail, Air */}
       <Modes />
 
-      {/* 6. Industries served */}
+      {/* 6. Industrial & Hazardous Goods — PSU Trust section */}
+      <IndustrialHazmat />
+
+      {/* 7. Industries served */}
       <Industries />
 
-      {/* 7. BGTS EV section — green */}
+      {/* 8. BGTS EV section — green */}
       <EkoBanner />
 
-      {/* 8. CTA — energy gradient */}
+      {/* 9. CTA — energy gradient */}
       <CTABanner />
 
       <Footer />

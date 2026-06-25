@@ -408,7 +408,7 @@ export default function EkoHaulESGPage() {
                     className="text-eko hover:bg-eko/10"
                     asChild
                   >
-                    <Link href="/BGTSEV">View Fleet Plans</Link>
+                    <Link href="/EV">View Fleet Plans</Link>
                   </Button>
                 </div>
               </>

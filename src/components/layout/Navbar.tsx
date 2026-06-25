@@ -164,11 +164,11 @@ export function Navbar() {
           {/* BGTS EV link — brand pill */}
           <li>
             <Link
-              href="/BGTSEV"
+              href="/EV"
               className={cn(
                 'flex items-center gap-1.5 px-4 py-2 rounded-lg text-[1.2rem] font-bold',
                 'transition-all duration-200',
-                pathname.startsWith('/BGTSEV')
+                pathname.startsWith('/EV')
                   ? 'bg-eko text-white shadow-md shadow-eko/30'
                   : 'bg-eko text-white hover:bg-eko-700 hover:shadow-md hover:shadow-eko/30 hover:scale-105'
               )}
@@ -268,7 +268,7 @@ export function Navbar() {
             ))}
 
             <Link
-              href="/BGTSEV"
+              href="/EV"
               className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-bold text-white bg-eko hover:bg-eko-700"
             >
               <Zap size={14} aria-hidden="true" />

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: 'BGTS EV — Gujarat\'s First EV Cargo Fleet',
     description:
       'Zero-emission delivery at or below the cost of diesel. FlexEV, DediEV, and FleetEV plans for every business size.',
-    images: [{ url: '/BGTSEV-og.png', width: 1200, height: 630 }],
+    images: [{ url: '/EV-og.png', width: 1200, height: 630 }],
   },
 }
 

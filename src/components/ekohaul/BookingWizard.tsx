@@ -350,7 +350,7 @@ function StepPickup({ control, errors }: any) {
   )
 }
 
-// ─── Page wrapper (standalone /BGTSEV/book route) ─────────────────────────
+// ─── Page wrapper (standalone /EV/book route) ─────────────────────────
 
 export function BookingWizard() {
   return (
@@ -679,7 +679,7 @@ function Confirmation({ bookingRef, watch }: { bookingRef: string; watch: any })
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Button variant="primary" asChild>
-          <Link href="/BGTSEV">Back to BGTS EV</Link>
+          <Link href="/EV">Back to BGTS EV</Link>
         </Button>
         <Button variant="secondary" asChild>
           <Link href="/tracking">Track My Shipment</Link>
@@ -853,7 +853,7 @@ export function BookingWizardContent({ onComplete }: { onComplete?: () => void }
                   <ArrowLeft size={16} /> Back
                 </button>
               ) : (
-                <Link href="/BGTSEV" className="flex items-center gap-2 text-sm font-semibold text-ink-muted hover:text-ink-strong transition-colors">
+                <Link href="/EV" className="flex items-center gap-2 text-sm font-semibold text-ink-muted hover:text-ink-strong transition-colors">
                   <ArrowLeft size={16} /> BGTS EV
                 </Link>
               )}

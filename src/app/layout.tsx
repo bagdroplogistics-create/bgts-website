@@ -4,7 +4,7 @@ import { Archivo, Hanken_Grotesk, IBM_Plex_Mono } from 'next/font/google'
 import '@/styles/globals.css'
 import { BookingModalProvider } from '@/contexts/BookingModalContext'
 import { BGTSBookingModal } from '@/components/forms/BGTSBookingModal'
-import { BGTSEVBookingModal } from '@/components/forms/BGTSEVBookingModal'
+import { BGTSEVBookingModal } from '@/components/forms/EVBookingModal'
 
 // ─── Font loading ─────────────────────────────────────────────────────────
 const archivo = Archivo({
