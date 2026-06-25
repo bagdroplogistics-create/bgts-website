@@ -1,6 +1,7 @@
 // Server component — no client state needed
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShieldCheck, Zap, Award, Truck, AlertTriangle, CheckCircle } from 'lucide-react'
 
 // ─── Hazmat Stats ──────────────────────────────────────────────────────────
@@ -172,13 +173,29 @@ export function IndustrialHazmat() {
 
       {/* ── 1. Dark Hero Banner ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-[#0D1117] py-20 md:py-28">
-        {/* Subtle grid pattern */}
+        {/* Background image */}
+        <Image
+          src="/bgts-hero-3.jpg"
+          alt="BGTS industrial hazardous cargo transport"
+          fill
+          className="object-cover object-center"
+          priority={false}
+          sizes="100vw"
+          aria-hidden="true"
+        />
+        {/* Dark gradient overlay — 80% opacity for strong text contrast */}
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0"
           style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg,#fff 0,#fff 1px,transparent 1px,transparent 48px),repeating-linear-gradient(90deg,#fff 0,#fff 1px,transparent 1px,transparent 48px)',
+            background:
+              'linear-gradient(105deg, rgba(13,17,23,0.88) 0%, rgba(13,17,23,0.72) 55%, rgba(13,17,23,0.55) 100%)',
           }}
+          aria-hidden="true"
+        />
+        {/* Subtle warm vignette at bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-32"
+          style={{ background: 'linear-gradient(to top, rgba(13,17,23,0.95), transparent)' }}
           aria-hidden="true"
         />
         {/* Orange accent line top */}

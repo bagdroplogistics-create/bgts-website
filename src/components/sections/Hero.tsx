@@ -16,6 +16,7 @@ interface Slide {
 
 const slides: Slide[] = [
   {
+    // Slide 1 — National logistics capability
     src: '/bgts-hero-1.jpg',
     alt: 'BGTS freight trucks on national highway',
     eyebrow: 'Est. 1950 · Trusted Across India',
@@ -24,31 +25,8 @@ const slides: Slide[] = [
     accent: 'India.',
   },
   {
+    // Slide 2 — Fleet versatility
     src: '/bgts-hero-2.jpg',
-    alt: 'BGTS logistics fleet at Vadodara depot',
-    eyebrow: '75 Years · Gujarat to Maharashtra',
-    line1: '75 Years of Trust.',
-    line2: 'Built on Every ',
-    accent: 'Route.',
-  },
-  {
-    src: '/bgts-hero-3.jpg',
-    alt: 'BGTS hazardous chemical freight — hydrogen and chlorine transport',
-    eyebrow: 'ADR Certified · Hazardous Cargo Specialists',
-    line1: 'Hydrogen. Chlorine.',
-    line2: 'Moved ',
-    accent: 'Safely.',
-  },
-  {
-    src: '/bgts-hero-4.jpg',
-    alt: 'BGTS fleet covering routes across India',
-    eyebrow: '340+ Routes · 99.2% On-Time',
-    line1: 'Your Cargo.',
-    line2: 'Our ',
-    accent: 'Commitment.',
-  },
-  {
-    src: '/bgts-hero-5.jpg',
     alt: 'BGTS fleet — 3-wheeler to trailer, every load covered',
     eyebrow: '3-Wheeler to 40 FT Trailer · Full Fleet',
     line1: 'Every Vehicle.',
@@ -56,12 +34,40 @@ const slides: Slide[] = [
     accent: 'Load.',
   },
   {
+    // Slide 3 — PSU credibility
     src: '/bgts-hero-3.jpg',
-    alt: 'BGTS PSU & Government industrial logistics — hazardous cargo specialists',
+    alt: 'BGTS PSU & Government industrial logistics — trusted by RMC, GSECL, NTPC, GACL',
     eyebrow: 'ADR Certified · PSU Trusted · Since 1995',
     line1: "Trusted by India's",
     line2: 'Largest ',
     accent: 'PSUs.',
+  },
+  {
+    // Slide 4 — Hazardous goods expertise
+    src: '/bgts-hero-4.jpg',
+    alt: 'BGTS hazardous chemical freight — hydrogen and chlorine transport',
+    eyebrow: 'ADR Certified · Hazardous Cargo Specialists',
+    line1: 'Hydrogen. Chlorine.',
+    line2: 'Moved ',
+    accent: 'Safely.',
+  },
+  {
+    // Slide 5 — Customer commitment
+    src: '/bgts-hero-5.jpg',
+    alt: 'BGTS fleet covering routes across India — 340+ routes, 99.2% on-time',
+    eyebrow: '340+ Routes · 99.2% On-Time',
+    line1: 'Your Cargo.',
+    line2: 'Our ',
+    accent: 'Commitment.',
+  },
+  {
+    // Slide 6 — 75-year legacy
+    src: '/bgts-hero-6.jpg',
+    alt: 'BGTS Vadodara depot — 75 years of Gujarat to Maharashtra logistics',
+    eyebrow: '75 Years · Gujarat to Maharashtra',
+    line1: '75 Years of Trust.',
+    line2: 'Built on Every ',
+    accent: 'Route.',
   },
 ]
 
@@ -94,7 +100,7 @@ export function Hero() {
       {/* Background images */}
       {slides.map((s, i) => (
         <div
-          key={s.src}
+          key={i}
           className={cn(
             'absolute inset-0 transition-opacity duration-700 ease-in-out',
             i === current && !fading ? 'opacity-100' : 'opacity-0'
@@ -108,6 +114,7 @@ export function Hero() {
             sizes="100vw"
             className="object-cover object-center"
             priority={i === 0}
+            loading="eager" 
           />
         </div>
       ))}
