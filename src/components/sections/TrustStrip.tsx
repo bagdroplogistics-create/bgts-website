@@ -17,27 +17,26 @@ interface Client {
 
 const CLIENTS: Client[] = [
   { name: 'Zydus Cadila',                            short: 'Zydus Cadila',     slug: 'zydus-cadila',        domain: 'zyduscadila.com'           },
-  { name: 'GSFC',                                    short: 'GSFC',             slug: 'gsfc',                domain: 'gsfclimited.com'            },
+  { name: 'GSFC',                                    short: 'GSFC',             slug: 'gsfc-fertilizers'                                             },
   { name: 'Sun Pharmaceutical',                      short: 'Sun Pharma',       slug: 'sun-pharmaceutical',  domain: 'sunpharma.com'              },
   { name: 'NTPC Limited',                            short: 'NTPC',             slug: 'ntpc',                domain: 'ntpc.co.in'                 },
-  { name: 'Alembic Pharmaceuticals',                 short: 'Alembic',          slug: 'alembic',             domain: 'alembicpharmaceuticals.com' },
+  { name: 'Alembic Pharmaceuticals',                 short: 'Alembic',          slug: 'alembic'                                                  },
   { name: 'Waaree Energies',                         short: 'Waaree Energies',  slug: 'waaree-energies',     domain: 'waaree.com'                 },
   { name: 'Gujarat Alkalies & Chemicals',            short: 'GACL',             slug: 'gacl',                domain: 'gacl.com'                   },
   { name: 'Sarabhai Group',                          short: 'Sarabhai Group',   slug: 'sarabhai-group',      domain: 'sarabhaigroup.com'          },
-  { name: 'SAIL',                                    short: 'SAIL',             slug: 'sail',                domain: 'sail.co.in'                 },
+  { name: 'SAIL',                                    short: 'SAIL',             slug: 'sail'                                                     },
   { name: 'Rajkot Municipal Corporation',            short: 'RMC',              slug: 'rmc',                 domain: 'rmc.gov.in'                 },
-  { name: 'GSECL',                                   short: 'GSECL',            slug: 'gsecl',               domain: 'gsecl.in'                   },
-  { name: 'Indian Railways',                         short: 'Indian Railways',  slug: 'indian-railways',     domain: 'indianrailways.gov.in'      },
-  { name: 'Ester Industries',                        short: 'Ester Industries', slug: 'ester-industries',    domain: 'esterindustries.com'        },
-  { name: 'Gujarat State Fertilizers & Chemicals',  short: 'GSFC',             slug: 'gsfc-fertilizers',    domain: 'gsfclimited.com'            },
+  { name: 'GSECL',                                   short: 'GSECL',            slug: 'gsecl'                                                    },
+  { name: 'Indian Railways',                         short: 'Indian Railways',  slug: 'indian-railways'                                          },
+  { name: 'Ester Industries',                        short: 'Ester Industries', slug: 'ester-industries'                                         },
   { name: 'Asense Pharma',                           short: 'Asense Pharma',    slug: 'asense-pharma'                                            },
   { name: 'Zenex Pharmaceuticals',                   short: 'Zenex Pharma',     slug: 'zenex-pharmaceuticals'                                    },
   { name: 'Amerikan Steels',                         short: 'Amerikan Steels',  slug: 'amerikan-steels'                                          },
-  { name: 'Subandhu Pakrite',                        short: 'Subandhu Pakrite', slug: 'subandhu-pakrite'                                         },
-  { name: 'GUVNL',                                   short: 'GUVNL',            slug: 'guvnl',               domain: 'guvnl.in'                   },
-  { name: 'Dhuvaran Thermal Power',                  short: 'Dhuvaran TPS',     slug: 'dhuvaran-tps',        domain: 'gsecl.in'                   },
-  { name: 'BLTPS Bhavnagar',                         short: 'BLTPS',            slug: 'bltps',               domain: 'gsecl.in'                   },
-  { name: 'PWD Kadana',                              short: 'PWD Kadana',       slug: 'pwd-kadana'                                               },
+  { name: 'Subandhu Pakrite',                        short: 'Subandhu Pakrite', slug: 'subandhu'                                                 },
+  { name: 'GUVNL',                                   short: 'GUVNL',            slug: 'gsecl'                                                    },
+  { name: 'Dhuvaran Thermal Power',                  short: 'Dhuvaran TPS',     slug: 'gsecl'                                                    },
+  { name: 'BLTPS Bhavnagar',                         short: 'BLTPS',            slug: 'gsecl'                                                    },
+  { name: 'PWD Kadana',                              short: 'PWD Kadana',       slug: 'gsecl'                                                    },
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -82,17 +81,17 @@ function LogoCard({ client, index }: { client: Client; index: number }) {
                  px-6 py-6 shadow-sm
                  hover:shadow-none hover:border-gray-200
                  transition-all duration-300 cursor-default"
-      style={{ width: '168px' }}
+      style={{ width: '260px' }}
       aria-label={client.name}
     >
       {/* Logo area */}
-      <div className="w-full h-16 flex items-center justify-center">
+      <div className="w-full h-36 flex items-center justify-center">
         {imgSrc ? (
           <img
             src={imgSrc}
             alt={`${client.name} logo`}
             /* REVERSED: full colour by default → grayscale on hover */
-            className="max-h-16 max-w-[136px] w-auto object-contain
+            className="max-h-28 max-w-[220px] w-auto object-contain
                        grayscale-0 opacity-100
                        group-hover:grayscale group-hover:opacity-50
                        transition-all duration-300"
@@ -101,10 +100,10 @@ function LogoCard({ client, index }: { client: Client; index: number }) {
           />
         ) : (
           // Initials avatar — shown when no logo file exists yet
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-brand/10 to-brand/20
+          <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-brand/10 to-brand/20
                           flex items-center justify-center border border-brand/20
                           group-hover:opacity-50 transition-opacity duration-300">
-            <span className="font-display font-black text-brand text-lg tracking-tight">
+            <span className="font-display font-black text-brand text-2xl tracking-tight">
               {initials(client.name)}
             </span>
           </div>
@@ -168,10 +167,6 @@ export function TrustStrip() {
       </div>
 
       {/* ── Full-width carousel ── */}
-      {/*
-          truststrip-wrap: clips overflow + triggers pause-on-hover
-          Left/right gradient edges fade the scroll into nothingness
-      */}
       <div className="truststrip-wrap relative overflow-hidden">
 
         {/* Left fade edge */}
