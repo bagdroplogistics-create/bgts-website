@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { ShieldCheck, Zap, Award, Truck, AlertTriangle, CheckCircle } from 'lucide-react'
+import { KmCounter } from '@/components/ui/KmCounter'
 
 // ─── Hazmat Stats ──────────────────────────────────────────────────────────
 
@@ -15,7 +16,8 @@ const HAZMAT_STATS = [
   {
     value: '7,98,110',
     label: 'KM Hazardous Cargo Transported',
-    sub: 'Post-2020 document-verified · Pre-2020 conservatively estimated',
+    sub: 'All contracts 1995–2026',
+    isKm: true,
   },
   {
     value: '0',
@@ -87,17 +89,18 @@ const MATERIALS = [
   },
 ]
 
-// ─── Compliance Badges ────────────────────────────────────────────────────
+// ─── Compliance Cards ─────────────────────────────────────────────────────
 
 const COMPLIANCE = [
-  'CMVR Hazmat Compliant',
-  'CCE Rules Compliant',
-  'AIS-140 GPS Enabled',
-  'Transit Insurance',
-  'PPE Equipped Fleet',
-  'TREM Cards Available',
-  'GST Registered',
-  'MSME Certified',
+  { icon: '🛡️', title: 'CMVR Hazmat Compliant',     desc: 'Central Motor Vehicles Rules for hazardous goods followed on 100% of hauls.' },
+  { icon: '🔰', title: 'CCE Rules Compliant',        desc: 'Chief Controller of Explosives regulations met for all applicable cargo types.' },
+  { icon: '📡', title: 'AIS-140 GPS Enabled',        desc: 'All vehicles fitted with government-mandated GPS for real-time trip tracking.' },
+  { icon: '📄', title: 'Transit Insurance',          desc: 'Full transit and third-party insurance active on every hazmat shipment.' },
+  { icon: '🦺', title: 'PPE Equipped Fleet',         desc: 'Drivers and loaders carry full Personal Protective Equipment on every haul.' },
+  { icon: '🚨', title: 'TREM Cards Available',       desc: 'Transport Emergency cards on board for all vehicles carrying hazardous goods.' },
+  { icon: '📋', title: 'GST Registered',             desc: 'GST compliant with e-way bills generated for every commercial movement.' },
+  { icon: '🏅', title: 'MSME Certified',             desc: 'Registered MSME vendor eligible for government and PSU procurement.' },
+
 ]
 
 // ─── Why Choose ───────────────────────────────────────────────────────────
@@ -211,7 +214,7 @@ export function IndustrialHazmat() {
             {HAZMAT_STATS.map((s, i) => (
               <div key={i} className="bg-[#161B22] px-6 py-8">
                 <p className="font-display font-black text-3xl md:text-4xl text-brand mb-1 leading-none">
-                  {s.value}
+                  {s.isKm ? <KmCounter /> : s.value}
                 </p>
                 <p className="text-white font-bold text-sm mb-1.5 leading-snug">{s.label}</p>
                 <p className="text-white/35 text-[11px] leading-snug">{s.sub}</p>
@@ -295,23 +298,44 @@ export function IndustrialHazmat() {
         </div>
       </section>
 
-      {/* ── 5. Compliance Strip ─────────────────────────────────────────── */}
-      <section className="py-8 bg-[#0D1117]" aria-label="Safety and compliance certifications">
+      {/* ── 5. Safety & Compliance Grid ──────────────────────────────────── */}
+      <section className="section-py bg-[#0D1117]" aria-labelledby="compliance-heading">
         <div className="container-xl">
-          <p className="text-center text-xs font-bold uppercase tracking-widest text-white/40 mb-5">
-            Safety &amp; Compliance — Every Haul, Every Time
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            {COMPLIANCE.map((badge) => (
-              <span
-                key={badge}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/8 border border-white/12 text-white/80 text-xs font-semibold"
+
+          {/* Header */}
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand/15 border border-brand/30 mb-4">
+              <ShieldCheck size={12} className="text-brand" aria-hidden="true" />
+              <span className="text-brand text-xs font-bold uppercase tracking-widest">Certifications & Standards</span>
+            </div>
+            <h2 id="compliance-heading" className="font-display font-black text-3xl md:text-4xl text-white mb-3">
+              Safety &amp; Compliance — Every Haul, Every Time
+            </h2>
+            <p className="text-white/50 text-base max-w-xl mx-auto">
+              Every vehicle, every driver, every route — fully compliant with Indian and international hazardous goods standards.
+            </p>
+          </div>
+
+          {/* 4 × 4 Card Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {COMPLIANCE.map((item) => (
+              <div
+                key={item.title}
+                className="group flex flex-col bg-white/5 border border-white/8 rounded-2xl p-5
+                           hover:bg-white/10 hover:border-brand/40 hover:-translate-y-0.5
+                           transition-all duration-200"
               >
-                <ShieldCheck size={11} className="text-brand shrink-0" aria-hidden="true" />
-                {badge}
-              </span>
+                <span className="text-2xl mb-3 leading-none" aria-hidden="true">{item.icon}</span>
+                <h3 className="font-display font-bold text-sm text-white mb-2 leading-snug">
+                  {item.title}
+                </h3>
+                <p className="text-white/45 text-xs leading-relaxed flex-1">
+                  {item.desc}
+                </p>
+              </div>
             ))}
           </div>
+
         </div>
       </section>
 

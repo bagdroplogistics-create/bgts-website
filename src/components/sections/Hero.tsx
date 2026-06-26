@@ -12,6 +12,7 @@ interface Slide {
   line1: string
   line2: string
   accent: string
+  fullHeadline?: string   // optional — overrides line1/line2/accent split
 }
 
 const slides: Slide[] = [
@@ -52,7 +53,17 @@ const slides: Slide[] = [
     accent: 'PSUs.',
   },
   {
-    // Slide 5 — Hazardous goods expertise
+    // Slide 5 — Hazmat milestone headline (minimal, full-bleed)
+    src: '/bgts-hero-7.jpg',
+    alt: 'BGTS hazardous materials transport — industrial safety across India',
+    eyebrow: '',
+    line1: '',
+    line2: '',
+    accent: '',
+    fullHeadline: "We’ve Gone to the Moon & Back — Moving Hazardous Materials Safely.",
+  },
+  {
+    // Slide 6 — Hazardous goods expertise
     src: '/bgts-hero-4.jpg',
     alt: 'BGTS hazardous chemical freight — hydrogen and chlorine transport',
     eyebrow: 'ADR Certified · Hazardous Cargo Specialists',
@@ -61,7 +72,7 @@ const slides: Slide[] = [
     accent: 'Safely.',
   },
   {
-    // Slide 6 — Customer commitment
+    // Slide 7 — Customer commitment
     src: '/bgts-hero-5.jpg',
     alt: 'BGTS fleet covering routes across India — 340+ routes, 99.2% on-time',
     eyebrow: '340+ Routes · 99.2% On-Time',
@@ -136,19 +147,27 @@ export function Hero() {
           fading ? 'opacity-0' : 'opacity-100'
         )}
       >
-        {/* Eyebrow badge */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/50 mb-5 sm:mb-7">
-          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" aria-hidden="true" />
-          <span className="text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase">
-            {slide.eyebrow}
-          </span>
-        </div>
+        {/* Eyebrow badge — hidden when empty (e.g. fullHeadline slides) */}
+        {slide.eyebrow && (
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/50 mb-5 sm:mb-7">
+            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" aria-hidden="true" />
+            <span className="text-white text-[10px] sm:text-xs font-bold tracking-widest uppercase">
+              {slide.eyebrow}
+            </span>
+          </div>
+        )}
 
-        {/* Headline only — no subtitle, no buttons */}
-        <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white tracking-tight leading-[0.97] max-w-5xl">
-          {slide.line1}<br />
-          {slide.line2}<span className="text-brand">{slide.accent}</span>
-        </h1>
+        {/* Headline — fullHeadline variant: single centered line, no accent split */}
+        {slide.fullHeadline ? (
+          <h1 className="font-display font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-white tracking-tight leading-[1.08] max-w-4xl text-center px-4">
+            {slide.fullHeadline}
+          </h1>
+        ) : (
+          <h1 className="font-display font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl text-white tracking-tight leading-[0.97] max-w-5xl">
+            {slide.line1}<br />
+            {slide.line2}<span className="text-brand">{slide.accent}</span>
+          </h1>
+        )}
       </div>
 
       {/* Prev / Next arrows */}
