@@ -8,10 +8,11 @@ import { VehicleSchedule } from './VehicleSchedule'
 import { BookingForm }     from './BookingForm'
 import { DispatchBoard }   from './DispatchBoard'
 import { VehicleMaster }   from './VehicleMaster'
-import { RateSettings }    from './RateSettings'
+import { RateSettings }       from './RateSettings'
+import { WebsiteInquiries } from './WebsiteInquiries'
 import type { BookingStage, VehicleStatus } from '@/types/dispatch'
 
-type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'vehicles' | 'rates'
+type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'vehicles' | 'rates' | 'inquiries'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'overview',  label: 'Overview'       },
@@ -20,6 +21,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'dispatch',  label: 'Dispatch Board' },
   { id: 'vehicles',  label: 'Vehicle Master' },
   { id: 'rates',     label: 'Rate Settings'  },
+  { id: 'inquiries', label: 'Website Inquiries' },
 ]
 
 export function DispatchShell() {
@@ -123,6 +125,7 @@ export function DispatchShell() {
         {tab === 'dispatch'  && <DispatchBoard bookings={bookings} onStageChange={handleStageChange} loading={bLoading} />}
         {tab === 'vehicles'  && <VehicleMaster vehicles={vehicles} onAdd={addVehicle} onUpdate={updateVehicle} onStatusChange={handleStatusChange} loading={vLoading} />}
         {tab === 'rates'     && <RateSettings />}
+        {tab === 'inquiries' && <WebsiteInquiries />}
       </main>
 
       {/* ════════════ FOOTER ════════════ */}

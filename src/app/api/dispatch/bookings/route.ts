@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
       trip_type:    String(trip_type ?? 'INTERCITY') as 'INTRACITY' | 'INTERCITY',
       margin_pct:   Number(margin_pct ?? 20),
       rate_total,
-      stage:        'BOOKED',
+      stage:        'BOOKING_RECEIVED',
       source:       String(source ?? 'ADMIN') as 'ADMIN' | 'CUSTOMER',
       notes:        notes ? String(notes) : null,
     })

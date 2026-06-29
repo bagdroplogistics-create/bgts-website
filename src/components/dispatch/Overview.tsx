@@ -4,16 +4,27 @@ import type { Booking, Vehicle } from '@/types/dispatch'
 interface Props { bookings: Booking[]; vehicles: Vehicle[]; dieselPrice?: number }
 
 const STAGE_LABEL: Record<string, string> = {
-  BOOKED: 'Booked', DISPATCHED: 'Dispatched', IN_TRANSIT: 'In Transit',
-  DELIVERED: 'Delivered', INVOICED: 'Invoiced', CANCELLED: 'Cancelled',
+  BOOKING_RECEIVED:  'Booking Received',  PAYMENT_PENDING:  'Payment Pending',
+  PAYMENT_RECEIVED:  'Payment Received',  BOOKING_CONFIRMED:'Booking Confirmed',
+  VEHICLE_DISPATCHED:'Vehicle Dispatched',IN_TRANSIT:       'In Transit',
+  DELIVERED:         'Delivered',         INVOICE_RAISED:   'Invoice Raised',
+  CANCELLED:         'Cancelled',
+  // Legacy
+  BOOKED: 'Booked', DISPATCHED: 'Dispatched', INVOICED: 'Invoiced',
 }
 const STAGE_STYLE: Record<string, React.CSSProperties> = {
-  BOOKED     : { background: '#e0edff', color: '#1e5fa8' },
-  DISPATCHED : { background: '#fff7d6', color: '#8a6400' },
-  IN_TRANSIT : { background: '#fff0dc', color: '#a05000' },
-  DELIVERED  : { background: '#d8f5e2', color: '#1a6e35' },
-  INVOICED   : { background: '#f0e0ff', color: '#6200b3' },
-  CANCELLED  : { background: '#ffe0e0', color: '#b30000' },
+  BOOKING_RECEIVED:  { background: '#e0edff', color: '#1e5fa8' },
+  PAYMENT_PENDING:   { background: '#fef3c7', color: '#92400e' },
+  PAYMENT_RECEIVED:  { background: '#ccfbf1', color: '#0f766e' },
+  BOOKING_CONFIRMED: { background: '#e0e7ff', color: '#3730a3' },
+  VEHICLE_DISPATCHED:{ background: '#fff7d6', color: '#8a6400' },
+  IN_TRANSIT:        { background: '#fff0dc', color: '#a05000' },
+  DELIVERED:         { background: '#d8f5e2', color: '#1a6e35' },
+  INVOICE_RAISED:    { background: '#f0e0ff', color: '#6200b3' },
+  CANCELLED:         { background: '#ffe0e0', color: '#b30000' },
+  BOOKED:            { background: '#e0edff', color: '#1e5fa8' },
+  DISPATCHED:        { background: '#fff7d6', color: '#8a6400' },
+  INVOICED:          { background: '#f0e0ff', color: '#6200b3' },
 }
 const STATUS_STYLE: Record<string, React.CSSProperties> = {
   AVAILABLE       : { background: '#d8f5e2', color: '#1a6e35' },
@@ -43,7 +54,7 @@ export function Overview({ bookings, vehicles }: Props) {
   const available  = vehicles.filter(v => v.status_now === 'AVAILABLE').length
   const holdCount  = vehicles.filter(v => ['COMPLIANCE_HOLD','MAINTENANCE','CHECK_RENEWAL'].includes(v.status_now)).length
   const nextWeek   = bookings.filter(b => b.trip_date >= today && b.trip_date <= week && b.stage !== 'CANCELLED').length
-  const activeBook = bookings.filter(b => !['DELIVERED','INVOICED','CANCELLED'].includes(b.stage)).length
+  const activeBook = bookings.filter(b => !['DELIVERED','INVOICE_RAISED','CANCELLED','INVOICED'].includes(b.stage)).length
 
   const STATS = [
     { label: 'Available Today',           value: available,  color: '#1a6e35' },

@@ -99,12 +99,20 @@ export type MaterialType =
 export type TripType = 'INTRACITY' | 'INTERCITY'
 
 export type BookingStage =
-  | 'BOOKED'       // Confirmed, vehicle assigned
-  | 'DISPATCHED'   // Vehicle left depot
-  | 'IN_TRANSIT'   // On the road
-  | 'DELIVERED'    // Goods reached destination
-  | 'INVOICED'     // Invoice raised
-  | 'CANCELLED'    // Trip cancelled
+  // ── New stages (active) ──────────────────────────────────────────────────
+  | 'BOOKING_RECEIVED'   // Customer inquiry received
+  | 'PAYMENT_PENDING'    // Awaiting advance payment
+  | 'PAYMENT_RECEIVED'   // Advance paid
+  | 'BOOKING_CONFIRMED'  // Booking locked in
+  | 'VEHICLE_DISPATCHED' // Vehicle left depot
+  | 'IN_TRANSIT'         // On the road
+  | 'DELIVERED'          // Goods reached destination
+  | 'INVOICE_RAISED'     // Invoice sent
+  | 'CANCELLED'          // Trip cancelled
+  // ── Legacy (kept for backward compat with existing DB rows) ──────────────
+  | 'BOOKED'
+  | 'DISPATCHED'
+  | 'INVOICED'
 
 export type BookingSource = 'ADMIN' | 'CUSTOMER'
 
@@ -196,3 +204,33 @@ export interface ApiError {
 }
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
+
+// ── Website Inquiries (from public booking forms) ────────────────────────────
+
+export type InquiryStatus = 'NEW' | 'CONTACTED' | 'CONVERTED' | 'DROPPED'
+
+export interface WebsiteInquiry {
+  id:                      string
+  created_at:              string
+  ref_no:                  string | null
+  category:                string   // 'FTL' | 'PTL' | 'EV' | 'SERVICE'
+  source_form:             string | null
+  full_name:               string | null
+  company_name:            string | null
+  mobile:                  string | null
+  email:                   string | null
+  origin_city:             string | null
+  destination_city:        string | null
+  pickup_date:             string | null
+  goods_type:              string | null
+  weight_range:            string | null
+  vehicle_type:            string | null
+  no_of_packages:          number | null
+  service_name:            string | null
+  service_specific:        string | null
+  special_instructions:    string | null
+  additional_requirements: string | null
+  additional_services:     string | null
+  raw_payload:             Record<string, unknown> | null
+  status:                  InquiryStatus
+}

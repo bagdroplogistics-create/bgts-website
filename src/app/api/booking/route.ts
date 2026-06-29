@@ -100,6 +100,41 @@ export async function POST(req: NextRequest) {
       html:    buildHtml(body),
     })
     console.log('[booking] ✅ Email sent → to:', TO_EMAIL, '| id:', info.messageId)
+
+  // ── Save to Supabase website_inquiries ──────────────────────────────────────
+  try {
+    const { getBgtsAdminClient } = await import('@/lib/supabase-bgts')
+    const sb = getBgtsAdminClient()
+    const svcType = String(body.serviceType ?? '')
+    const category =
+      svcType.toLowerCase().includes('ev')  ? 'EV'  :
+      svcType.toLowerCase().includes('ptl') ? 'PTL' :
+      svcType.toLowerCase().includes('ftl') ? 'FTL' : 'FTL'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb as any).from('website_inquiries').insert({
+      ref_no:               String(body.bookingRef ?? ''),
+      category,
+      source_form:          String(body.serviceType ?? ''),
+      full_name:            String(body.fullName       ?? ''),
+      company_name:         String(body.companyName    ?? '') || null,
+      mobile:               String(body.mobile         ?? ''),
+      email:                String(body.email          ?? '') || null,
+      origin_city:          String(body.pickupCity     ?? '') || null,
+      destination_city:     String(body.deliveryCity   ?? '') || null,
+      pickup_date:          String(body.pickupDate     ?? '') || null,
+      goods_type:           String(body.goodsType      ?? '') || null,
+      weight_range:         String(body.weightRange    ?? '') || null,
+      vehicle_type:         String(body.vehicleType    ?? '') || null,
+      no_of_packages:       body.numberOfPackages ? Number(body.numberOfPackages) : null,
+      additional_services:  String(body.additionalServices ?? '') || null,
+      special_instructions: String(body.specialInstructions ?? '') || null,
+      raw_payload:          body,
+      status:               'NEW',
+    })
+  } catch (dbErr) {
+    // Non-fatal — email already sent
+    console.warn('[booking] DB save failed (non-fatal):', dbErr)
+  }
     return NextResponse.json({ success: true, messageId: info.messageId, to: TO_EMAIL })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)

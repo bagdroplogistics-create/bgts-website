@@ -7,12 +7,20 @@ import type { Booking, BookingStage } from '@/types/dispatch'
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const STAGE_LABELS: Record<BookingStage, string> = {
-  BOOKED:      'Booking Confirmed',
-  DISPATCHED:  'Vehicle Dispatched',
-  IN_TRANSIT:  'In Transit',
-  DELIVERED:   'Delivered',
-  INVOICED:    'Invoice Raised',
-  CANCELLED:   'Cancelled',
+  // New stages
+  BOOKING_RECEIVED:  'Booking Received',
+  PAYMENT_PENDING:   'Payment Pending',
+  PAYMENT_RECEIVED:  'Payment Received',
+  BOOKING_CONFIRMED: 'Booking Confirmed',
+  VEHICLE_DISPATCHED:'Vehicle Dispatched',
+  IN_TRANSIT:        'In Transit',
+  DELIVERED:         'Delivered',
+  INVOICE_RAISED:    'Invoice Raised',
+  CANCELLED:         'Cancelled',
+  // Legacy
+  BOOKED:    'Booking Confirmed',
+  DISPATCHED:'Vehicle Dispatched',
+  INVOICED:  'Invoice Raised',
 }
 
 function fmt(booking: Booking): {

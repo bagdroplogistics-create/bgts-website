@@ -3,15 +3,26 @@ import { useState } from 'react'
 import { buildWhatsAppMessage, openWhatsApp, STAGE_LABELS } from '@/lib/whatsapp'
 import type { Booking, BookingStage } from '@/types/dispatch'
 
-const STAGE_ORDER: BookingStage[] = ['BOOKED','DISPATCHED','IN_TRANSIT','DELIVERED','INVOICED','CANCELLED']
+// Active stages shown in dropdown
+const STAGE_ORDER: BookingStage[] = [
+  'BOOKING_RECEIVED','PAYMENT_PENDING','PAYMENT_RECEIVED','BOOKING_CONFIRMED',
+  'VEHICLE_DISPATCHED','IN_TRANSIT','DELIVERED','INVOICE_RAISED','CANCELLED',
+]
 
 const STAGE_COLORS: Record<BookingStage, string> = {
-  BOOKED:      'bg-blue-100 text-blue-800',
-  DISPATCHED:  'bg-yellow-100 text-yellow-800',
-  IN_TRANSIT:  'bg-orange-100 text-orange-800',
-  DELIVERED:   'bg-green-100 text-green-800',
-  INVOICED:    'bg-purple-100 text-purple-800',
-  CANCELLED:   'bg-red-100 text-red-800',
+  BOOKING_RECEIVED:  'bg-blue-100 text-blue-800',
+  PAYMENT_PENDING:   'bg-amber-100 text-amber-800',
+  PAYMENT_RECEIVED:  'bg-teal-100 text-teal-800',
+  BOOKING_CONFIRMED: 'bg-indigo-100 text-indigo-800',
+  VEHICLE_DISPATCHED:'bg-yellow-100 text-yellow-800',
+  IN_TRANSIT:        'bg-orange-100 text-orange-800',
+  DELIVERED:         'bg-green-100 text-green-800',
+  INVOICE_RAISED:    'bg-purple-100 text-purple-800',
+  CANCELLED:         'bg-red-100 text-red-800',
+  // Legacy
+  BOOKED:    'bg-blue-100 text-blue-800',
+  DISPATCHED:'bg-yellow-100 text-yellow-800',
+  INVOICED:  'bg-purple-100 text-purple-800',
 }
 
 type FilterStatus = 'ALL' | BookingStage
@@ -71,12 +82,12 @@ export function DispatchBoard({ bookings, onStageChange, loading }: Props) {
         <div className="flex items-center gap-3">
           {/* Filter */}
           <div className="flex gap-1 flex-wrap">
-            {(['ALL','BOOKED','DISPATCHED','IN_TRANSIT','DELIVERED','INVOICED','CANCELLED'] as FilterStatus[]).map(s => (
+            {(['ALL','BOOKING_RECEIVED','PAYMENT_PENDING','PAYMENT_RECEIVED','BOOKING_CONFIRMED','VEHICLE_DISPATCHED','IN_TRANSIT','DELIVERED','INVOICE_RAISED','CANCELLED'] as FilterStatus[]).map(s => (
               <button key={s} onClick={() => setFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                   filter === s ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}>
-                {s === 'ALL' ? 'All' : s.replace('_',' ')}
+                {s === 'ALL' ? 'All' : (STAGE_LABELS as Record<string,string>)[s] ?? s.replace(/_/g,' ')}
               </button>
             ))}
           </div>

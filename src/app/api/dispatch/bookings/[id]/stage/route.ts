@@ -3,7 +3,11 @@ import { getBgtsAdminClient } from '@/lib/supabase-bgts'
 import type { BookingStage } from '@/types/dispatch'
 
 const VALID_STAGES: BookingStage[] = [
-  'BOOKED', 'DISPATCHED', 'IN_TRANSIT', 'DELIVERED', 'INVOICED', 'CANCELLED'
+  // New stages
+  'BOOKING_RECEIVED', 'PAYMENT_PENDING', 'PAYMENT_RECEIVED', 'BOOKING_CONFIRMED',
+  'VEHICLE_DISPATCHED', 'IN_TRANSIT', 'DELIVERED', 'INVOICE_RAISED', 'CANCELLED',
+  // Legacy (keep accepting for existing data)
+  'BOOKED', 'DISPATCHED', 'INVOICED',
 ]
 
 // PATCH /api/dispatch/bookings/[id]/stage
@@ -35,16 +39,16 @@ export async function PATCH(
     return NextResponse.json({ data: null, error: error.message }, { status: 500 })
   }
 
-  // If delivered/cancelled — free up the vehicle
-  if (body.stage === 'DELIVERED' || body.stage === 'CANCELLED') {
+  // Free up vehicle when trip is complete or cancelled
+  if (['DELIVERED','INVOICE_RAISED','CANCELLED','INVOICED'].includes(body.stage)) {
     await supabase
       .from('vehicles' as any)
       .update({ status_now: 'AVAILABLE' })
       .eq('id', data.vehicle_id)
   }
 
-  // If dispatched — mark vehicle ON_TRIP
-  if (body.stage === 'DISPATCHED' || body.stage === 'IN_TRANSIT') {
+  // Mark vehicle ON_TRIP when dispatched or in transit
+  if (['VEHICLE_DISPATCHED','IN_TRANSIT','DISPATCHED'].includes(body.stage)) {
     await supabase
       .from('vehicles' as any)
       .update({ status_now: 'ON_TRIP' })

@@ -165,5 +165,35 @@ export async function POST(req: NextRequest) {
     }
   }
 
+
+  // ── Save to Supabase website_inquiries ──────────────────────────────────────
+  try {
+    const { getBgtsAdminClient } = await import('@/lib/supabase-bgts')
+    const sb = getBgtsAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb as any).from('website_inquiries').insert({
+      ref_no:                  refNo,
+      category:                'SERVICE',
+      source_form:             serviceName,
+      full_name:               String(body.fullName        ?? ''),
+      company_name:            String(body.companyName     ?? '') || null,
+      mobile:                  String(body.mobile          ?? ''),
+      email:                   customerEmail || null,
+      origin_city:             String(body.originCity      ?? '') || null,
+      destination_city:        String(body.destinationCity ?? '') || null,
+      pickup_date:             String(body.pickupDate      ?? '') || null,
+      goods_type:              String(body.goodsType       ?? '') || null,
+      weight_range:            String(body.weightLoad      ?? '') || null,
+      no_of_packages:          body.numberOfPackages ? Number(body.numberOfPackages) : null,
+      service_name:            serviceName,
+      service_specific:        String(body.serviceSpecific        ?? '') || null,
+      special_instructions:    String(body.specialInstructions    ?? '') || null,
+      additional_requirements: String(body.additionalRequirements ?? '') || null,
+      raw_payload:             body,
+      status:                  'NEW',
+    })
+  } catch (dbErr) {
+    console.warn('[service-inquiry] DB save failed (non-fatal):', dbErr)
+  }
   return NextResponse.json({ success: true, refNo })
 }
