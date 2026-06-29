@@ -15,9 +15,10 @@ import { Negotiation }      from './Negotiation'
 import { TenderAnalyser }   from './TenderAnalyser'
 import { InvoiceGenerator } from './InvoiceGenerator'
 import { Advisory }         from './Advisory'
+import MarketVehicleDesk    from './MarketVehicleDesk'
 import type { BookingStage, VehicleStatus } from '@/types/dispatch'
 
-type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'quote' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'advisory' | 'inquiries'
+type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'quote' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'advisory' | 'inquiries' | 'mvd'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'overview',  label: 'Overview'       },
@@ -26,12 +27,13 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'dispatch',  label: 'Dispatch Board' },
   { id: 'vehicles',  label: 'Vehicle Master' },
   { id: 'rates',     label: 'Rate Settings'  },
-  { id: 'inquiries',    label: 'Website Inquiries' },
-  { id: 'quote',        label: 'Quote Engine'      },
-  { id: 'negotiation',  label: 'Negotiation'       },
-  { id: 'tender',       label: 'Tender'            },
-  { id: 'invoice',      label: 'Invoice'           },
-  { id: 'advisory',     label: 'Advisory'          },
+  { id: 'inquiries',    label: 'Website Inquiries'  },
+  { id: 'quote',        label: 'Quote Engine'       },
+  { id: 'negotiation',  label: 'Negotiation'        },
+  { id: 'tender',       label: 'Tender'             },
+  { id: 'invoice',      label: 'Invoice'            },
+  { id: 'advisory',     label: 'Advisory'           },
+  { id: 'mvd',          label: 'Market Vehicle Desk' },
 ]
 
 export function DispatchShell() {
@@ -59,6 +61,7 @@ export function DispatchShell() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: 'system-ui,-apple-system,sans-serif', display: 'flex', flexDirection: 'column' }}>
+      <style>{`nav::-webkit-scrollbar { display: none; }`}</style>
 
       {/* ════════════ HEADER ════════════ */}
       <header style={{ background: '#ffffff', borderBottom: '1px solid #e0dbd3' }}>
@@ -96,13 +99,14 @@ export function DispatchShell() {
 
         {/* ── Tab bar — full width cream strip ── */}
         <div style={{ width: '100%', background: '#F3EFE8', borderTop: '1px solid #e0dbd3' }}>
-          <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 28px' }}>
-            <nav style={{ display: 'flex', gap: 0, overflowX: 'auto' }}>
+          <div style={{ width: '100%', padding: '0 8px' }}>
+            <nav style={{ display: 'flex', gap: 0, overflowX: 'auto', scrollbarWidth: 'none', msOverflowStyle: 'none', justifyContent: 'space-between' } as React.CSSProperties}>
               {TABS.map(t => (
                 <button key={t.id} onClick={() => setTab(t.id)}
                   style={{
-                    padding        : '10px 18px',
-                    fontSize       : '0.85rem',
+                    flex           : 1,
+                    padding        : '10px 6px',
+                    fontSize       : '0.92rem',
                     fontWeight     : tab === t.id ? 600 : 400,
                     color          : tab === t.id ? '#c45c28' : '#555',
                     background     : 'transparent',
@@ -110,6 +114,7 @@ export function DispatchShell() {
                     borderBottom   : `2px solid ${tab === t.id ? '#c45c28' : 'transparent'}`,
                     cursor         : 'pointer',
                     whiteSpace     : 'nowrap',
+                    textAlign      : 'center',
                     transition     : 'color 0.15s',
                   }}>
                   {t.label}
@@ -141,13 +146,18 @@ export function DispatchShell() {
         {tab === 'tender'      && <TenderAnalyser />}
         {tab === 'invoice'     && <InvoiceGenerator />}
         {tab === 'advisory'    && <Advisory />}
+        {tab === 'mvd'         && (
+          <div style={{ padding: '20px 28px' }}>
+            <MarketVehicleDesk />
+          </div>
+        )}
       </main>
 
       {/* ════════════ FOOTER ════════════ */}
       <footer style={{ width: '100%', background: '#F3EFE8', borderTop: '1px solid #e0dbd3', marginTop: 'auto' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', padding: '14px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: '0.72rem', color: '#999', fontStyle: 'italic' }}>
-            BGTS Dispatch &amp; Booking Platform &mdash; WhatsApp/Email sends open on this device for a team member to review and send; nothing transmits automatically.
+            BGTS Dispatch &amp; Booking Platform — WhatsApp/Email sends open on this device for a team member to review and send; nothing transmits automatically.
           </span>
           <span style={{ fontSize: '0.72rem', color: '#bbb' }}>
             &copy; {new Date().getFullYear()} Baroda Goods Transport Service
