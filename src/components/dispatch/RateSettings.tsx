@@ -277,6 +277,58 @@ export function RateSettings() {
         </div>
       </div>
 
+      {/* ═══ 4. FLEET BREAK-EVEN SUMMARY ═══════════════════════════════ */}
+      <div style={CARD}>
+        <h3 style={{ fontWeight: 700, fontSize: '1rem', color: '#111', margin: '0 0 14px' }}>
+          Fleet Break-Even Summary
+        </h3>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                {['Vehicle','Fixed/Month','Break-Even Revenue','Target @40%','EMI Status'].map(h => (
+                  <th key={h} style={TH}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {vehicles.length === 0 ? (
+                <tr><td colSpan={5} style={{ ...TD, textAlign: 'center', color: '#aaa', padding: 24 }}>Add vehicles first</td></tr>
+              ) : vehicles.map(v => {
+                const total       = totalPerMo(v.id)
+                const f           = fixed[v.id] ?? {}
+                const emiPerMo    = Number(f.emi_per_mo ?? 0)
+                const breakEvenRev = total > 0 ? Math.ceil(total / 0.80) : 0
+                const target40Rev  = total > 0 ? Math.ceil(total / 0.60) : 0
+                const hasEmi       = emiPerMo > 0
+                return (
+                  <tr key={v.id}>
+                    <td style={MONO}>{v.reg_no}</td>
+                    <td style={{ ...TD, fontWeight: 700 }}>
+                      {total > 0 ? String.fromCharCode(8377) + total.toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '—'}
+                    </td>
+                    <td style={{ ...TD, color: '#b30000', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      {breakEvenRev > 0 ? String.fromCharCode(8377) + breakEvenRev.toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '—'}
+                    </td>
+                    <td style={{ ...TD, color: '#1a4a8a', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                      {target40Rev > 0 ? String.fromCharCode(8377) + target40Rev.toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '—'}
+                    </td>
+                    <td style={TD}>
+                      <span style={{
+                        display: 'inline-block', padding: '2px 8px', borderRadius: 4, fontSize: '0.72rem', fontWeight: 600,
+                        background: hasEmi ? '#ffe0e0' : '#d8f5e2', color: hasEmi ? '#b30000' : '#1a6e35',
+                      }}>
+                        {hasEmi ? String.fromCharCode(8377) + emiPerMo.toLocaleString('en-IN', { maximumFractionDigits: 0 }) + '/mo EMI' : 'Loan Cleared'}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   )
 }

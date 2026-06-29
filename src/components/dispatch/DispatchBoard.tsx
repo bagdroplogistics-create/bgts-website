@@ -39,11 +39,20 @@ function rs(n: number | null) {
 }
 
 export function DispatchBoard({ bookings, onStageChange, loading }: Props) {
-  const [filter,  setFilter]  = useState<FilterStatus>('ALL')
+  const [filter,      setFilter]      = useState<FilterStatus>('ALL')
+  const [vehicleFilter, setVehicleFilter] = useState<string>('ALL')
   const [pending, setPending] = useState<string | null>(null)
   const [waModal, setWaModal] = useState<{ booking: Booking; stage: BookingStage; msg: string } | null>(null)
 
-  const filtered = filter === 'ALL' ? bookings : bookings.filter(b => b.stage === filter)
+  const filtered = bookings.filter(b => {
+    const stageOk   = filter === 'ALL'        || b.stage === filter
+    const vehicleOk = vehicleFilter === 'ALL' || b.vehicle_id === vehicleFilter
+    return stageOk && vehicleOk
+  })
+  // Unique vehicles in bookings for filter dropdown
+  const vehicleOptions = Array.from(
+    new Map(bookings.filter(b => b.vehicle).map(b => [b.vehicle_id, b.vehicle!])).values()
+  )
 
   const handleStageChange = async (booking: Booking, newStage: BookingStage) => {
     if (newStage === booking.stage) return
@@ -91,9 +100,19 @@ export function DispatchBoard({ bookings, onStageChange, loading }: Props) {
               </button>
             ))}
           </div>
+          {/* Vehicle filter */}
+          <select
+            value={vehicleFilter}
+            onChange={e => setVehicleFilter(e.target.value)}
+            style={{ padding: '6px 10px', fontSize: '0.78rem', border: '1px solid #d5cfc7', borderRadius: 6, background: '#faf7f4', cursor: 'pointer' }}>
+            <option value="ALL">All Vehicles</option>
+            {vehicleOptions.map(v => (
+              <option key={v.id} value={v.id}>{v.reg_no}</option>
+            ))}
+          </select>
           <button onClick={handleExport}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-semibold hover:bg-gray-700 transition-colors">
-            ⬇ Export Today (CSV)
+            ⬇ Export CSV
           </button>
         </div>
       </div>
