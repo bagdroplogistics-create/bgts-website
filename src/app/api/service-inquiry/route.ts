@@ -45,7 +45,7 @@ function buildInquiryHtml(data: Record<string, unknown>): string {
     <table style="width:100%;border-collapse:collapse">${rowsHtml}</table>
     <div style="padding:20px 32px;background:#f8fafb;border-top:1px solid #e5e7eb">
       <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center">
-        Submitted via BGTS website · Respond within 2 hours · bgtspl@gmail.com
+        Submitted via BGTS website · Respond within 2 hours · info@bgts.in
       </p>
     </div>
   </div>
@@ -90,7 +90,7 @@ function buildConfirmationHtml(data: Record<string, unknown>): string {
       <div style="border-top:1px solid #e5e7eb;padding-top:20px">
         <div style="font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">BGTS Contact</div>
         <p style="font-size:13px;color:#6b7280;margin:0 0 4px">📞 +91 63 5722 5722</p>
-        <p style="font-size:13px;color:#6b7280;margin:0 0 4px">✉️ bgtspl@gmail.com</p>
+        <p style="font-size:13px;color:#6b7280;margin:0 0 4px">✉️ info@bgts.in</p>
         <p style="font-size:13px;color:#6b7280;margin:0">📍 Nr Natraj Cinema, Pratapgunj Naka, Vadodara — 390002, Gujarat, India</p>
       </div>
     </div>
