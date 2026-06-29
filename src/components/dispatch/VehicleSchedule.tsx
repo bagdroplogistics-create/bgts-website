@@ -98,7 +98,7 @@ export function VehicleSchedule({ onBookCell, onViewBooking }: Props) {
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={dates.length + 1} className="px-4 py-10 text-center text-gray-400 text-sm">
-                    No vehicles in owned fleet. Add vehicles in the Vehicle Master tab first.
+                    No vehicles found. Add vehicles in the Vehicle Master tab first.
                   </td>
                 </tr>
               ) : rows.map(row => (
@@ -124,8 +124,8 @@ export function VehicleSchedule({ onBookCell, onViewBooking }: Props) {
                           {cell.client_name}
                         </div>
                       )}
-                      {cell.status === 'HOLD' && <span>✕</span>}
-                      {cell.status === 'OPEN'  && <span className="text-green-500">+</span>}
+                      {cell.status === 'HOLD' && <span className="text-red-400 font-semibold text-xs">Hold</span>}
+                      {cell.status === 'OPEN'  && <span className="text-green-600 font-semibold text-xs">Open</span>}
                     </td>
                   ))}
               

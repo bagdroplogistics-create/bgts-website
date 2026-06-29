@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBgtsClient } from '@/lib/supabase-bgts'
+import { getBgtsAdminClient } from '@/lib/supabase-bgts'
 import type { ScheduleRow, ScheduleCellStatus } from '@/types/dispatch'
 
 // GET /api/dispatch/schedule?days=7|14|30&from=YYYY-MM-DD
@@ -7,7 +7,7 @@ import type { ScheduleRow, ScheduleCellStatus } from '@/types/dispatch'
 export async function GET(req: NextRequest) {
   try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = getBgtsClient() as any
+  const supabase = getBgtsAdminClient() as any
   const { searchParams } = new URL(req.url)
 
   const days     = Math.min(Number(searchParams.get('days') ?? 7), 30)
@@ -24,11 +24,11 @@ export async function GET(req: NextRequest) {
 
   const toDate = dates[dates.length - 1]
 
-  // Fetch all owned vehicles
+  // Fetch all vehicles (owned + market network)
   const { data: vehicles, error: ve } = await supabase
     .from('vehicles' as any)
     .select('*')
-    .eq('ownership', 'OWNED')
+    .neq('class', 'MARKET')
     .order('reg_no') as unknown as { data: import('@/types/dispatch').Vehicle[] | null; error: { message: string } | null }
 
   if (ve || !vehicles) {
