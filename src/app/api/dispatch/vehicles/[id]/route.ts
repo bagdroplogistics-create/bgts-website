@@ -41,3 +41,21 @@ export async function PATCH(
     return NextResponse.json({ data: null, error: e instanceof Error ? e.message : 'Server error' }, { status: 500 })
   }
 }
+
+
+// DELETE /api/dispatch/vehicles/[id]
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const supabase = getBgtsAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from('vehicles').delete().eq('id', id)
+    if (error) return NextResponse.json({ data: null, error: error.message }, { status: 400 })
+    return NextResponse.json({ data: { deleted: true }, error: null })
+  } catch (e) {
+    return NextResponse.json({ data: null, error: e instanceof Error ? e.message : 'Server error' }, { status: 500 })
+  }
+}

@@ -84,6 +84,19 @@ export function VehicleMaster({ vehicles, onAdd, onUpdate, onStatusChange, loadi
   const openEdit = (v: Vehicle) => { setForm(vehicleToForm(v)); setEditTarget(v); setErr(null); setMode('edit') }
   const closeModal = () => { setMode(null); setEditTarget(null); setErr(null) }
 
+  const handleDelete = async (v: Vehicle) => {
+    if (!confirm(`Delete ${v.reg_no}? This cannot be undone.`)) return
+    try {
+      const res  = await fetch(`/api/dispatch/vehicles/${v.id}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (json.error) throw new Error(json.error)
+      // Refresh page to re-fetch vehicles list
+      window.location.reload()
+    } catch (ex) {
+      alert(ex instanceof Error ? ex.message : 'Delete failed')
+    }
+  }
+
   const toPayload = (f: VForm) => ({
     reg_no    : f.reg_no,
     class     : f.class,
@@ -173,11 +186,16 @@ export function VehicleMaster({ vehicles, onAdd, onUpdate, onStatusChange, loadi
                       </select>
                     </td>
                     <td style={{ ...TD, whiteSpace: 'nowrap' }}>
-                      <button onClick={() => openEdit(v)}
-                        title="Edit vehicle"
-                        style={{ padding: '4px 10px', fontSize: '0.72rem', fontWeight: 600, border: '1px solid #d5cfc7', borderRadius: 6, background: '#faf7f4', color: '#555', cursor: 'pointer' }}>
-                        Edit
-                      </button>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={() => openEdit(v)} title="Edit vehicle"
+                          style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #d5cfc7', borderRadius: 6, background: '#faf7f4', color: '#555', cursor: 'pointer', fontSize: '0.9rem' }}>
+                          ✏️
+                        </button>
+                        <button onClick={() => handleDelete(v)} title="Delete vehicle"
+                          style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #f5c0b0', borderRadius: 6, background: '#fff5f2', color: '#c45c28', cursor: 'pointer', fontWeight: 700, fontSize: '1rem' }}>
+                          ✕
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
