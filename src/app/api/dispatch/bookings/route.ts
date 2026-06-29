@@ -7,38 +7,35 @@ import type { BookingStage, BookingSource } from '@/types/dispatch'
 // Query params: stage, source, from_date, to_date, vehicle_id
 export async function GET(req: NextRequest) {
   try {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = getBgtsAdminClient() as any // typed as any for supabase-js compat
-  const { searchParams } = new URL(req.url)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getBgtsAdminClient() as any
+    const { searchParams } = new URL(req.url)
 
-  const stage      = searchParams.get('stage')      as BookingStage | null
-  const source     = searchParams.get('source')     as BookingSource | null
-  const from_date  = searchParams.get('from_date')
-  const to_date    = searchParams.get('to_date')
-  const vehicle_id = searchParams.get('vehicle_id')
+    const stage      = searchParams.get('stage')      as BookingStage | null
+    const source     = searchParams.get('source')     as BookingSource | null
+    const from_date  = searchParams.get('from_date')
+    const to_date    = searchParams.get('to_date')
+    const vehicle_id = searchParams.get('vehicle_id')
 
-  let query = supabase
-    .from('bookings' as any)
-    .select('*, vehicle:vehicles(id, reg_no, class, make_model, payload_kg, status_now)')
-    .order('trip_date', { ascending: false })
+    let query = supabase
+      .from('bookings' as any)
+      .select('*, vehicle:vehicles(id, reg_no, class, make_model, payload_kg, status_now)')
+      .order('trip_date', { ascending: false })
 
-  if (stage)      query = query.eq('stage', stage)
-  if (source)     query = query.eq('source', source)
-  if (vehicle_id) query = query.eq('vehicle_id', vehicle_id)
-  if (from_date)  query = query.gte('trip_date', from_date)
-  if (to_date)    query = query.lte('trip_date', to_date)
+    if (stage)      query = query.eq('stage', stage)
+    if (source)     query = query.eq('source', source)
+    if (vehicle_id) query = query.eq('vehicle_id', vehicle_id)
+    if (from_date)  query = query.gte('trip_date', from_date)
+    if (to_date)    query = query.lte('trip_date', to_date)
 
-  const { data, error } = await query
+    const { data, error } = await query
 
-  if (error) {
-    console.error('[bookings GET]', error)
-    return NextResponse.json({ data: null, error: error.message }, { status: 500 })
-  }
+    if (error) {
+      console.error('[bookings GET]', error)
+      return NextResponse.json({ data: null, error: error.message }, { status: 500 })
+    }
 
-  return NextResponse.json({ data, error: null })
-}
-
-// POST /api/dispatch/bookings
+    return NextResponse.json({ data, error: null })
   } catch (e) {
     return NextResponse.json({ data: null, error: e instanceof Error ? e.message : 'Server error' }, { status: 500 })
   }
