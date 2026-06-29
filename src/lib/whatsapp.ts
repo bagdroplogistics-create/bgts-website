@@ -46,37 +46,51 @@ function fmt(booking: Booking): {
 export function buildWhatsAppMessage(booking: Booking, stage: BookingStage): string {
   const f = fmt(booking)
 
+  const SIG = `\n\n— Baroda Goods Transport Service\n📞 +91 63 5722 5722`
+  const INFO = `📅 Date: ${f.date}\n🚛 Vehicle: ${f.vehicle}\n📍 Route: ${f.route}\n💰 Rate: ${f.rate}`
+
   const templates: Record<BookingStage, string> = {
-    BOOKED: `Dear ${f.client},\n\nYour booking with BGTS has been *confirmed* ✅\n\n` +
-      `📅 Date: ${f.date}\n🚛 Vehicle: ${f.vehicle}\n📍 Route: ${f.route}\n` +
-      `💰 Rate: ${f.rate}\n\nOur team will be in touch before dispatch.\n\n` +
-      `— Baroda Goods Transport Service\n📞 +91 63 5722 5722`,
+    BOOKING_RECEIVED:
+      `Dear ${f.client},\n\nThank you! We have *received your booking request* 📋\n\n` +
+      INFO + `\n\nOur team will review and confirm shortly.` + SIG,
 
-    DISPATCHED: `Dear ${f.client},\n\nYour vehicle has been *dispatched* 🚛\n\n` +
-      `📅 Date: ${f.date}\n🚛 Vehicle: ${f.vehicle}\n📍 Route: ${f.route}\n\n` +
-      `The vehicle has left our depot and is on the way to pickup.\n\n` +
-      `— Baroda Goods Transport Service\n📞 +91 63 5722 5722`,
+    PAYMENT_PENDING:
+      `Dear ${f.client},\n\n*Payment is pending* for your upcoming booking 💳\n\n` +
+      INFO + `\n\nKindly arrange the advance payment to confirm your booking.` + SIG,
 
-    IN_TRANSIT: `Dear ${f.client},\n\nYour goods are *in transit* 🛣️\n\n` +
-      `📅 Date: ${f.date}\n🚛 Vehicle: ${f.vehicle}\n📍 Route: ${f.route}\n\n` +
-      `Goods have been loaded and the vehicle is en route to destination.\n\n` +
-      `— Baroda Goods Transport Service\n📞 +91 63 5722 5722`,
+    PAYMENT_RECEIVED:
+      `Dear ${f.client},\n\nWe have *received your payment* ✅\n\n` +
+      INFO + `\n\nYour booking will now be confirmed shortly.` + SIG,
 
-    DELIVERED: `Dear ${f.client},\n\nYour goods have been *delivered successfully* ✅🎉\n\n` +
-      `📅 Date: ${f.date}\n🚛 Vehicle: ${f.vehicle}\n📍 Route: ${f.route}\n\n` +
-      `Please confirm receipt at your end. Thank you for choosing BGTS!\n\n` +
-      `— Baroda Goods Transport Service\n📞 +91 63 5722 5722`,
+    BOOKING_CONFIRMED:
+      `Dear ${f.client},\n\nYour booking has been *confirmed* ✅\n\n` +
+      INFO + `\n\nOur team will be in touch before dispatch.` + SIG,
 
-    INVOICED: `Dear ${f.client},\n\nYour *invoice has been raised* 🧾\n\n` +
-      `📅 Trip Date: ${f.date}\n📍 Route: ${f.route}\n💰 Amount: ${f.rate}\n\n` +
-      `Kindly arrange payment at your earliest convenience. ` +
-      `Please reach out for any queries.\n\n` +
-      `— Baroda Goods Transport Service\n📞 +91 63 5722 5722`,
+    VEHICLE_DISPATCHED:
+      `Dear ${f.client},\n\nYour vehicle has been *dispatched* 🚛\n\n` +
+      INFO + `\n\nThe vehicle has left our depot and is on the way to pickup.` + SIG,
 
-    CANCELLED: `Dear ${f.client},\n\nWe regret to inform you that your booking for *${f.date}* ` +
-      `on route *${f.route}* has been *cancelled*.\n\n` +
-      `We apologise for any inconvenience. Please contact us to reschedule.\n\n` +
-      `— Baroda Goods Transport Service\n📞 +91 63 5722 5722`,
+    IN_TRANSIT:
+      `Dear ${f.client},\n\nYour goods are *in transit* 🛣️\n\n` +
+      INFO + `\n\nGoods have been loaded and the vehicle is en route to destination.` + SIG,
+
+    DELIVERED:
+      `Dear ${f.client},\n\nYour goods have been *delivered successfully* ✅🎉\n\n` +
+      INFO + `\n\nPlease confirm receipt at your end. Thank you for choosing BGTS!` + SIG,
+
+    INVOICE_RAISED:
+      `Dear ${f.client},\n\nYour *invoice has been raised* 🧾\n\n` +
+      `📅 Trip: ${f.date}\n📍 Route: ${f.route}\n💰 Amount: ${f.rate}` +
+      `\n\nKindly arrange payment at your earliest convenience.` + SIG,
+
+    CANCELLED:
+      `Dear ${f.client},\n\nYour booking for *${f.date}* on route *${f.route}* has been *cancelled*.\n\n` +
+      `We apologise for any inconvenience. Please contact us to reschedule.` + SIG,
+
+    // Legacy — same messages mapped to closest new stage
+    BOOKED:     `Dear ${f.client},\n\nYour booking with BGTS has been *confirmed* ✅\n\n` + INFO + SIG,
+    DISPATCHED: `Dear ${f.client},\n\nYour vehicle has been *dispatched* 🚛\n\n` + INFO + SIG,
+    INVOICED:   `Dear ${f.client},\n\nYour *invoice has been raised* 🧾\n\n📅 ${f.date}\n📍 ${f.route}\n💰 ${f.rate}` + SIG,
   }
 
   return templates[stage]
