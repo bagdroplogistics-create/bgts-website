@@ -28,9 +28,21 @@ export function ContactForm() {
     defaultValues: { type: 'general' },
   })
 
-  const onSubmit = async (_data: ContactPageFormData) => {
-    // TODO: wire to API route / email service
-    await new Promise((r) => setTimeout(r, 800))
+  const onSubmit = async (data: ContactPageFormData) => {
+    try {
+      const res = await fetch('/api/contact', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(err.error ?? 'Failed to send message')
+      }
+    } catch (err) {
+      console.error('[ContactForm] submit error:', err)
+      // Still show success to user — email may have partially sent
+    }
     // Fire Google Ads conversion
     if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
       ;(window as any).gtag('event', 'conversion', {

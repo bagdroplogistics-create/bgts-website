@@ -105,11 +105,18 @@ export async function POST(req: NextRequest) {
   try {
     const { getBgtsAdminClient } = await import('@/lib/supabase-bgts')
     const sb = getBgtsAdminClient()
-    const svcType = String(body.serviceType ?? '')
+    const svcType   = String(body.serviceType ?? '')
+    const refStr    = String(body.bookingRef  ?? '')
+    const vehStr    = String(body.vehicleType ?? body.vehicle ?? '')
+    const isEV      =
+      svcType.toLowerCase().includes('ev')    ||
+      refStr.toUpperCase().startsWith('BGTSEV') ||
+      vehStr.toLowerCase().includes('ev')     ||
+      vehStr.toLowerCase().includes('electric')
     const category =
-      svcType.toLowerCase().includes('ev')  ? 'EV'  :
-      svcType.toLowerCase().includes('ptl') ? 'PTL' :
-      svcType.toLowerCase().includes('ftl') ? 'FTL' : 'FTL'
+      isEV                                    ? 'EV'  :
+      svcType.toLowerCase().includes('ptl')   ? 'PTL' :
+      svcType.toLowerCase().includes('ftl')   ? 'FTL' : 'FTL'
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (sb as any).from('website_inquiries').insert({
       ref_no:               String(body.bookingRef ?? ''),

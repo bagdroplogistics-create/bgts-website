@@ -746,7 +746,7 @@ export function BookingWizardContent({ onComplete }: { onComplete?: () => void }
       await fetch('/api/booking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...data, bookingRef }),
+        body: JSON.stringify({ ...data, bookingRef, serviceType: 'BGTS EV Booking' }),
       })
     } catch {
       // Email failure should not block confirmation screen
