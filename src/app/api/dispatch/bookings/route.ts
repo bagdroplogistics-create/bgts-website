@@ -6,6 +6,7 @@ import type { BookingStage, BookingSource } from '@/types/dispatch'
 // GET /api/dispatch/bookings
 // Query params: stage, source, from_date, to_date, vehicle_id
 export async function GET(req: NextRequest) {
+  try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = getBgtsAdminClient() as any // typed as any for supabase-js compat
   const { searchParams } = new URL(req.url)
@@ -38,6 +39,10 @@ export async function GET(req: NextRequest) {
 }
 
 // POST /api/dispatch/bookings
+  } catch (e) {
+    return NextResponse.json({ data: null, error: e instanceof Error ? e.message : 'Server error' }, { status: 500 })
+  }
+}
 export async function POST(req: NextRequest) {
   const supabase = getBgtsAdminClient()
 

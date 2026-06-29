@@ -4,6 +4,7 @@ import { getBgtsAdminClient } from '@/lib/supabase-bgts'
 // GET /api/dispatch/rates
 // Returns global settings + fixed + variable costs for all vehicles
 export async function GET() {
+  try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = getBgtsAdminClient() as any
 
@@ -28,8 +29,10 @@ export async function GET() {
     data: { settings, fixed, variable, vehicles },
     error: null,
   })
+  } catch (e) {
+    return NextResponse.json({ data: null, error: e instanceof Error ? e.message : 'Server error' }, { status: 500 })
+  }
 }
-
 // POST /api/dispatch/rates
 // Upserts global settings + per-vehicle costs
 export async function POST(req: NextRequest) {

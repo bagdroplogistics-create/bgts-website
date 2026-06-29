@@ -5,6 +5,7 @@ import type { ScheduleRow, ScheduleCellStatus } from '@/types/dispatch'
 // GET /api/dispatch/schedule?days=7|14|30&from=YYYY-MM-DD
 // Returns: ScheduleRow[] — each vehicle with cells for each date
 export async function GET(req: NextRequest) {
+  try {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const supabase = getBgtsClient() as any
   const { searchParams } = new URL(req.url)
@@ -74,4 +75,8 @@ export async function GET(req: NextRequest) {
   }))
 
   return NextResponse.json({ data: { dates, rows }, error: null })
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Server error'
+    return NextResponse.json({ data: null, error: msg }, { status: 500 })
+  }
 }
