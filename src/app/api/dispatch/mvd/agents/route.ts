@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const sb = getBgtsAdminClient()
     const status = req.nextUrl.searchParams.get('status')
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (sb as any).from('mvd_agents').select('*').order('created_at', { ascending: false })
+    let query = (sb as any).from('mvd_agents').select('*').order('created_at', { ascending: false }).range(0, 9999)
     if (status) query = query.eq('status', status)
     const { data, error } = await query
     if (error) throw error

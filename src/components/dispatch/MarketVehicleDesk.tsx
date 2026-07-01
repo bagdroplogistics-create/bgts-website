@@ -738,7 +738,7 @@ function AgentPortal() {
 export default function MarketVehicleDesk() {
   const [activeTab,   setActiveTab]   = useState<'flow' | 'find' | 'portal'>('flow')
   const [agentCount,  setAgentCount]  = useState<number | null>(null)
-  const ROUTE_COUNT = 20 // entries in ROUTE_MATRIX
+  const ROUTE_COUNT = 44 // entries in ROUTE_MATRIX
 
   useEffect(() => {
     fetch('/api/dispatch/mvd/agents')
