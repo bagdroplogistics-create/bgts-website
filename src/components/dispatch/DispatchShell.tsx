@@ -10,15 +10,13 @@ import { DispatchBoard }   from './DispatchBoard'
 import { VehicleMaster }   from './VehicleMaster'
 import { RateSettings }       from './RateSettings'
 import { WebsiteInquiries } from './WebsiteInquiries'
-import { QuoteEngine }      from './QuoteEngine'
 import { Negotiation }      from './Negotiation'
 import { TenderAnalyser }   from './TenderAnalyser'
 import { InvoiceGenerator } from './InvoiceGenerator'
-import { Advisory }         from './Advisory'
 import MarketVehicleDesk    from './MarketVehicleDesk'
 import type { BookingStage, VehicleStatus } from '@/types/dispatch'
 
-type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'quote' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'advisory' | 'inquiries' | 'mvd'
+type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'inquiries' | 'mvd'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'overview',  label: 'Overview'       },
@@ -28,11 +26,9 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'vehicles',  label: 'Vehicle Master' },
   { id: 'rates',     label: 'Rate Settings'  },
   { id: 'inquiries',    label: 'Website Inquiries'  },
-  { id: 'quote',        label: 'Quote Engine'       },
   { id: 'negotiation',  label: 'Negotiation'        },
   { id: 'tender',       label: 'Tender'             },
   { id: 'invoice',      label: 'Invoice'            },
-  { id: 'advisory',     label: 'Advisory'           },
   { id: 'mvd',          label: 'Market Vehicle Desk' },
 ]
 
@@ -137,15 +133,13 @@ export function DispatchShell() {
             onSuccess={() => { refreshBookings(); setTab('dispatch') }}
           />
         )}
-        {tab === 'dispatch'  && <DispatchBoard bookings={bookings} onStageChange={handleStageChange} loading={bLoading} />}
+        {tab === 'dispatch'  && <DispatchBoard bookings={bookings} onStageChange={handleStageChange} loading={bLoading} onRefresh={refreshBookings} />}
         {tab === 'vehicles'  && <VehicleMaster vehicles={vehicles} onAdd={addVehicle} onUpdate={updateVehicle} onStatusChange={handleStatusChange} loading={vLoading} />}
         {tab === 'rates'     && <RateSettings />}
         {tab === 'inquiries'   && <WebsiteInquiries />}
-        {tab === 'quote'       && <QuoteEngine />}
         {tab === 'negotiation' && <Negotiation />}
         {tab === 'tender'      && <TenderAnalyser />}
         {tab === 'invoice'     && <InvoiceGenerator />}
-        {tab === 'advisory'    && <Advisory />}
         {tab === 'mvd'         && (
           <div style={{ padding: '20px 28px' }}>
             <MarketVehicleDesk />

@@ -736,7 +736,16 @@ function AgentPortal() {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function MarketVehicleDesk() {
-  const [activeTab, setActiveTab] = useState<'flow' | 'find' | 'portal'>('flow')
+  const [activeTab,   setActiveTab]   = useState<'flow' | 'find' | 'portal'>('flow')
+  const [agentCount,  setAgentCount]  = useState<number | null>(null)
+  const ROUTE_COUNT = 20 // entries in ROUTE_MATRIX
+
+  useEffect(() => {
+    fetch('/api/dispatch/mvd/agents')
+      .then(r => r.json())
+      .then(j => setAgentCount((j.data ?? []).length))
+      .catch(() => setAgentCount(0))
+  }, [])
 
   const tabs: { id: 'flow' | 'find' | 'portal'; label: string }[] = [
     { id: 'flow',   label: '00  Process Flow' },
@@ -753,8 +762,10 @@ export default function MarketVehicleDesk() {
           <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>Agent Sourcing &amp; Allocation Console</div>
         </div>
         <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#ccc' }}>
-          <span>agents loaded</span>
-          <span>routes mapped</span>
+          <span style={{ color: agentCount === 0 ? '#f87171' : '#86efac', fontWeight: 600 }}>
+            {agentCount === null ? '…' : agentCount.toLocaleString()} agents loaded
+          </span>
+          <span style={{ color: '#86efac', fontWeight: 600 }}>{ROUTE_COUNT} routes mapped</span>
         </div>
       </div>
 
