@@ -13,15 +13,17 @@ import { WebsiteInquiries } from './WebsiteInquiries'
 import { Negotiation }      from './Negotiation'
 import { TenderAnalyser }   from './TenderAnalyser'
 import { InvoiceGenerator } from './InvoiceGenerator'
-import MarketVehicleDesk    from './MarketVehicleDesk'
+import MarketVehicleDesk           from './MarketVehicleDesk'
+import { MarketVehicleBookingForm } from './MarketVehicleBookingForm'
 import type { BookingStage, VehicleStatus } from '@/types/dispatch'
 
-type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'inquiries' | 'mvd'
+type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'inquiries' | 'mvd' | 'mvd-booking'
 
 const TABS: { id: Tab; label: string }[] = [
   { id: 'overview',  label: 'Overview'       },
   { id: 'schedule',  label: 'Schedule'       },
-  { id: 'booking',   label: 'New Booking'    },
+  { id: 'booking',       label: 'New Booking'             },
+  { id: 'mvd-booking',   label: 'Market Vehicle Booking'  },
   { id: 'dispatch',  label: 'Dispatch Board' },
   { id: 'vehicles',  label: 'Vehicle Master' },
   { id: 'rates',     label: 'Rate Settings'  },
@@ -132,6 +134,11 @@ export function DispatchShell() {
             initialVehicle={preVehicle}
             onSuccess={() => { refreshBookings(); setTab('dispatch') }}
           />
+        )}
+        {tab === 'mvd-booking' && (
+          <div style={{ padding: '20px 28px' }}>
+            <MarketVehicleBookingForm onSuccess={() => setTab('dispatch')} />
+          </div>
         )}
         {tab === 'dispatch'  && <DispatchBoard bookings={bookings} onStageChange={handleStageChange} loading={bLoading} onRefresh={refreshBookings} />}
         {tab === 'vehicles'  && <VehicleMaster vehicles={vehicles} onAdd={addVehicle} onUpdate={updateVehicle} onStatusChange={handleStatusChange} loading={vLoading} />}
