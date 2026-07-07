@@ -375,7 +375,7 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
         <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '12px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
           <div>
             <div style={{ fontWeight: 700, fontSize: 13, color: '#1d4ed8', marginBottom: 2 }}>
-              \u{1F4CB} Auto-loaded from Market Vehicle Booking
+              📋 Auto-loaded from Market Vehicle Booking
             </div>
             <div style={{ fontSize: 12, color: '#3b82f6' }}>
               <strong>{fmtRef(activeBooking.id)}</strong>
@@ -564,7 +564,7 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
                       rel="noopener noreferrer"
                       style={{ background: '#25d366', color: '#fff', border: 'none', borderRadius: 5, padding: '5px 12px', fontSize: 12, textDecoration: 'none', display: 'inline-block', fontWeight: 600 }}
                     >
-                      \u{1F4F1} WhatsApp
+                      📱 WhatsApp
                     </a>
                     <button
                       disabled={logSaving[`${m.agent.id}-whatsapp`]}
@@ -825,7 +825,7 @@ function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
         <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa' }}>Loading bookings…</div>
       ) : bookings.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa', background: '#f9fafb', borderRadius: 10, border: '1px dashed #e5e7eb' }}>
-          <div style={{ fontSize: 32, marginBottom: 10 }}>\u{1F4CB}</div>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>📋</div>
           <div style={{ fontWeight: 600, marginBottom: 4 }}>No market vehicle bookings yet</div>
           <div style={{ fontSize: 13 }}>Bookings submitted from the Market Vehicle Booking tab will appear here.</div>
         </div>
