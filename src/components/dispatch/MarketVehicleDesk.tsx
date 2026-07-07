@@ -268,6 +268,7 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
   const [msgGenerated, setMsgGenerated] = useState(false)
   const [saving,       setSaving]       = useState(false)
   const [copyStates,   setCopyStates]   = useState<Record<string, boolean>>({})
+  const [showModal,    setShowModal]    = useState(false)
   const [activeBooking, setActiveBooking] = useState<MvdAutoBooking | null>(null)
   const [outreachLog,  setOutreachLog]  = useState<Record<string, OutreachRecord[]>>({})
   const [logSaving,    setLogSaving]    = useState<Record<string, boolean>>({})
@@ -342,6 +343,7 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
     }))
     setMessages(msgs)
     setMsgGenerated(true)
+    setShowModal(true)
 
     // Save inquiry to DB
     setSaving(true)
@@ -529,6 +531,11 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
                   Generate inquiry messages →
                 </button>
               )}
+              {msgGenerated && messages.length > 0 && !showModal && (
+                <button onClick={() => setShowModal(true)} style={{ background: '#1d4ed8', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                  View {messages.length} message{messages.length !== 1 ? 's' : ''} ↗
+                </button>
+              )}
             </div>
           </div>
 
@@ -586,88 +593,106 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
         </div>
       )}
 
-      {/* Generated messages */}
-      {msgGenerated && messages.length > 0 && (
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '20px 24px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <div style={{ fontWeight: 700, fontSize: 15 }}>
-              Inquiry Messages — Ready to Send
-              {activeBooking && (
-                <span style={{ marginLeft: 10, fontSize: 12, color: '#6b7280', fontWeight: 400 }}>
-                  Booking ref: <strong style={{ color: '#1d4ed8' }}>{fmtRef(activeBooking.id)}</strong>
-                </span>
-              )}
-            </div>
-            {saving && <div style={{ fontSize: 12, color: '#888' }}>Saving inquiry…</div>}
-          </div>
-
-          {messages.map((m, i) => {
-            const { texts } = getLangText(m)
-            const agentLog  = outreachLog[m.agent.id] ?? []
-            return (
-              <div key={m.agent.id} style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: '14px 16px', marginBottom: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: '#1a1a1a' }}>
-                    #{i + 1} — {m.agent.company_name} · {m.agent.mobile}
-                  </div>
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <a
-                      href={`https://wa.me/${m.agent.mobile.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(texts[0]?.text ?? '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ background: '#25d366', color: '#fff', border: 'none', borderRadius: 5, padding: '5px 12px', fontSize: 12, textDecoration: 'none', display: 'inline-block', fontWeight: 600 }}
-                    >
-                      📱 WhatsApp
-                    </a>
-                    <button
-                      disabled={logSaving[`${m.agent.id}-whatsapp`]}
-                      onClick={() => logOutreach(m.agent, 'whatsapp', texts[0]?.text ?? '')}
-                      style={{ background: agentLog.some(r => r.method === 'whatsapp') ? '#f0fdf4' : '#f3f4f6', color: agentLog.some(r => r.method === 'whatsapp') ? '#166534' : '#374151', border: `1px solid ${agentLog.some(r => r.method === 'whatsapp') ? '#bbf7d0' : '#d1d5db'}`, borderRadius: 5, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
-                    >
-                      {logSaving[`${m.agent.id}-whatsapp`] ? '…' : agentLog.some(r => r.method === 'whatsapp') ? '✓ WA Logged' : 'Log WA Sent'}
-                    </button>
-                    <button
-                      disabled={logSaving[`${m.agent.id}-phone`]}
-                      onClick={() => logOutreach(m.agent, 'phone', texts[0]?.text ?? '')}
-                      style={{ background: agentLog.some(r => r.method === 'phone') ? '#f0fdf4' : '#f3f4f6', color: agentLog.some(r => r.method === 'phone') ? '#166534' : '#374151', border: `1px solid ${agentLog.some(r => r.method === 'phone') ? '#bbf7d0' : '#d1d5db'}`, borderRadius: 5, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
-                    >
-                      {logSaving[`${m.agent.id}-phone`] ? '…' : agentLog.some(r => r.method === 'phone') ? '✓ Call Logged' : 'Log Call'}
-                    </button>
-                  </div>
+      {/* ── Inquiry Messages Modal ──────────────────────────────────────────── */}
+      {showModal && messages.length > 0 && (
+        <div
+          onClick={e => { if (e.target === e.currentTarget) setShowModal(false) }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px 16px', overflowY: 'auto' }}
+        >
+          <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 780, boxShadow: '0 20px 60px rgba(0,0,0,0.25)', position: 'relative' }}>
+            {/* Modal header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 24px', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, background: '#fff', borderRadius: '14px 14px 0 0', zIndex: 1 }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: '#1a1a1a' }}>
+                  Inquiry Messages — Ready to Send
+                  <span style={{ marginLeft: 10, background: '#c45c28', color: '#fff', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20 }}>{messages.length} agent{messages.length !== 1 ? 's' : ''}</span>
                 </div>
-
-                {/* Message text blocks */}
-                {texts.map(({ label, text }) => (
-                  <div key={label} style={{ marginBottom: 10 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase' }}>{label}</span>
-                      <button
-                        onClick={() => copyText(`${m.agent.id}-${label}`, text)}
-                        style={{ background: copyStates[`${m.agent.id}-${label}`] ? '#16a34a' : '#f3f4f6', color: copyStates[`${m.agent.id}-${label}`] ? '#fff' : '#374151', border: '1px solid #d1d5db', borderRadius: 5, padding: '3px 12px', fontSize: 11, cursor: 'pointer' }}
-                      >
-                        {copyStates[`${m.agent.id}-${label}`] ? '✓ Copied' : 'Copy'}
-                      </button>
-                    </div>
-                    <pre style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 6, padding: '10px 12px', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, fontFamily: 'inherit' }}>{text}</pre>
-                  </div>
-                ))}
-
-                {/* Outreach activity log for this agent */}
-                {agentLog.length > 0 && (
-                  <div style={{ marginTop: 10, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 7, padding: '10px 14px' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginBottom: 6, textTransform: 'uppercase' }}>Outreach Activity</div>
-                    {agentLog.map((r, ri) => (
-                      <div key={ri} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12, color: '#374151', marginBottom: ri < agentLog.length - 1 ? 4 : 0 }}>
-                        <span style={{ background: '#dcfce7', color: '#166534', borderRadius: 4, padding: '1px 7px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>{r.method}</span>
-                        <span>{new Date(r.logged_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                        <span style={{ color: '#16a34a', fontWeight: 600 }}>{r.status}</span>
-                      </div>
-                    ))}
+                {activeBooking && (
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
+                    Booking ref: <strong style={{ color: '#1d4ed8' }}>{fmtRef(activeBooking.id)}</strong>
+                    {saving && <span style={{ marginLeft: 10, color: '#aaa' }}>Saving inquiry…</span>}
                   </div>
                 )}
               </div>
-            )
-          })}
+              <button
+                onClick={() => setShowModal(false)}
+                style={{ background: '#f3f4f6', border: 'none', borderRadius: '50%', width: 34, height: 34, fontSize: 18, cursor: 'pointer', color: '#555', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal body — scrollable */}
+            <div style={{ padding: '20px 24px', maxHeight: 'calc(90vh - 80px)', overflowY: 'auto' }}>
+              {messages.map((m, i) => {
+                const { texts } = getLangText(m)
+                const agentLog  = outreachLog[m.agent.id] ?? []
+                return (
+                  <div key={m.agent.id} style={{ border: '1px solid #f0f0f0', borderRadius: 10, padding: '14px 16px', marginBottom: 14 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, color: '#1a1a1a' }}>
+                        #{i + 1} — {m.agent.company_name} · {m.agent.mobile}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        <a
+                          href={`https://wa.me/${m.agent.mobile.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(texts[0]?.text ?? '')}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ background: '#25d366', color: '#fff', border: 'none', borderRadius: 5, padding: '5px 12px', fontSize: 12, textDecoration: 'none', display: 'inline-block', fontWeight: 600 }}
+                        >
+                          📱 WhatsApp
+                        </a>
+                        <button
+                          disabled={logSaving[`${m.agent.id}-whatsapp`]}
+                          onClick={() => logOutreach(m.agent, 'whatsapp', texts[0]?.text ?? '')}
+                          style={{ background: agentLog.some(r => r.method === 'whatsapp') ? '#f0fdf4' : '#f3f4f6', color: agentLog.some(r => r.method === 'whatsapp') ? '#166534' : '#374151', border: `1px solid ${agentLog.some(r => r.method === 'whatsapp') ? '#bbf7d0' : '#d1d5db'}`, borderRadius: 5, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          {logSaving[`${m.agent.id}-whatsapp`] ? '…' : agentLog.some(r => r.method === 'whatsapp') ? '✓ WA Logged' : 'Log WA Sent'}
+                        </button>
+                        <button
+                          disabled={logSaving[`${m.agent.id}-phone`]}
+                          onClick={() => logOutreach(m.agent, 'phone', texts[0]?.text ?? '')}
+                          style={{ background: agentLog.some(r => r.method === 'phone') ? '#f0fdf4' : '#f3f4f6', color: agentLog.some(r => r.method === 'phone') ? '#166534' : '#374151', border: `1px solid ${agentLog.some(r => r.method === 'phone') ? '#bbf7d0' : '#d1d5db'}`, borderRadius: 5, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          {logSaving[`${m.agent.id}-phone`] ? '…' : agentLog.some(r => r.method === 'phone') ? '✓ Call Logged' : 'Log Call'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Message text blocks */}
+                    {texts.map(({ label, text }) => (
+                      <div key={label} style={{ marginBottom: 10 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase' }}>{label}</span>
+                          <button
+                            onClick={() => copyText(`${m.agent.id}-${label}`, text)}
+                            style={{ background: copyStates[`${m.agent.id}-${label}`] ? '#16a34a' : '#f3f4f6', color: copyStates[`${m.agent.id}-${label}`] ? '#fff' : '#374151', border: '1px solid #d1d5db', borderRadius: 5, padding: '3px 12px', fontSize: 11, cursor: 'pointer' }}
+                          >
+                            {copyStates[`${m.agent.id}-${label}`] ? '✓ Copied' : 'Copy'}
+                          </button>
+                        </div>
+                        <pre style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 6, padding: '10px 12px', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, fontFamily: 'inherit' }}>{text}</pre>
+                      </div>
+                    ))}
+
+                    {/* Outreach activity log for this agent */}
+                    {agentLog.length > 0 && (
+                      <div style={{ marginTop: 10, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 7, padding: '10px 14px' }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginBottom: 6, textTransform: 'uppercase' }}>Outreach Activity</div>
+                        {agentLog.map((r, ri) => (
+                          <div key={ri} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12, color: '#374151', marginBottom: ri < agentLog.length - 1 ? 4 : 0 }}>
+                            <span style={{ background: '#dcfce7', color: '#166534', borderRadius: 4, padding: '1px 7px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>{r.method}</span>
+                            <span>{new Date(r.logged_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                            <span style={{ color: '#16a34a', fontWeight: 600 }}>{r.status}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                    )
+              })}
+            </div>
+          </div>
         </div>
       )}
     </div>
