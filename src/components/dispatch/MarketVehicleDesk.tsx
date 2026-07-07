@@ -119,6 +119,27 @@ function fmtRef(id: string) {
   return `MVD-${id.slice(0, 8).toUpperCase()}`
 }
 
+const BGTS_FOOTER_EN = `Contact: 6357115711 / 6357225722 / 6357335733
+Website: www.bgts.in
+Email: info@bgts.in
+Address: Near Natraj Cinema, Next to BATA Showroom, PratapGunj Naka, Vadodara - 390002, Gujarat.
+
+— BGTS PVT LTD`
+
+const BGTS_FOOTER_HI = `संपर्क: 6357115711 / 6357225722 / 6357335733
+वेबसाइट: www.bgts.in
+ईमेल: info@bgts.in
+पता: नटराज सिनेमा के पास, बाटा शोरूम के बगल में, प्रतापगंज नाका, वडोदरा - 390002, गुजरात।
+
+— BGTS PVT LTD`
+
+const BGTS_FOOTER_GU = `સંપર્ક: 6357115711 / 6357225722 / 6357335733
+વેબસાઇટ: www.bgts.in
+ઈમેઇલ: info@bgts.in
+સરનામું: નટરાજ સિનેમા પાસે, BATA શોરૂમ બાજુમાં, પ્રતાપગંજ નાકા, વડોદરા - 390002, ગુજરાત.
+
+— BGTS PVT LTD`
+
 function buildMessages(
   from_city: string,
   to_city: string,
@@ -132,14 +153,46 @@ function buildMessages(
   const agentName   = agent.contact_person || agent.company_name
   const dateStr     = pickup_date || 'to be confirmed'
   const materialStr = material_type || 'general cargo'
-  const fleetLabel  = agent.fleet_type === 'FLEET_OWNER' ? 'Fleet Owner' : agent.fleet_type === 'BROKER' ? 'Broker' : 'Transporter'
   const refLine     = bookingRef ? `\nBooking Ref: ${bookingRef}` : ''
 
-  const en = `Dear ${agentName} (${fleetLabel}),\n\nWe have a transport requirement and would like your quote:${refLine}\n\nRoute: ${from_city} → ${to_city}\nVehicle: ${vehicle_type}\nMaterial: ${materialStr}\nPickup Date: ${dateStr}\n\nKindly share your best rate for this movement at the earliest.\n\nThanks & Regards,\nBGTS Transport\n+91 63 5722 5722`
+  const en =
+`Hello ${agentName}, this is a message from BGTS (Baroda Goods Transport Service Pvt. Ltd.).
 
-  const hi = `प्रिय ${agentName} जी,\n\nहमें निम्न ट्रांसपोर्ट की आवश्यकता है। कृपया अपना सबसे अच्छा रेट बताएं:${refLine}\n\nरूट: ${from_city} → ${to_city}\nवाहन: ${vehicle_type}\nमाल: ${materialStr}\nपिकअप तारीख: ${dateStr}\n\nधन्यवाद,\nBGTS Transport`
+We have a load requirement:${refLine}
+Route: ${from_city} → ${to_city}.
+Vehicle Required: ${vehicle_type}.
+Material: ${materialStr}.
+Pickup Date: ${dateStr}.
 
-  const gu = `પ્રિય ${agentName} સાહેબ,\n\nઅમને નીચેની ટ્રાન્સપોર્ટ જરૂરી છે. કૃપા કરીને આપનો શ્રેષ્ઠ ભાવ જણાવો:${refLine}\n\nરૂટ: ${from_city} → ${to_city}\nવાહન: ${vehicle_type}\nમાલ: ${materialStr}\nપિકઅપ તારીખ: ${dateStr}\n\nઆભાર,\nBGTS Transport`
+Kindly share your best rate and vehicle availability for this route at the earliest. Please reply to this number or call back.
+
+${BGTS_FOOTER_EN}`
+
+  const hi =
+`नमस्ते ${agentName} जी, यह BGTS (बरोडा गुड्स ट्रांसपोर्ट सर्विस प्राइवेट लिमिटेड) की तरफ से संदेश है।
+
+हमारे पास एक लोड है:${refLine}
+रूट: ${from_city} → ${to_city}.
+वाहन आवश्यक: ${vehicle_type}.
+सामान: ${materialStr}.
+पिकअप तारीख: ${dateStr}.
+
+कृपया इस रूट के लिए अपनी सबसे अच्छी दर और वाहन की उपलब्धता जल्द से जल्द बताएं। इस नंबर पर रिप्लाई करें या कॉल बैक करें।
+
+${BGTS_FOOTER_HI}`
+
+  const gu =
+`નમસ્તે ${agentName} સાહેબ, આ BGTS (બરોડા ગુડ્સ ટ્રાન્સપોર્ટ સર્વિસ પ્રાઇવેટ લિ.) તરફથી સંદેશ છે.
+
+અમારી પાસે એક ટ્રાન્સપોર્ટ જરૂરિયાત છે:${refLine}
+રૂટ: ${from_city} → ${to_city}.
+વાહન: ${vehicle_type}.
+માલ: ${materialStr}.
+પિકઅપ તારીખ: ${dateStr}.
+
+કૃપા કરીને આ રૂટ માટે આપનો શ્રેષ્ઠ ભાવ અને વાહનની ઉપલબ્ધતા જલ્દી જણાવો. આ નંબર પર રિપ્લાય કરો અથવા કૉલ બૅક કરો.
+
+${BGTS_FOOTER_GU}`
 
   return { en, hi, gu }
 }
