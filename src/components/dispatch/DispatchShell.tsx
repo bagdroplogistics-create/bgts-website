@@ -15,7 +15,7 @@ import { TenderAnalyser }   from './TenderAnalyser'
 import { InvoiceGenerator } from './InvoiceGenerator'
 import MarketVehicleDesk           from './MarketVehicleDesk'
 import { MarketVehicleBookingForm } from './MarketVehicleBookingForm'
-import type { BookingStage, VehicleStatus } from '@/types/dispatch'
+import type { BookingStage, VehicleStatus, MvdAutoBooking } from '@/types/dispatch'
 
 type Tab = 'overview' | 'schedule' | 'booking' | 'dispatch' | 'negotiation' | 'tender' | 'invoice' | 'vehicles' | 'rates' | 'inquiries' | 'mvd' | 'mvd-booking'
 
@@ -38,6 +38,8 @@ export function DispatchShell() {
   const [tab,        setTab]        = useState<Tab>('overview')
   const [preVehicle, setPreVehicle] = useState<string | undefined>()
   const [preDate,    setPreDate]    = useState<string | undefined>()
+
+  const [mvdAutoBooking, setMvdAutoBooking] = useState<MvdAutoBooking | null>(null)
 
   const { bookings, loading: bLoading, updateStage, refresh: refreshBookings } = useBookings()
   const { vehicles, loading: vLoading, addVehicle, updateStatus, updateVehicle } = useVehicles()
@@ -137,7 +139,7 @@ export function DispatchShell() {
         )}
         {tab === 'mvd-booking' && (
           <div style={{ padding: '20px 28px' }}>
-            <MarketVehicleBookingForm onSuccess={() => setTab('dispatch')} />
+            <MarketVehicleBookingForm onSuccess={(booking) => { setMvdAutoBooking(booking); setTab('mvd') }} />
           </div>
         )}
         {tab === 'dispatch'  && <DispatchBoard bookings={bookings} onStageChange={handleStageChange} loading={bLoading} onRefresh={refreshBookings} />}
@@ -149,7 +151,10 @@ export function DispatchShell() {
         {tab === 'invoice'     && <InvoiceGenerator />}
         {tab === 'mvd'         && (
           <div style={{ padding: '20px 28px' }}>
-            <MarketVehicleDesk />
+            <MarketVehicleDesk
+              autoBooking={mvdAutoBooking}
+              onAutoBookingConsumed={() => setMvdAutoBooking(null)}
+            />
           </div>
         )}
       </main>

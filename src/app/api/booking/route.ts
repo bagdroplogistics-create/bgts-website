@@ -1,7 +1,110 @@
 import { NextRequest, NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
+import {
+  sendWhatsAppMessage,
+  buildCustomerAvailableMsg,
+  buildCustomerUnavailableMsg,
+  buildAdminNotificationMsg,
+} from '@/lib/whatsapp-notify'
 
-function buildHtml(data: Record<string, unknown>): string {
+// ── Vehicle availability check ────────────────────────────────────────────────
+// Maps website vehicle type labels → DB vehicle class codes
+const VEHICLE_CLASS_MAP: Record<string, string[]> = {
+  'lcv':       ['LCV', 'LGV'],
+  'pickup':    ['LCV', 'LGV'],
+  'taurus':    ['MCV', 'MGV'],
+  'open':      ['MGV', 'HCV'],
+  'dala':      ['MGV', 'HCV'],
+  'container': ['HCV'],
+  'trailer':   ['TRAILER'],
+  'flatbed':   ['TRAILER'],
+  'odc':       ['HCV', 'TRAILER'],
+  'crane':     ['OTHER'],
+  'tanker':    ['TANKER'],
+  'packers':   ['OTHER'],
+  'movers':    ['OTHER'],
+}
+
+function resolveVehicleClasses(vehicleType: string): string[] {
+  const lower = vehicleType.toLowerCase()
+  const matches = new Set<string>()
+  for (const [keyword, classes] of Object.entries(VEHICLE_CLASS_MAP)) {
+    if (lower.includes(keyword)) classes.forEach(c => matches.add(c))
+  }
+  return matches.size > 0 ? Array.from(matches) : []
+}
+
+interface AvailabilityResult {
+  available:  boolean
+  count:      number
+  vehicleIds: string[]
+}
+
+async function checkVehicleAvailability(
+  date: string,
+  vehicleType: string,
+): Promise<AvailabilityResult> {
+  try {
+    const { getBgtsAdminClient } = await import('@/lib/supabase-bgts')
+    const sb = getBgtsAdminClient()
+
+    // Step 1 — find all fleet vehicles that are currently AVAILABLE
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let vehicleQuery = (sb as any)
+      .from('vehicles')
+      .select('id, class, status_now')
+      .eq('status_now', 'AVAILABLE')
+
+    const classes = vehicleType ? resolveVehicleClasses(vehicleType) : []
+    if (classes.length > 0) {
+      vehicleQuery = vehicleQuery.in('class', classes)
+    }
+
+    const { data: vehicles, error: vErr } = await vehicleQuery
+    if (vErr || !vehicles || vehicles.length === 0) {
+      return { available: false, count: 0, vehicleIds: [] }
+    }
+
+    const vehicleIds: string[] = vehicles.map((v: { id: string }) => v.id)
+
+    // Step 2 — exclude vehicles already booked on this date
+    if (date) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: booked } = await (sb as any)
+        .from('bookings')
+        .select('vehicle_id')
+        .in('vehicle_id', vehicleIds)
+        .eq('trip_date', date)
+        .neq('stage', 'CANCELLED')
+
+      const bookedIds = new Set((booked ?? []).map((b: { vehicle_id: string }) => b.vehicle_id))
+      const freeVehicles = vehicleIds.filter(id => !bookedIds.has(id))
+
+      return {
+        available:  freeVehicles.length > 0,
+        count:      freeVehicles.length,
+        vehicleIds: freeVehicles,
+      }
+    }
+
+    return { available: vehicleIds.length > 0, count: vehicleIds.length, vehicleIds }
+  } catch (e) {
+    console.error('[availability] check failed (non-fatal):', e)
+    // If check fails, assume unavailable — safer to under-promise
+    return { available: false, count: 0, vehicleIds: [] }
+  }
+}
+
+// ── Admin email HTML ──────────────────────────────────────────────────────────
+function buildHtml(data: Record<string, unknown>, available: boolean, availCount: number): string {
+  const availBadge = available
+    ? `<div style="background:#d1fae5;border:1px solid #6ee7b7;border-radius:8px;padding:12px 20px;margin-bottom:16px">
+        <span style="color:#065f46;font-weight:700;font-size:14px">✅ ${availCount} Fleet Vehicle(s) Available — Confirm with Customer</span>
+       </div>`
+    : `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px 20px;margin-bottom:16px">
+        <span style="color:#92400e;font-weight:700;font-size:14px">⚠️ No Fleet Vehicle Available — Arrange Market Vehicle or Alternative</span>
+       </div>`
+
   const rows: [string, string][] = [
     ['Booking Reference', String(data.bookingRef        ?? '—')],
     ['Vehicle',           String(data.vehicleType       ?? '—')],
@@ -16,7 +119,7 @@ function buildHtml(data: Record<string, unknown>): string {
     ['Mobile',            String(data.mobile            ?? '—')],
     ['Email',             String(data.email             ?? '—')],
     ['Special Notes',     String(data.specialInstructions ?? '') || 'None'],
-    ...(data.numberOfPackages  ? [['No. of Packages', String(data.numberOfPackages)]  as [string, string]] : []),
+    ...(data.numberOfPackages   ? [['No. of Packages', String(data.numberOfPackages)]   as [string, string]] : []),
     ...(data.additionalServices ? [['Add-on Services', String(data.additionalServices)] as [string, string]] : []),
   ]
 
@@ -41,6 +144,7 @@ function buildHtml(data: Record<string, unknown>): string {
       <span style="font-size:11px;color:#c2410c;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Booking Reference</span>
       <span style="font-size:26px;font-weight:900;color:#9a3412;letter-spacing:3px">${data.bookingRef ?? '—'}</span>
     </div>
+    <div style="padding:16px 32px 0">${availBadge}</div>
     <table style="width:100%;border-collapse:collapse">${rowsHtml}</table>
     <div style="padding:20px 32px;background:#f8fafb;border-top:1px solid #e5e7eb">
       <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center">BGTS Website Booking · bgts.in</p>
@@ -50,6 +154,7 @@ function buildHtml(data: Record<string, unknown>): string {
 </html>`
 }
 
+// ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   let body: Record<string, unknown> = {}
   try {
@@ -58,21 +163,77 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const SMTP_USER = process.env.SMTP_USER
-  const SMTP_PASS = process.env.SMTP_PASS
-  const SMTP_HOST = process.env.SMTP_HOST ?? 'smtp.gmail.com'
-  const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587)
-  // Recipient: use TO_EMAIL if set, otherwise fall back to SMTP_USER
-  const TO_EMAIL  = process.env.TO_EMAIL ?? process.env.SERVICE_INQUIRY_EMAIL ?? SMTP_USER
+  const SMTP_USER  = process.env.SMTP_USER
+  const SMTP_PASS  = process.env.SMTP_PASS
+  const SMTP_HOST  = process.env.SMTP_HOST  ?? 'smtp.gmail.com'
+  const SMTP_PORT  = Number(process.env.SMTP_PORT ?? 587)
+  const TO_EMAIL   = process.env.TO_EMAIL ?? process.env.SERVICE_INQUIRY_EMAIL ?? SMTP_USER
+  const ADMIN_WA   = process.env.WHATSAPP_ADMIN_NUMBER
 
+  // ── 1. Check vehicle availability ─────────────────────────────────────────
+  const pickupDate   = String(body.pickupDate   ?? '')
+  const vehicleType  = String(body.vehicleType  ?? '')
+  const customerName = String(body.fullName     ?? 'Customer')
+  const pickupCity   = String(body.pickupCity   ?? '')
+  const deliveryCity = String(body.deliveryCity ?? '')
+  const customerMobile = String(body.mobile     ?? '')
+
+  const availability = await checkVehicleAvailability(pickupDate, vehicleType)
+  console.log(`[booking] Availability check → available: ${availability.available}, count: ${availability.count}`)
+
+  // ── 2. WhatsApp to customer ────────────────────────────────────────────────
+  const customerMsg = availability.available
+    ? buildCustomerAvailableMsg({
+        name:        customerName,
+        pickup:      pickupCity,
+        delivery:    deliveryCity,
+        vehicleType,
+        date:        pickupDate,
+      })
+    : buildCustomerUnavailableMsg({
+        name:        customerName,
+        pickup:      pickupCity,
+        delivery:    deliveryCity,
+        vehicleType,
+        date:        pickupDate,
+      })
+
+  if (customerMobile) {
+    const customerWa = await sendWhatsAppMessage(customerMobile, customerMsg)
+    console.log(`[booking] Customer WA → ${customerWa.method} | sent: ${customerWa.sent}`)
+  }
+
+  // ── 3. WhatsApp to admin team ──────────────────────────────────────────────
+  const adminMsg = buildAdminNotificationMsg({
+    ref:            String(body.bookingRef  ?? '—'),
+    name:           customerName,
+    company:        String(body.companyName ?? ''),
+    mobile:         customerMobile,
+    email:          String(body.email       ?? ''),
+    pickup:         pickupCity,
+    delivery:       deliveryCity,
+    vehicleType,
+    goods:          String(body.goodsType   ?? ''),
+    date:           pickupDate,
+    available:      availability.available,
+    availableCount: availability.count,
+  })
+
+  if (ADMIN_WA) {
+    const adminWa = await sendWhatsAppMessage(ADMIN_WA, adminMsg)
+    console.log(`[booking] Admin WA → ${adminWa.method} | sent: ${adminWa.sent}`)
+  } else {
+    console.log('[booking] WHATSAPP_ADMIN_NUMBER not set — admin WA skipped')
+    console.log('[booking] Admin WA message:\n', adminMsg)
+  }
+
+  // ── 4. Email to admin (existing flow, unchanged) ───────────────────────────
   if (!SMTP_USER || !SMTP_PASS) {
     console.error('[booking] ❌ SMTP_USER or SMTP_PASS missing from .env.local')
     return NextResponse.json({ success: false, error: 'Email not configured' }, { status: 500 })
   }
 
-  // Gmail App Passwords must have no spaces
-  const smtpPass = SMTP_PASS.replace(/\s/g, '')
-
+  const smtpPass    = SMTP_PASS.replace(/\s/g, '')
   const transporter = nodemailer.createTransport({
     host:   SMTP_HOST,
     port:   SMTP_PORT,
@@ -81,72 +242,72 @@ export async function POST(req: NextRequest) {
     tls:    { rejectUnauthorized: false },
   })
 
-  const serviceType = String(body.serviceType ?? 'Booking')
-  const vehicle     = String(body.vehicleType ?? '')
-  const route       = `${body.pickupCity ?? ''} → ${body.deliveryCity ?? ''}`
-  const ref         = String(body.bookingRef ?? '')
-  const subject     = `[BGTS] New ${serviceType} | ${vehicle} | ${route} | Ref: ${ref}`
+  const vehicle = String(body.vehicleType  ?? '')
+  const route   = `${body.pickupCity ?? ''} → ${body.deliveryCity ?? ''}`
+  const ref     = String(body.bookingRef ?? '')
+  const svcType = String(body.serviceType ?? 'Booking')
+  const subject = `[BGTS] New ${svcType} | ${vehicle} | ${route} | Ref: ${ref}`
 
   try {
-    // Verify SMTP connection first
     await transporter.verify()
-    console.log('[booking] ✅ SMTP connection verified')
-
     const info = await transporter.sendMail({
       from:    `"BGTS Bookings" <${SMTP_USER}>`,
       to:      TO_EMAIL,
       replyTo: (body.email as string) ?? undefined,
       subject,
-      html:    buildHtml(body),
+      html:    buildHtml(body, availability.available, availability.count),
     })
     console.log('[booking] ✅ Email sent → to:', TO_EMAIL, '| id:', info.messageId)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[booking] ❌ SMTP error:', msg)
+    return NextResponse.json({ success: false, error: msg }, { status: 500 })
+  }
 
-  // ── Save to Supabase website_inquiries ──────────────────────────────────────
+  // ── 5. Save to Supabase website_inquiries ─────────────────────────────────
   try {
     const { getBgtsAdminClient } = await import('@/lib/supabase-bgts')
     const sb = getBgtsAdminClient()
-    const svcType   = String(body.serviceType ?? '')
-    const refStr    = String(body.bookingRef  ?? '')
-    const vehStr    = String(body.vehicleType ?? body.vehicle ?? '')
-    const isEV      =
-      svcType.toLowerCase().includes('ev')    ||
-      refStr.toUpperCase().startsWith('BGTSEV') ||
-      vehStr.toLowerCase().includes('ev')     ||
+    const svcTypeStr = String(body.serviceType ?? '')
+    const refStr     = String(body.bookingRef  ?? '')
+    const vehStr     = String(body.vehicleType ?? body.vehicle ?? '')
+    const isEV =
+      svcTypeStr.toLowerCase().includes('ev')     ||
+      refStr.toUpperCase().startsWith('BGTSEV')   ||
+      vehStr.toLowerCase().includes('ev')         ||
       vehStr.toLowerCase().includes('electric')
     const category =
-      isEV                                    ? 'EV'  :
-      svcType.toLowerCase().includes('ptl')   ? 'PTL' :
-      svcType.toLowerCase().includes('ftl')   ? 'FTL' : 'FTL'
+      isEV                                      ? 'EV'  :
+      svcTypeStr.toLowerCase().includes('ptl')  ? 'PTL' : 'FTL'
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (sb as any).from('website_inquiries').insert({
-      ref_no:               String(body.bookingRef ?? ''),
+      ref_no:               String(body.bookingRef        ?? ''),
       category,
-      source_form:          String(body.serviceType ?? ''),
-      full_name:            String(body.fullName       ?? ''),
-      company_name:         String(body.companyName    ?? '') || null,
-      mobile:               String(body.mobile         ?? ''),
-      email:                String(body.email          ?? '') || null,
-      origin_city:          String(body.pickupCity     ?? '') || null,
-      destination_city:     String(body.deliveryCity   ?? '') || null,
-      pickup_date:          String(body.pickupDate     ?? '') || null,
-      goods_type:           String(body.goodsType      ?? '') || null,
-      weight_range:         String(body.weightRange    ?? '') || null,
-      vehicle_type:         String(body.vehicleType    ?? '') || null,
-      no_of_packages:       body.numberOfPackages ? Number(body.numberOfPackages) : null,
-      additional_services:  String(body.additionalServices ?? '') || null,
+      source_form:          String(body.serviceType       ?? ''),
+      full_name:            String(body.fullName          ?? ''),
+      company_name:         String(body.companyName       ?? '') || null,
+      mobile:               customerMobile,
+      email:                String(body.email             ?? '') || null,
+      origin_city:          pickupCity    || null,
+      destination_city:     deliveryCity  || null,
+      pickup_date:          pickupDate    || null,
+      goods_type:           String(body.goodsType         ?? '') || null,
+      weight_range:         String(body.weightRange       ?? '') || null,
+      vehicle_type:         vehicleType   || null,
+      no_of_packages:       body.numberOfPackages  ? Number(body.numberOfPackages)  : null,
+      additional_services:  String(body.additionalServices  ?? '') || null,
       special_instructions: String(body.specialInstructions ?? '') || null,
       raw_payload:          body,
       status:               'NEW',
     })
   } catch (dbErr) {
-    // Non-fatal — email already sent
     console.warn('[booking] DB save failed (non-fatal):', dbErr)
   }
-    return NextResponse.json({ success: true, messageId: info.messageId, to: TO_EMAIL })
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err)
-    console.error('[booking] ❌ SMTP error:', msg)
-    // Return error so frontend can show a warning instead of false "Confirmed"
-    return NextResponse.json({ success: false, error: msg }, { status: 500 })
-  }
+
+  return NextResponse.json({
+    success:     true,
+    available:   availability.available,
+    fleetCount:  availability.count,
+  })
 }

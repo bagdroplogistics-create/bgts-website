@@ -205,6 +205,19 @@ export interface ApiError {
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
+// ── MVD Auto-booking (passed from Market Vehicle Booking → Market Vehicle Desk) ─
+export interface MvdAutoBooking {
+  id:           string
+  from_loc:     string
+  to_loc:       string
+  vehicle_type: string
+  material:     string
+  trip_date:    string
+  client_name:  string
+  phone:        string
+  company_name: string | null
+}
+
 // ── Website Inquiries (from public booking forms) ────────────────────────────
 
 export type InquiryStatus = 'NEW' | 'CONTACTED' | 'CONVERTED' | 'DROPPED'

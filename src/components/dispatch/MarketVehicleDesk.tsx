@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import type { MvdAutoBooking } from '@/types/dispatch'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface MvdAgent {
@@ -30,11 +31,36 @@ interface SearchMeta {
   total: number
 }
 
+interface OutreachRecord {
+  id?: string
+  agent_id: string
+  agent_name: string
+  agent_mobile: string
+  method: string
+  message_sent: string
+  logged_at: string
+  status: string
+}
+
+interface MvdBookingRecord {
+  id: string
+  trip_date: string
+  client_name: string
+  company_name: string | null
+  from_loc: string
+  to_loc: string
+  vehicle_type: string
+  material: string
+  phone: string
+  stage: string
+  created_at: string
+}
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 const VEHICLE_TYPES = [
   'Any / All Types',
   'LCV / Pickup',
-  'Taurus (22–24 ft)',
+  'Taurus (22-24 ft)',
   'Open Truck / Dala',
   'Container',
   'Trailer / Flatbed',
@@ -58,7 +84,7 @@ const REGIONS = [
 ]
 
 const ROUTE_VEHICLE_OPTIONS = [
-  'LCV / Pickup', 'Taurus (22–24 ft)', 'Open Truck / Dala', 'Container',
+  'LCV / Pickup', 'Taurus (22-24 ft)', 'Open Truck / Dala', 'Container',
   'Trailer / Flatbed', 'ODC / Heavy Lift / Low Bed', 'Crane', 'Tanker', 'Packers & Movers',
 ]
 
@@ -89,6 +115,10 @@ function statusBadge(status: string) {
   )
 }
 
+function fmtRef(id: string) {
+  return `MVD-${id.slice(0, 8).toUpperCase()}`
+}
+
 function buildMessages(
   from_city: string,
   to_city: string,
@@ -97,17 +127,19 @@ function buildMessages(
   pickup_date: string,
   agent: MvdAgent,
   language: string,
+  bookingRef?: string,
 ): { en: string; hi: string; gu: string } {
-  const agentName  = agent.contact_person || agent.company_name
-  const dateStr    = pickup_date || 'to be confirmed'
+  const agentName   = agent.contact_person || agent.company_name
+  const dateStr     = pickup_date || 'to be confirmed'
   const materialStr = material_type || 'general cargo'
-  const fleetLabel = agent.fleet_type === 'FLEET_OWNER' ? 'Fleet Owner' : agent.fleet_type === 'BROKER' ? 'Broker' : 'Transporter'
+  const fleetLabel  = agent.fleet_type === 'FLEET_OWNER' ? 'Fleet Owner' : agent.fleet_type === 'BROKER' ? 'Broker' : 'Transporter'
+  const refLine     = bookingRef ? `\nBooking Ref: ${bookingRef}` : ''
 
-  const en = `Dear ${agentName} (${fleetLabel}),\n\nWe have a transport requirement and would like your quote:\n\nRoute: ${from_city} → ${to_city}\nVehicle: ${vehicle_type}\nMaterial: ${materialStr}\nPickup Date: ${dateStr}\n\nKindly share your best rate for this movement at the earliest.\n\nThanks & Regards,\nBGTS Transport\n+91-XXXXXXXXXX`
+  const en = `Dear ${agentName} (${fleetLabel}),\n\nWe have a transport requirement and would like your quote:${refLine}\n\nRoute: ${from_city} → ${to_city}\nVehicle: ${vehicle_type}\nMaterial: ${materialStr}\nPickup Date: ${dateStr}\n\nKindly share your best rate for this movement at the earliest.\n\nThanks & Regards,\nBGTS Transport\n+91 63 5722 5722`
 
-  const hi = `प्रिय ${agentName} जी,\n\nहमें निम्न ट्रांसपोर्ट की आवश्यकता है। कृपया अपना सबसे अच्छा रेट बताएं:\n\nरूट: ${from_city} → ${to_city}\nवाहन: ${vehicle_type}\nमाल: ${materialStr}\nपिकअप तारीख: ${dateStr}\n\nधन्यवाद,\nBGTS Transport`
+  const hi = `प्रिय ${agentName} जी,\n\nहमें निम्न ट्रांसपोर्ट की आवश्यकता है। कृपया अपना सबसे अच्छा रेट बताएं:${refLine}\n\nरूट: ${from_city} → ${to_city}\nवाहन: ${vehicle_type}\nमाल: ${materialStr}\nपिकअप तारीख: ${dateStr}\n\nधन्यवाद,\nBGTS Transport`
 
-  const gu = `પ્રિય ${agentName} સાહેબ,\n\nઅમને નીચેની ટ્રાન્સપોર્ટ જરૂરી છે. કૃપા કરીને આપનો શ્રેષ્ઠ ભાવ જણાવો:\n\nરૂટ: ${from_city} → ${to_city}\nવાહન: ${vehicle_type}\nમાલ: ${materialStr}\nપિકઅપ તારીખ: ${dateStr}\n\nઆભાર,\nBGTS Transport`
+  const gu = `પ્રિય ${agentName} સાહેબ,\n\nઅમને નીચેની ટ્રાન્સપોર્ટ જરૂરી છે. કૃપા કરીને આપનો શ્રેષ્ઠ ભાવ જણાવો:${refLine}\n\nરૂટ: ${from_city} → ${to_city}\nવાહન: ${vehicle_type}\nમાલ: ${materialStr}\nપિકઅપ તારીખ: ${dateStr}\n\nઆભાર,\nBGTS Transport`
 
   return { en, hi, gu }
 }
@@ -129,7 +161,6 @@ function ProcessFlow() {
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>Inquiry → Allocation Flow</h2>
         <p style={{ color: '#666', fontSize: 14 }}>This is the path an inbound company inquiry takes through MVD — from Sales/BD raising it, to Operations finding and messaging the right agent, to the agent base growing on its own through self-registration.</p>
       </div>
-
       <div style={{ position: 'relative' }}>
         {steps.map((s, i) => (
           <div key={i} style={{ display: 'flex', gap: 16, marginBottom: 8 }}>
@@ -145,7 +176,6 @@ function ProcessFlow() {
           </div>
         ))}
       </div>
-
       <div style={{ marginTop: 24, background: '#f9f9f9', border: '1px dashed #c45c28', borderRadius: 10, padding: '16px 20px' }}>
         <div style={{ fontWeight: 700, fontSize: 14, color: '#c45c28', marginBottom: 6 }}>Parallel feed — Agent self-registration</div>
         <p style={{ color: '#555', fontSize: 13, margin: 0 }}>Independently of any single inquiry, agents register themselves through the Agent Portal — company, contact, mobile, city, vehicle types, routes covered. New registrations enter the same searchable pool immediately, tagged NEW until reviewed, growing the database without manual data entry.</p>
@@ -158,28 +188,41 @@ function ProcessFlow() {
 }
 
 // ── Sub-tab 01: Find Agent ────────────────────────────────────────────────────
-function FindAgent() {
-  const [form, setForm] = useState({
-    from_city: '',
-    to_city: '',
-    vehicle_type: 'Any / All Types',
-    agent_type: 'ALL',
-    material_type: '',
-    pickup_date: '',
-    name_search: '',
-    language: 'en',
-  })
-  const [loading, setLoading]   = useState(false)
-  const [agents, setAgents]     = useState<MvdAgent[]>([])
-  const [meta, setMeta]         = useState<SearchMeta | null>(null)
-  const [searched, setSearched] = useState(false)
-  const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [messages, setMessages] = useState<{ agent: MvdAgent; en: string; hi: string; gu: string }[]>([])
-  const [msgGenerated, setMsgGenerated] = useState(false)
-  const [saving, setSaving]     = useState(false)
-  const [copyStates, setCopyStates] = useState<Record<string, boolean>>({})
+interface FindAgentProps {
+  autoBooking?:           MvdAutoBooking | null
+  onAutoBookingConsumed?: () => void
+}
 
-  const handleSearch = async () => {
+const DEFAULT_FORM = {
+  from_city:     '',
+  to_city:       '',
+  vehicle_type:  'Any / All Types',
+  agent_type:    'ALL',
+  material_type: '',
+  pickup_date:   '',
+  name_search:   '',
+  language:      'en',
+}
+
+function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
+  const [form,         setForm]         = useState(DEFAULT_FORM)
+  const [loading,      setLoading]      = useState(false)
+  const [agents,       setAgents]       = useState<MvdAgent[]>([])
+  const [meta,         setMeta]         = useState<SearchMeta | null>(null)
+  const [searched,     setSearched]     = useState(false)
+  const [selected,     setSelected]     = useState<Set<string>>(new Set())
+  const [messages,     setMessages]     = useState<{ agent: MvdAgent; en: string; hi: string; gu: string }[]>([])
+  const [msgGenerated, setMsgGenerated] = useState(false)
+  const [saving,       setSaving]       = useState(false)
+  const [copyStates,   setCopyStates]   = useState<Record<string, boolean>>({})
+  const [activeBooking, setActiveBooking] = useState<MvdAutoBooking | null>(null)
+  const [outreachLog,  setOutreachLog]  = useState<Record<string, OutreachRecord[]>>({})
+  const [logSaving,    setLogSaving]    = useState<Record<string, boolean>>({})
+  const processedRef = useRef<string | null>(null)
+
+  // Core search function that accepts params directly (avoids stale closure)
+  const runSearch = useCallback(async (params: typeof DEFAULT_FORM) => {
+    if (!params.to_city && !params.from_city && !params.name_search) return
     setLoading(true)
     setSearched(false)
     setSelected(new Set())
@@ -187,14 +230,14 @@ function FindAgent() {
     setMsgGenerated(false)
     try {
       const res = await fetch('/api/dispatch/mvd/agents/search', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from_city:    form.from_city,
-          to_city:      form.to_city,
-          vehicle_type: form.vehicle_type === 'Any / All Types' ? 'ALL' : form.vehicle_type,
-          agent_type:   form.agent_type,
-          name_search:  form.name_search,
+          from_city:    params.from_city,
+          to_city:      params.to_city,
+          vehicle_type: params.vehicle_type === 'Any / All Types' ? 'ALL' : params.vehicle_type,
+          agent_type:   params.agent_type,
+          name_search:  params.name_search,
         }),
       })
       const json = await res.json()
@@ -206,25 +249,43 @@ function FindAgent() {
       setLoading(false)
       setSearched(true)
     }
-  }
+  }, [])
+
+  const handleSearch = useCallback(() => runSearch(form), [form, runSearch])
+
+  // Auto-populate + auto-search when a booking is pushed in
+  useEffect(() => {
+    if (!autoBooking || processedRef.current === autoBooking.id) return
+    processedRef.current = autoBooking.id
+    setActiveBooking(autoBooking)
+    const newForm = {
+      from_city:     autoBooking.from_loc,
+      to_city:       autoBooking.to_loc,
+      vehicle_type:  autoBooking.vehicle_type || 'Any / All Types',
+      agent_type:    'ALL',
+      material_type: autoBooking.material || '',
+      pickup_date:   autoBooking.trip_date || '',
+      name_search:   '',
+      language:      'en',
+    }
+    setForm(newForm)
+    onAutoBookingConsumed?.()
+    // Run search immediately with new values
+    if (autoBooking.to_loc || autoBooking.from_loc) {
+      runSearch(newForm)
+    }
+  }, [autoBooking, onAutoBookingConsumed, runSearch])
 
   const toggleSelect = (id: string) => {
-    setSelected(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
-  }
-
-  const selectAll = () => {
-    setSelected(new Set(agents.map(a => a.id)))
+    setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   }
 
   const generateMessages = async () => {
     const selectedAgents = agents.filter(a => selected.has(a.id))
+    const ref = activeBooking ? fmtRef(activeBooking.id) : undefined
     const msgs = selectedAgents.map(a => ({
       agent: a,
-      ...buildMessages(form.from_city, form.to_city, form.vehicle_type, form.material_type, form.pickup_date, a, form.language),
+      ...buildMessages(form.from_city, form.to_city, form.vehicle_type, form.material_type, form.pickup_date, a, form.language, ref),
     }))
     setMessages(msgs)
     setMsgGenerated(true)
@@ -234,18 +295,18 @@ function FindAgent() {
     try {
       const { en, hi, gu } = msgs[0] ?? { en: '', hi: '', gu: '' }
       await fetch('/api/dispatch/mvd/inquiries', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from_city:    form.from_city,
-          to_city:      form.to_city,
-          vehicle_type: form.vehicle_type,
+          from_city:     form.from_city,
+          to_city:       form.to_city,
+          vehicle_type:  form.vehicle_type,
           material_type: form.material_type || null,
-          pickup_date:  form.pickup_date || null,
-          agent_ids:    selectedAgents.map(a => a.id),
-          message_en:   en,
-          message_hi:   hi,
-          message_gu:   gu,
+          pickup_date:   form.pickup_date   || null,
+          agent_ids:     selectedAgents.map(a => a.id),
+          message_en:    en,
+          message_hi:    hi,
+          message_gu:    gu,
         }),
       })
     } catch (e) {
@@ -261,99 +322,127 @@ function FindAgent() {
     setTimeout(() => setCopyStates(prev => ({ ...prev, [key]: false })), 1800)
   }
 
+  const logOutreach = async (agent: MvdAgent, method: string, message: string) => {
+    const key = `${agent.id}-${method}`
+    setLogSaving(prev => ({ ...prev, [key]: true }))
+    try {
+      const res = await fetch('/api/dispatch/mvd/outreach', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mvd_booking_id: activeBooking?.id || null,
+          agent_id:       agent.id,
+          agent_name:     agent.company_name,
+          agent_mobile:   agent.mobile,
+          method,
+          message_sent:   message,
+        }),
+      })
+      const json = await res.json()
+      const record: OutreachRecord = {
+        id:           json.data?.id,
+        agent_id:     agent.id,
+        agent_name:   agent.company_name,
+        agent_mobile: agent.mobile,
+        method,
+        message_sent: message,
+        logged_at:    new Date().toISOString(),
+        status:       'SENT',
+      }
+      setOutreachLog(prev => ({ ...prev, [agent.id]: [...(prev[agent.id] ?? []), record] }))
+    } catch (e) {
+      console.error('Failed to log outreach:', e)
+    } finally {
+      setLogSaving(prev => ({ ...prev, [key]: false }))
+    }
+  }
+
   const getLangText = (msg: { en: string; hi: string; gu: string }) => {
-    if (form.language === 'en') return { texts: [{ label: 'English', text: msg.en }] }
-    if (form.language === 'hi') return { texts: [{ label: 'Hindi', text: msg.hi }] }
-    if (form.language === 'gu') return { texts: [{ label: 'Gujarati', text: msg.gu }] }
+    if (form.language === 'en')  return { texts: [{ label: 'English',   text: msg.en }] }
+    if (form.language === 'hi')  return { texts: [{ label: 'Hindi',     text: msg.hi }] }
+    if (form.language === 'gu')  return { texts: [{ label: 'Gujarati',  text: msg.gu }] }
     return { texts: [{ label: 'English', text: msg.en }, { label: 'Hindi', text: msg.hi }, { label: 'Gujarati', text: msg.gu }] }
   }
 
+  const INP: React.CSSProperties = { width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }
+  const LBL: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }
+
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: '20px 0' }}>
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '20px 0' }}>
+
+      {/* Auto-booking banner */}
+      {activeBooking && (
+        <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: '12px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 13, color: '#1d4ed8', marginBottom: 2 }}>
+              \u{1F4CB} Auto-loaded from Market Vehicle Booking
+            </div>
+            <div style={{ fontSize: 12, color: '#3b82f6' }}>
+              <strong>{fmtRef(activeBooking.id)}</strong>
+              {' — '}
+              {activeBooking.client_name}{activeBooking.company_name ? ` (${activeBooking.company_name})` : ''}
+              {' — '}
+              {activeBooking.from_loc} → {activeBooking.to_loc}
+              {' — '}
+              {activeBooking.vehicle_type}
+              {activeBooking.material ? ` — ${activeBooking.material}` : ''}
+              {activeBooking.trip_date ? ` — ${activeBooking.trip_date}` : ''}
+            </div>
+          </div>
+          <button
+            onClick={() => { setActiveBooking(null); setForm(DEFAULT_FORM); setAgents([]); setSearched(false); setMessages([]); setMsgGenerated(false); processedRef.current = null }}
+            style={{ background: 'none', border: '1px solid #bfdbfe', borderRadius: 5, padding: '4px 10px', fontSize: 11, color: '#3b82f6', cursor: 'pointer' }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
       {/* Search panel */}
       <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '20px 24px', marginBottom: 20 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: '#1a1a1a' }}>Find Agent — for an inbound inquiry</h3>
-        <p style={{ color: '#888', fontSize: 12, marginTop: -12, marginBottom: 16 }}>Enter the route and vehicle type from the inquiry. Region matching is approximate — always confirm exact lane coverage with the agent before allocating.</p>
+        <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#1a1a1a' }}>Find Agent — for an inbound inquiry</h3>
+        <p style={{ color: '#888', fontSize: 12, marginTop: 0, marginBottom: 16 }}>Enter the route and vehicle type from the inquiry. Region matching is approximate — always confirm exact lane coverage with the agent before allocating.</p>
 
-        {/* Name search */}
         <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Search by company / agent name (optional)</label>
-          <input
-            value={form.name_search}
-            onChange={e => setForm(p => ({ ...p, name_search: e.target.value }))}
-            placeholder="Type company name or contact person..."
-            style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }}
-          />
+          <label style={LBL}>Search by company / agent name (optional)</label>
+          <input value={form.name_search} onChange={e => setForm(p => ({ ...p, name_search: e.target.value }))} placeholder="Type company name or contact person..." style={INP} />
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>From (origin city)</label>
-            <input
-              value={form.from_city}
-              onChange={e => setForm(p => ({ ...p, from_city: e.target.value }))}
-              placeholder="e.g. Ahmedabad"
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }}
-            />
+            <label style={LBL}>From (origin city)</label>
+            <input value={form.from_city} onChange={e => setForm(p => ({ ...p, from_city: e.target.value }))} placeholder="e.g. Ahmedabad" style={INP} />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>To (destination city)</label>
-            <input
-              value={form.to_city}
-              onChange={e => setForm(p => ({ ...p, to_city: e.target.value }))}
-              placeholder="e.g. Mumbai"
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }}
-            />
+            <label style={LBL}>To (destination city)</label>
+            <input value={form.to_city} onChange={e => setForm(p => ({ ...p, to_city: e.target.value }))} placeholder="e.g. Mumbai" style={INP} />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Vehicle type required</label>
-            <select
-              value={form.vehicle_type}
-              onChange={e => setForm(p => ({ ...p, vehicle_type: e.target.value }))}
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, background: '#fff', boxSizing: 'border-box' }}
-            >
+            <label style={LBL}>Vehicle type required</label>
+            <select value={form.vehicle_type} onChange={e => setForm(p => ({ ...p, vehicle_type: e.target.value }))} style={{ ...INP, background: '#fff' }}>
               {VEHICLE_TYPES.map(v => <option key={v}>{v}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Agent type</label>
-            <select
-              value={form.agent_type}
-              onChange={e => setForm(p => ({ ...p, agent_type: e.target.value }))}
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, background: '#fff', boxSizing: 'border-box' }}
-            >
+            <label style={LBL}>Agent type</label>
+            <select value={form.agent_type} onChange={e => setForm(p => ({ ...p, agent_type: e.target.value }))} style={{ ...INP, background: '#fff' }}>
               {AGENT_TYPES.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Material type (for outreach message)</label>
-            <input
-              value={form.material_type}
-              onChange={e => setForm(p => ({ ...p, material_type: e.target.value }))}
-              placeholder="e.g. Industrial Materials, Pharma, FMCG..."
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }}
-            />
+            <label style={LBL}>Material type (for outreach message)</label>
+            <input value={form.material_type} onChange={e => setForm(p => ({ ...p, material_type: e.target.value }))} placeholder="e.g. Industrial Materials, Pharma, FMCG..." style={INP} />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Pickup date (optional)</label>
-            <input
-              type="date"
-              value={form.pickup_date}
-              onChange={e => setForm(p => ({ ...p, pickup_date: e.target.value }))}
-              style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }}
-            />
+            <label style={LBL}>Pickup date (optional)</label>
+            <input type="date" value={form.pickup_date} onChange={e => setForm(p => ({ ...p, pickup_date: e.target.value }))} style={INP} />
           </div>
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Message language</label>
+          <label style={LBL}>Message language</label>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-            {[
-              { v: 'en', l: 'English' },
-              { v: 'hi', l: 'Hindi (हिंदी)' },
-              { v: 'gu', l: 'Gujarati (ગુજરાતી)' },
-              { v: 'all', l: 'All three' },
-            ].map(({ v, l }) => (
+            {[{ v: 'en', l: 'English' }, { v: 'hi', l: 'Hindi (हिंदी)' }, { v: 'gu', l: 'Gujarati (ગુજરાતી)' }, { v: 'all', l: 'All three' }].map(({ v, l }) => (
               <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13 }}>
                 <input type="radio" name="lang" value={v} checked={form.language === v} onChange={() => setForm(p => ({ ...p, language: v }))} />
                 {l}
@@ -362,11 +451,7 @@ function FindAgent() {
           </div>
         </div>
 
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          style={{ background: loading ? '#999' : '#c45c28', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 28px', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}
-        >
+        <button onClick={handleSearch} disabled={loading} style={{ background: loading ? '#999' : '#c45c28', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 28px', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}>
           {loading ? 'Searching…' : 'Search Agents'}
         </button>
       </div>
@@ -381,16 +466,13 @@ function FindAgent() {
             </div>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
               {agents.length > 0 && (
-                <button onClick={selectAll} style={{ background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}>
+                <button onClick={() => setSelected(new Set(agents.map(a => a.id)))} style={{ background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}>
                   Select all shown
                 </button>
               )}
               <span style={{ fontSize: 12, color: '#666' }}><strong>{selected.size}</strong> agent(s) selected</span>
               {selected.size > 0 && (
-                <button
-                  onClick={generateMessages}
-                  style={{ background: '#c45c28', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
-                >
+                <button onClick={generateMessages} style={{ background: '#c45c28', color: '#fff', border: 'none', borderRadius: 6, padding: '7px 16px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
                   Generate inquiry messages →
                 </button>
               )}
@@ -424,13 +506,20 @@ function FindAgent() {
                       <td style={{ padding: '8px 10px' }}>
                         <input type="checkbox" checked={selected.has(a.id)} onChange={() => toggleSelect(a.id)} style={{ cursor: 'pointer' }} />
                       </td>
-                      <td style={{ padding: '8px 10px', fontWeight: 600 }}>{a.company_name}</td>
+                      <td style={{ padding: '8px 10px', fontWeight: 600 }}>
+                        {a.company_name}
+                        {outreachLog[a.id]?.length > 0 && (
+                          <span style={{ marginLeft: 6, background: '#dcfce7', color: '#166534', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10 }}>
+                            ✓ {outreachLog[a.id].length} sent
+                          </span>
+                        )}
+                      </td>
                       <td style={{ padding: '8px 10px', color: '#555' }}>{a.contact_person || '—'}</td>
                       <td style={{ padding: '8px 10px' }}>
                         <a href={`tel:${a.mobile}`} style={{ color: '#c45c28', fontWeight: 600, textDecoration: 'none' }}>{a.mobile}</a>
                       </td>
                       <td style={{ padding: '8px 10px', color: '#555' }}>{a.city}{a.state ? `, ${a.state}` : ''}</td>
-                      <td style={{ padding: '8px 10px', color: '#555', fontSize: 12 }}>{a.fleet_type.replace('_', ' ')}</td>
+                      <td style={{ padding: '8px 10px', color: '#555', fontSize: 12 }}>{a.fleet_type.replace(/_/g, ' ')}</td>
                       <td style={{ padding: '8px 10px' }}>{gradeBadge(a.grade)}</td>
                       <td style={{ padding: '8px 10px', color: '#555' }}>{a.reliability_score}</td>
                       <td style={{ padding: '8px 10px' }}>{statusBadge(a.status)}</td>
@@ -447,39 +536,82 @@ function FindAgent() {
       {/* Generated messages */}
       {msgGenerated && messages.length > 0 && (
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '20px 24px' }}>
-          <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>Inquiry Messages — Ready to Send</div>
-          {saving && <div style={{ fontSize: 12, color: '#888', marginBottom: 10 }}>Saving inquiry to database…</div>}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <div style={{ fontWeight: 700, fontSize: 15 }}>
+              Inquiry Messages — Ready to Send
+              {activeBooking && (
+                <span style={{ marginLeft: 10, fontSize: 12, color: '#6b7280', fontWeight: 400 }}>
+                  Booking ref: <strong style={{ color: '#1d4ed8' }}>{fmtRef(activeBooking.id)}</strong>
+                </span>
+              )}
+            </div>
+            {saving && <div style={{ fontSize: 12, color: '#888' }}>Saving inquiry…</div>}
+          </div>
+
           {messages.map((m, i) => {
             const { texts } = getLangText(m)
+            const agentLog  = outreachLog[m.agent.id] ?? []
             return (
-              <div key={m.agent.id} style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: '14px 16px', marginBottom: 12 }}>
-                <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 8, color: '#1a1a1a' }}>
-                  #{i + 1} — {m.agent.company_name} · {m.agent.mobile}
+              <div key={m.agent.id} style={{ border: '1px solid #f0f0f0', borderRadius: 8, padding: '14px 16px', marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10, flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: '#1a1a1a' }}>
+                    #{i + 1} — {m.agent.company_name} · {m.agent.mobile}
+                  </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <a
+                      href={`https://wa.me/${m.agent.mobile.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(texts[0]?.text ?? '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ background: '#25d366', color: '#fff', border: 'none', borderRadius: 5, padding: '5px 12px', fontSize: 12, textDecoration: 'none', display: 'inline-block', fontWeight: 600 }}
+                    >
+                      \u{1F4F1} WhatsApp
+                    </a>
+                    <button
+                      disabled={logSaving[`${m.agent.id}-whatsapp`]}
+                      onClick={() => logOutreach(m.agent, 'whatsapp', texts[0]?.text ?? '')}
+                      style={{ background: agentLog.some(r => r.method === 'whatsapp') ? '#f0fdf4' : '#f3f4f6', color: agentLog.some(r => r.method === 'whatsapp') ? '#166534' : '#374151', border: `1px solid ${agentLog.some(r => r.method === 'whatsapp') ? '#bbf7d0' : '#d1d5db'}`, borderRadius: 5, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      {logSaving[`${m.agent.id}-whatsapp`] ? '…' : agentLog.some(r => r.method === 'whatsapp') ? '✓ WA Logged' : 'Log WA Sent'}
+                    </button>
+                    <button
+                      disabled={logSaving[`${m.agent.id}-phone`]}
+                      onClick={() => logOutreach(m.agent, 'phone', texts[0]?.text ?? '')}
+                      style={{ background: agentLog.some(r => r.method === 'phone') ? '#f0fdf4' : '#f3f4f6', color: agentLog.some(r => r.method === 'phone') ? '#166534' : '#374151', border: `1px solid ${agentLog.some(r => r.method === 'phone') ? '#bbf7d0' : '#d1d5db'}`, borderRadius: 5, padding: '5px 12px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                    >
+                      {logSaving[`${m.agent.id}-phone`] ? '…' : agentLog.some(r => r.method === 'phone') ? '✓ Call Logged' : 'Log Call'}
+                    </button>
+                  </div>
                 </div>
+
+                {/* Message text blocks */}
                 {texts.map(({ label, text }) => (
                   <div key={label} style={{ marginBottom: 10 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#888', textTransform: 'uppercase' }}>{label}</span>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <button
-                          onClick={() => copyText(`${m.agent.id}-${label}`, text)}
-                          style={{ background: copyStates[`${m.agent.id}-${label}`] ? '#16a34a' : '#f3f4f6', color: copyStates[`${m.agent.id}-${label}`] ? '#fff' : '#374151', border: '1px solid #d1d5db', borderRadius: 5, padding: '3px 12px', fontSize: 11, cursor: 'pointer' }}
-                        >
-                          {copyStates[`${m.agent.id}-${label}`] ? '✓ Copied' : 'Copy'}
-                        </button>
-                        <a
-                          href={`https://wa.me/${m.agent.mobile.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(text)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ background: '#25d366', color: '#fff', border: 'none', borderRadius: 5, padding: '3px 12px', fontSize: 11, textDecoration: 'none', display: 'inline-block' }}
-                        >
-                          WhatsApp
-                        </a>
-                      </div>
+                      <button
+                        onClick={() => copyText(`${m.agent.id}-${label}`, text)}
+                        style={{ background: copyStates[`${m.agent.id}-${label}`] ? '#16a34a' : '#f3f4f6', color: copyStates[`${m.agent.id}-${label}`] ? '#fff' : '#374151', border: '1px solid #d1d5db', borderRadius: 5, padding: '3px 12px', fontSize: 11, cursor: 'pointer' }}
+                      >
+                        {copyStates[`${m.agent.id}-${label}`] ? '✓ Copied' : 'Copy'}
+                      </button>
                     </div>
                     <pre style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: 6, padding: '10px 12px', fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0, fontFamily: 'inherit' }}>{text}</pre>
                   </div>
                 ))}
+
+                {/* Outreach activity log for this agent */}
+                {agentLog.length > 0 && (
+                  <div style={{ marginTop: 10, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 7, padding: '10px 14px' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginBottom: 6, textTransform: 'uppercase' }}>Outreach Activity</div>
+                    {agentLog.map((r, ri) => (
+                      <div key={ri} style={{ display: 'flex', gap: 10, alignItems: 'center', fontSize: 12, color: '#374151', marginBottom: ri < agentLog.length - 1 ? 4 : 0 }}>
+                        <span style={{ background: '#dcfce7', color: '#166534', borderRadius: 4, padding: '1px 7px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase' }}>{r.method}</span>
+                        <span>{new Date(r.logged_at).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                        <span style={{ color: '#16a34a', fontWeight: 600 }}>{r.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )
           })}
@@ -492,25 +624,17 @@ function FindAgent() {
 // ── Sub-tab 02: Agent Portal ──────────────────────────────────────────────────
 function AgentPortal() {
   const [form, setForm] = useState({
-    company_name: '',
-    contact_person: '',
-    mobile: '',
-    city: '',
-    state: '',
-    fleet_type: 'BROKER',
-    vehicle_types: [] as string[],
-    routes_covered: [] as string[],
+    company_name: '', contact_person: '', mobile: '', city: '', state: '',
+    fleet_type: 'BROKER', vehicle_types: [] as string[], routes_covered: [] as string[],
   })
-  const [saving, setSaving]       = useState(false)
-  const [saveMsg, setSaveMsg]     = useState('')
-  const [saveErr, setSaveErr]     = useState('')
-
-  const [lookupMobile, setLookupMobile] = useState('')
-  const [lookupResult, setLookupResult] = useState<MvdAgent | null>(null)
-  const [lookupErr, setLookupErr]       = useState('')
+  const [saving,  setSaving]  = useState(false)
+  const [saveMsg, setSaveMsg] = useState('')
+  const [saveErr, setSaveErr] = useState('')
+  const [lookupMobile,  setLookupMobile]  = useState('')
+  const [lookupResult,  setLookupResult]  = useState<MvdAgent | null>(null)
+  const [lookupErr,     setLookupErr]     = useState('')
   const [lookupLoading, setLookupLoading] = useState(false)
-
-  const [recentAgents, setRecentAgents] = useState<MvdAgent[]>([])
+  const [recentAgents,  setRecentAgents]  = useState<MvdAgent[]>([])
 
   const loadRecent = useCallback(async () => {
     try {
@@ -522,48 +646,20 @@ function AgentPortal() {
 
   useEffect(() => { loadRecent() }, [loadRecent])
 
-  const toggleVehicle = (v: string) => {
-    setForm(p => ({
-      ...p,
-      vehicle_types: p.vehicle_types.includes(v)
-        ? p.vehicle_types.filter(x => x !== v)
-        : [...p.vehicle_types, v],
-    }))
-  }
-
-  const toggleRoute = (r: string) => {
-    setForm(p => ({
-      ...p,
-      routes_covered: p.routes_covered.includes(r)
-        ? p.routes_covered.filter(x => x !== r)
-        : [...p.routes_covered, r],
-    }))
-  }
+  const toggleVehicle = (v: string) => setForm(p => ({ ...p, vehicle_types: p.vehicle_types.includes(v) ? p.vehicle_types.filter(x => x !== v) : [...p.vehicle_types, v] }))
+  const toggleRoute   = (r: string) => setForm(p => ({ ...p, routes_covered: p.routes_covered.includes(r) ? p.routes_covered.filter(x => x !== r) : [...p.routes_covered, r] }))
 
   const handleRegister = async () => {
-    if (!form.company_name.trim() || !form.mobile.trim() || !form.city.trim()) {
-      setSaveErr('Company name, mobile and city are required.')
-      return
-    }
+    if (!form.company_name.trim() || !form.mobile.trim() || !form.city.trim()) { setSaveErr('Company name, mobile and city are required.'); return }
     setSaving(true); setSaveErr(''); setSaveMsg('')
     try {
-      const res  = await fetch('/api/dispatch/mvd/agents', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
+      const res  = await fetch('/api/dispatch/mvd/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
       const json = await res.json()
       if (json.error) throw new Error(json.error)
       setSaveMsg(json.isUpdate ? 'Listing updated successfully.' : 'Registration successful! You are now in the BGTS search pool.')
-      if (!json.isUpdate) {
-        setForm({ company_name: '', contact_person: '', mobile: '', city: '', state: '', fleet_type: 'BROKER', vehicle_types: [], routes_covered: [] })
-      }
+      if (!json.isUpdate) setForm({ company_name: '', contact_person: '', mobile: '', city: '', state: '', fleet_type: 'BROKER', vehicle_types: [], routes_covered: [] })
       loadRecent()
-    } catch (e: unknown) {
-      setSaveErr(e instanceof Error ? e.message : String(e))
-    } finally {
-      setSaving(false)
-    }
+    } catch (e: unknown) { setSaveErr(e instanceof Error ? e.message : String(e)) } finally { setSaving(false) }
   }
 
   const handleLookup = async () => {
@@ -574,112 +670,69 @@ function AgentPortal() {
       const json = await res.json()
       if (json.error) { setLookupErr(json.error); return }
       setLookupResult(json.data)
-    } catch (e: unknown) {
-      setLookupErr(String(e))
-    } finally {
-      setLookupLoading(false)
-    }
+    } catch (e: unknown) { setLookupErr(String(e)) } finally { setLookupLoading(false) }
   }
+
+  const INP: React.CSSProperties = { width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }
+  const LBL: React.CSSProperties = { fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }
 
   return (
     <div style={{ maxWidth: 860, margin: '0 auto', padding: '20px 0' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
-
-        {/* Registration form */}
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '20px 24px' }}>
           <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#1a1a1a' }}>Register / Update your listing</h3>
           <p style={{ color: '#888', fontSize: 12, marginBottom: 16 }}>Self-service registration. Registering adds you to the BGTS search pool for matching inquiries on your route and vehicle type.</p>
-
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Company / Transporter name *</label>
-            <input value={form.company_name} onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))} placeholder="ABC Transport Co." style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }} />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Contact person</label>
-            <input value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} placeholder="Ramesh Patel" style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }} />
-          </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>Mobile number (used as your ID) *</label>
-            <input value={form.mobile} onChange={e => setForm(p => ({ ...p, mobile: e.target.value }))} placeholder="9876543210" style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }} />
-          </div>
+          <div style={{ marginBottom: 12 }}><label style={LBL}>Company / Transporter name *</label><input value={form.company_name} onChange={e => setForm(p => ({ ...p, company_name: e.target.value }))} placeholder="ABC Transport Co." style={INP} /></div>
+          <div style={{ marginBottom: 12 }}><label style={LBL}>Contact person</label><input value={form.contact_person} onChange={e => setForm(p => ({ ...p, contact_person: e.target.value }))} placeholder="Ramesh Patel" style={INP} /></div>
+          <div style={{ marginBottom: 12 }}><label style={LBL}>Mobile number (used as your ID) *</label><input value={form.mobile} onChange={e => setForm(p => ({ ...p, mobile: e.target.value }))} placeholder="9876543210" style={INP} /></div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 12 }}>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>City / Base location *</label>
-              <input value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder="Ahmedabad" style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }} />
-            </div>
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 4 }}>State</label>
-              <input value={form.state} onChange={e => setForm(p => ({ ...p, state: e.target.value }))} placeholder="Gujarat" style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14, boxSizing: 'border-box' }} />
-            </div>
+            <div><label style={LBL}>City / Base location *</label><input value={form.city} onChange={e => setForm(p => ({ ...p, city: e.target.value }))} placeholder="Ahmedabad" style={INP} /></div>
+            <div><label style={LBL}>State</label><input value={form.state} onChange={e => setForm(p => ({ ...p, state: e.target.value }))} placeholder="Gujarat" style={INP} /></div>
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Fleet type</label>
+            <label style={LBL}>Fleet type</label>
             <div style={{ display: 'flex', gap: 16 }}>
               {[['FLEET_OWNER','Fleet Owner'],['BROKER','Broker'],['FLEET_OWNER_BROKER','Fleet Owner / Broker']].map(([v,l]) => (
                 <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontSize: 13 }}>
-                  <input type="radio" name="fleet_type" value={v} checked={form.fleet_type === v} onChange={() => setForm(p => ({ ...p, fleet_type: v }))} />
-                  {l}
+                  <input type="radio" name="fleet_type" value={v} checked={form.fleet_type === v} onChange={() => setForm(p => ({ ...p, fleet_type: v }))} />{l}
                 </label>
               ))}
             </div>
           </div>
           <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Vehicle types you can provide</label>
+            <label style={LBL}>Vehicle types you can provide</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {ROUTE_VEHICLE_OPTIONS.map(v => (
                 <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12, background: form.vehicle_types.includes(v) ? '#fef7f3' : '#f9fafb', border: `1px solid ${form.vehicle_types.includes(v) ? '#c45c28' : '#e5e7eb'}`, borderRadius: 5, padding: '3px 8px' }}>
-                  <input type="checkbox" checked={form.vehicle_types.includes(v)} onChange={() => toggleVehicle(v)} style={{ margin: 0 }} />
-                  {v}
+                  <input type="checkbox" checked={form.vehicle_types.includes(v)} onChange={() => toggleVehicle(v)} style={{ margin: 0 }} />{v}
                 </label>
               ))}
             </div>
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#555', display: 'block', marginBottom: 6 }}>Routes you cover</label>
+            <label style={LBL}>Routes you cover</label>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {REGIONS.map(r => (
                 <label key={r} style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: 12, background: form.routes_covered.includes(r) ? '#fef7f3' : '#f9fafb', border: `1px solid ${form.routes_covered.includes(r) ? '#c45c28' : '#e5e7eb'}`, borderRadius: 5, padding: '3px 8px' }}>
-                  <input type="checkbox" checked={form.routes_covered.includes(r)} onChange={() => toggleRoute(r)} style={{ margin: 0 }} />
-                  {r}
+                  <input type="checkbox" checked={form.routes_covered.includes(r)} onChange={() => toggleRoute(r)} style={{ margin: 0 }} />{r}
                 </label>
               ))}
             </div>
           </div>
-
           {saveErr && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '8px 12px', fontSize: 13, color: '#b91c1c', marginBottom: 10 }}>{saveErr}</div>}
           {saveMsg && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 6, padding: '8px 12px', fontSize: 13, color: '#15803d', marginBottom: 10 }}>{saveMsg}</div>}
-
-          <button
-            onClick={handleRegister}
-            disabled={saving}
-            style={{ background: saving ? '#999' : '#c45c28', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 24px', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}
-          >
+          <button onClick={handleRegister} disabled={saving} style={{ background: saving ? '#999' : '#c45c28', color: '#fff', border: 'none', borderRadius: 7, padding: '10px 24px', fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>
             {saving ? 'Saving…' : 'Register / Save listing'}
           </button>
-
           <p style={{ color: '#aaa', fontSize: 11, marginTop: 10 }}>This portal identifies agents by mobile number — it is not a secure login. Before production rollout, add OTP/mobile verification.</p>
         </div>
 
-        {/* Right column: lookup + recent */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Lookup */}
           <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '20px 24px' }}>
             <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 12, color: '#1a1a1a' }}>Look up your listing</h3>
             <div style={{ display: 'flex', gap: 8 }}>
-              <input
-                value={lookupMobile}
-                onChange={e => setLookupMobile(e.target.value)}
-                placeholder="Enter your registered mobile number"
-                onKeyDown={e => e.key === 'Enter' && handleLookup()}
-                style={{ flex: 1, border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14 }}
-              />
-              <button
-                onClick={handleLookup}
-                disabled={lookupLoading}
-                style={{ background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
-              >
-                {lookupLoading ? '…' : 'Find my listing'}
-              </button>
+              <input value={lookupMobile} onChange={e => setLookupMobile(e.target.value)} placeholder="Enter your registered mobile number" onKeyDown={e => e.key === 'Enter' && handleLookup()} style={{ flex: 1, border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 12px', fontSize: 14 }} />
+              <button onClick={handleLookup} disabled={lookupLoading} style={{ background: '#1a1a1a', color: '#fff', border: 'none', borderRadius: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>{lookupLoading ? '…' : 'Find my listing'}</button>
             </div>
             {lookupErr && <div style={{ marginTop: 10, color: '#b91c1c', fontSize: 13 }}>{lookupErr}</div>}
             {lookupResult && (
@@ -689,21 +742,15 @@ function AgentPortal() {
                 <div style={{ color: '#555' }}>{lookupResult.city}{lookupResult.state ? `, ${lookupResult.state}` : ''}</div>
                 <div style={{ marginTop: 6, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                   <span style={{ background: '#f3f4f6', color: '#374151', padding: '2px 8px', borderRadius: 4, fontSize: 11 }}>{lookupResult.fleet_type.replace(/_/g, ' ')}</span>
-                  {gradeBadge(lookupResult.grade)}
-                  {statusBadge(lookupResult.status)}
+                  {gradeBadge(lookupResult.grade)}{statusBadge(lookupResult.status)}
                 </div>
-                {lookupResult.vehicle_types?.length > 0 && (
-                  <div style={{ marginTop: 6, color: '#666', fontSize: 12 }}><strong>Vehicles:</strong> {lookupResult.vehicle_types.join(', ')}</div>
-                )}
-                {lookupResult.routes_covered?.length > 0 && (
-                  <div style={{ color: '#666', fontSize: 12 }}><strong>Routes:</strong> {lookupResult.routes_covered.join(', ')}</div>
-                )}
+                {lookupResult.vehicle_types?.length > 0 && <div style={{ marginTop: 6, color: '#666', fontSize: 12 }}><strong>Vehicles:</strong> {lookupResult.vehicle_types.join(', ')}</div>}
+                {lookupResult.routes_covered?.length > 0 && <div style={{ color: '#666', fontSize: 12 }}><strong>Routes:</strong> {lookupResult.routes_covered.join(', ')}</div>}
                 <div style={{ color: '#aaa', fontSize: 11, marginTop: 6 }}>Registered {new Date(lookupResult.created_at).toLocaleDateString('en-IN')}</div>
               </div>
             )}
           </div>
 
-          {/* Recent */}
           <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: '20px 24px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Recently registered</h3>
@@ -734,11 +781,129 @@ function AgentPortal() {
   )
 }
 
+// ── Sub-tab 03: Pending Bookings ──────────────────────────────────────────────
+interface PendingBookingsProps {
+  onLoadBooking: (b: MvdAutoBooking) => void
+}
+
+function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
+  const [bookings,  setBookings]  = useState<MvdBookingRecord[]>([])
+  const [loading,   setLoading]   = useState(false)
+  const [refreshed, setRefreshed] = useState(false)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res  = await fetch('/api/dispatch/mvd/bookings')
+      const json = await res.json()
+      setBookings(json.data ?? [])
+      setRefreshed(true)
+    } catch (e) { console.error(e) } finally { setLoading(false) }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const stageColor: Record<string, string> = {
+    BOOKING_RECEIVED: '#fef3c7',
+    BOOKING_CONFIRMED: '#d1fae5',
+    CANCELLED: '#fee2e2',
+  }
+
+  return (
+    <div style={{ maxWidth: 960, margin: '0 auto', padding: '20px 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Market Vehicle Booking Queue</h3>
+          <p style={{ fontSize: 12, color: '#888', margin: '4px 0 0' }}>All bookings submitted via the Market Vehicle Booking tab. Click “Open in Find Agent” to auto-load the booking into the agent search.</p>
+        </div>
+        <button onClick={load} disabled={loading} style={{ background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 6, padding: '7px 14px', fontSize: 12, cursor: 'pointer' }}>
+          {loading ? 'Loading…' : '↻ Refresh'}
+        </button>
+      </div>
+
+      {!refreshed && loading ? (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa' }}>Loading bookings…</div>
+      ) : bookings.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px 0', color: '#aaa', background: '#f9fafb', borderRadius: 10, border: '1px dashed #e5e7eb' }}>
+          <div style={{ fontSize: 32, marginBottom: 10 }}>\u{1F4CB}</div>
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>No market vehicle bookings yet</div>
+          <div style={{ fontSize: 13 }}>Bookings submitted from the Market Vehicle Booking tab will appear here.</div>
+        </div>
+      ) : (
+        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, overflow: 'hidden' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Ref</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Date</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Client</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Route</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Vehicle</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Material</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Status</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {bookings.map((b, idx) => (
+                <tr key={b.id} style={{ borderBottom: '1px solid #f0f0f0', background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                  <td style={{ padding: '10px 14px', fontWeight: 700, color: '#1d4ed8', fontSize: 12 }}>{fmtRef(b.id)}</td>
+                  <td style={{ padding: '10px 14px', color: '#555' }}>{b.trip_date}</td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <div style={{ fontWeight: 600 }}>{b.client_name}</div>
+                    {b.company_name && <div style={{ fontSize: 11, color: '#888' }}>{b.company_name}</div>}
+                  </td>
+                  <td style={{ padding: '10px 14px', color: '#374151' }}>
+                    <span style={{ fontWeight: 600 }}>{b.from_loc}</span>
+                    <span style={{ color: '#aaa', margin: '0 4px' }}>→</span>
+                    <span style={{ fontWeight: 600 }}>{b.to_loc}</span>
+                  </td>
+                  <td style={{ padding: '10px 14px', color: '#555', fontSize: 12 }}>{b.vehicle_type}</td>
+                  <td style={{ padding: '10px 14px', color: '#555', fontSize: 12 }}>{b.material}</td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <span style={{ background: stageColor[b.stage] ?? '#f3f4f6', color: '#374151', fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 4 }}>
+                      {b.stage.replace(/_/g, ' ')}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <button
+                      onClick={() => onLoadBooking({
+                        id:           b.id,
+                        from_loc:     b.from_loc,
+                        to_loc:       b.to_loc,
+                        vehicle_type: b.vehicle_type,
+                        material:     b.material,
+                        trip_date:    b.trip_date,
+                        client_name:  b.client_name,
+                        phone:        b.phone,
+                        company_name: b.company_name,
+                      })}
+                      style={{ background: '#c45c28', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      Open in Find Agent →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
-export default function MarketVehicleDesk() {
-  const [activeTab,   setActiveTab]   = useState<'flow' | 'find' | 'portal'>('flow')
-  const [agentCount,  setAgentCount]  = useState<number | null>(null)
-  const ROUTE_COUNT = 44 // entries in ROUTE_MATRIX
+interface MarketVehicleDeskProps {
+  autoBooking?:           MvdAutoBooking | null
+  onAutoBookingConsumed?: () => void
+}
+
+export default function MarketVehicleDesk({ autoBooking, onAutoBookingConsumed }: MarketVehicleDeskProps) {
+  const [activeTab,  setActiveTab]  = useState<'flow' | 'find' | 'portal' | 'queue'>('flow')
+  const [agentCount, setAgentCount] = useState<number | null>(null)
+  const [findAgentBooking, setFindAgentBooking] = useState<MvdAutoBooking | null>(null)
+  const ROUTE_COUNT = 44
 
   useEffect(() => {
     fetch('/api/dispatch/mvd/agents')
@@ -747,10 +912,23 @@ export default function MarketVehicleDesk() {
       .catch(() => setAgentCount(0))
   }, [])
 
-  const tabs: { id: 'flow' | 'find' | 'portal'; label: string }[] = [
+  // When autoBooking arrives from DispatchShell, switch to Find Agent tab
+  useEffect(() => {
+    if (!autoBooking) return
+    setFindAgentBooking(autoBooking)
+    setActiveTab('find')
+  }, [autoBooking])
+
+  const handleLoadFromQueue = (b: MvdAutoBooking) => {
+    setFindAgentBooking(b)
+    setActiveTab('find')
+  }
+
+  const tabs: { id: 'flow' | 'find' | 'portal' | 'queue'; label: string }[] = [
     { id: 'flow',   label: '00  Process Flow' },
     { id: 'find',   label: '01  Find Agent (Ops)' },
     { id: 'portal', label: '02  Agent Portal' },
+    { id: 'queue',  label: '03  Booking Queue' },
   ]
 
   return (
@@ -772,22 +950,7 @@ export default function MarketVehicleDesk() {
       {/* Sub-tabs */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: 20 }}>
         {tabs.map(t => (
-          <button
-            key={t.id}
-            onClick={() => setActiveTab(t.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              borderBottom: activeTab === t.id ? '2px solid #c45c28' : '2px solid transparent',
-              marginBottom: -2,
-              padding: '10px 20px',
-              fontSize: 13,
-              fontWeight: activeTab === t.id ? 700 : 500,
-              color: activeTab === t.id ? '#c45c28' : '#666',
-              cursor: 'pointer',
-              transition: 'color 0.15s',
-            }}
-          >
+          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: 'none', border: 'none', borderBottom: activeTab === t.id ? '2px solid #c45c28' : '2px solid transparent', marginBottom: -2, padding: '10px 20px', fontSize: 13, fontWeight: activeTab === t.id ? 700 : 500, color: activeTab === t.id ? '#c45c28' : '#666', cursor: 'pointer', transition: 'color 0.15s' }}>
             {t.label}
           </button>
         ))}
@@ -795,8 +958,14 @@ export default function MarketVehicleDesk() {
 
       {/* Content */}
       {activeTab === 'flow'   && <ProcessFlow />}
-      {activeTab === 'find'   && <FindAgent />}
+      {activeTab === 'find'   && (
+        <FindAgent
+          autoBooking={findAgentBooking}
+          onAutoBookingConsumed={() => { setFindAgentBooking(null); onAutoBookingConsumed?.() }}
+        />
+      )}
       {activeTab === 'portal' && <AgentPortal />}
+      {activeTab === 'queue'  && <PendingBookings onLoadBooking={handleLoadFromQueue} />}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import type { MvdAutoBooking } from '@/types/dispatch'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const MVD_VEHICLE_TYPES = [
@@ -46,7 +47,7 @@ const EMPTY: MvdBookingForm = {
 }
 
 interface Props {
-  onSuccess: () => void
+  onSuccess: (booking: MvdAutoBooking) => void
 }
 
 // ── Style constants ───────────────────────────────────────────────────────────
@@ -143,8 +144,19 @@ export function MarketVehicleBookingForm({ onSuccess }: Props) {
       const json = await res.json()
       if (json.error) throw new Error(json.error)
       setSuccess(true)
+      const created: MvdAutoBooking = {
+        id:           json.data?.id ?? '',
+        from_loc:     form.from_loc,
+        to_loc:       form.to_loc,
+        vehicle_type: form.vehicle_type,
+        material:     form.material,
+        trip_date:    form.trip_date,
+        client_name:  form.client_name,
+        phone:        form.phone,
+        company_name: form.company_name || null,
+      }
       setForm({ ...EMPTY, trip_date: today })
-      setTimeout(() => { setSuccess(false); onSuccess() }, 1500)
+      setTimeout(() => { setSuccess(false); onSuccess(created) }, 1200)
     } catch (err2) {
       setErr(err2 instanceof Error ? err2.message : 'Failed to create booking')
     } finally {
