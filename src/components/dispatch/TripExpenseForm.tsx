@@ -7,11 +7,16 @@ interface Booking {
   client_name: string; company_name: string | null; vehicle_id: string
   vehicle?: { reg_no: string }
 }
+interface MvdBooking {
+  id: string; trip_date: string; from_loc: string; to_loc: string
+  client_name: string; company_name: string | null; vehicle_type: string
+}
 
 interface TripExpForm {
   bill_no:          string
   trip_no:          string
   booking_id:       string
+  mvd_booking_id:   string
   vehicle_id:       string
   vehicle_no:       string
   trip_date:        string
@@ -50,7 +55,7 @@ interface TripExpForm {
 }
 
 const EMPTY: TripExpForm = {
-  bill_no:'', trip_no:'', booking_id:'', vehicle_id:'', vehicle_no:'', trip_date:'',
+  bill_no:'', trip_no:'', booking_id:'', mvd_booking_id:'', vehicle_id:'', vehicle_no:'', trip_date:'',
   leg1_date:'', leg1_from:'', leg1_to:'', leg1_lr_no:'', leg1_qty:'',
   leg2_date:'', leg2_from:'', leg2_to:'', leg2_lr_no:'', leg2_qty:'',
   opening_kms:'', closing_kms:'',
@@ -82,16 +87,18 @@ const REQ: React.CSSProperties = { color:'#e03030', marginLeft:2 }
 export function TripExpenseForm() {
   const today = new Date().toISOString().slice(0, 10)
   const [form,     setForm]     = useState<TripExpForm>({ ...EMPTY, trip_date: today })
-  const [vehicles, setVehicles] = useState<Vehicle[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
+  const [vehicles,    setVehicles]    = useState<Vehicle[]>([])
+  const [bookings,    setBookings]    = useState<Booking[]>([])
+  const [mvdBookings, setMvdBookings] = useState<MvdBooking[]>([])
   const [saving,   setSaving]   = useState(false)
   const [err,      setErr]      = useState<string|null>(null)
   const [success,  setSuccess]  = useState(false)
 
   useEffect(() => {
-    // Load vehicles + bookings
+    // Load vehicles + fleet bookings + market vehicle bookings
     fetch('/api/vehicles').then(r => r.json()).then(j => setVehicles(j.data ?? j ?? []))
     fetch('/api/dispatch/bookings').then(r => r.json()).then(j => setBookings(j.data ?? j ?? []))
+    fetch('/api/dispatch/mvd/bookings').then(r => r.json()).then(j => setMvdBookings(j.data ?? j ?? []))
 
     // Auto-fill next sequential Bill No and LR Nos
     fetch('/api/dispatch/trip-expenses?next=true')
@@ -113,23 +120,56 @@ export function TripExpenseForm() {
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm(p => ({ ...p, [k]: e.target.value }))
 
-  const handleBookingSelect = (bookingId: string) => {
-    const bk = bookings.find(b => b.id === bookingId)
-    if (!bk) { setForm(p => ({ ...p, booking_id: '' })); return }
-    const veh = vehicles.find(v => v.id === bk.vehicle_id)
-    setForm(p => ({
-      ...p,
-      booking_id: bk.id,
-      vehicle_id: bk.vehicle_id,
-      vehicle_no: veh?.reg_no ?? bk.vehicle?.reg_no ?? '',
-      trip_date:  bk.trip_date,
-      leg1_date:  bk.trip_date,
-      leg1_from:  bk.from_loc,
-      leg1_to:    bk.to_loc,
-      leg2_from:  bk.to_loc,
-      leg2_to:    bk.from_loc,
-    }))
+  const handleBookingSelect = (value: string) => {
+    if (!value) {
+      setForm(p => ({ ...p, booking_id: '', mvd_booking_id: '' }))
+      return
+    }
+    // Value is prefixed: "fleet:UUID" or "mvd:UUID"
+    const [type, id] = value.split(':')
+
+    if (type === 'fleet') {
+      const bk = bookings.find(b => b.id === id)
+      if (!bk) return
+      const veh = vehicles.find(v => v.id === bk.vehicle_id)
+      setForm(p => ({
+        ...p,
+        booking_id:     bk.id,
+        mvd_booking_id: '',
+        vehicle_id:     bk.vehicle_id,
+        vehicle_no:     veh?.reg_no ?? bk.vehicle?.reg_no ?? '',
+        trip_date:      bk.trip_date,
+        leg1_date:      bk.trip_date,
+        leg1_from:      bk.from_loc,
+        leg1_to:        bk.to_loc,
+        leg2_from:      bk.to_loc,
+        leg2_to:        bk.from_loc,
+      }))
+    } else if (type === 'mvd') {
+      const bk = mvdBookings.find(b => b.id === id)
+      if (!bk) return
+      setForm(p => ({
+        ...p,
+        booking_id:     '',
+        mvd_booking_id: bk.id,
+        vehicle_id:     '',
+        vehicle_no:     '',   // market vehicle — user enters reg no manually
+        trip_date:      bk.trip_date,
+        leg1_date:      bk.trip_date,
+        leg1_from:      bk.from_loc,
+        leg1_to:        bk.to_loc,
+        leg2_from:      bk.to_loc,
+        leg2_to:        bk.from_loc,
+      }))
+    }
   }
+
+  // Derive dropdown value from current state
+  const bookingDropdownValue = form.booking_id
+    ? `fleet:${form.booking_id}`
+    : form.mvd_booking_id
+      ? `mvd:${form.mvd_booking_id}`
+      : ''
 
   const handleVehicleSelect = (vehicleId: string) => {
     const veh = vehicles.find(v => v.id === vehicleId)
@@ -162,9 +202,10 @@ export function TripExpenseForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bill_no:          form.bill_no      || null,
-          trip_no:          form.trip_no      || null,
-          booking_id:       form.booking_id   || null,
+          bill_no:          form.bill_no        || null,
+          trip_no:          form.trip_no        || null,
+          booking_id:       form.booking_id     || null,
+          mvd_booking_id:   form.mvd_booking_id || null,
           vehicle_id:       form.vehicle_id   || null,
           vehicle_no:       form.vehicle_no,
           trip_date:        form.trip_date    || null,
@@ -231,26 +272,44 @@ export function TripExpenseForm() {
 
           <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:12 }}>
 
-            {/* Link to existing booking */}
+            {/* Link to existing booking — fleet or market vehicle */}
             <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:7, padding:'10px 14px' }}>
               <div style={{ fontSize:'0.68rem', fontWeight:700, color:'#1d4ed8', textTransform:'uppercase', marginBottom:6 }}>
                 Link to Existing Booking (optional)
               </div>
               <select
-                value={form.booking_id}
+                value={bookingDropdownValue}
                 onChange={e => handleBookingSelect(e.target.value)}
                 style={{ ...INP, background:'#fff' }}
               >
                 <option value="">— Select booking to auto-fill details —</option>
-                {bookings.map(b => (
-                  <option key={b.id} value={b.id}>
-                    {b.trip_date} | {b.client_name}{b.company_name ? ` (${b.company_name})` : ''} | {b.from_loc} → {b.to_loc}
-                  </option>
-                ))}
+                {bookings.length > 0 && (
+                  <optgroup label="── Fleet Vehicle Bookings ──">
+                    {bookings.map(b => (
+                      <option key={b.id} value={`fleet:${b.id}`}>
+                        {b.trip_date} | {b.client_name}{b.company_name ? ` (${b.company_name})` : ''} | {b.from_loc} → {b.to_loc}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {mvdBookings.length > 0 && (
+                  <optgroup label="── Market Vehicle Bookings ──">
+                    {mvdBookings.map(b => (
+                      <option key={b.id} value={`mvd:${b.id}`}>
+                        🚛 {b.trip_date} | {b.client_name}{b.company_name ? ` (${b.company_name})` : ''} | {b.from_loc} → {b.to_loc} [{b.vehicle_type}]
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
               </select>
               {form.booking_id && (
                 <div style={{ fontSize:'0.7rem', color:'#3b82f6', marginTop:4 }}>
-                  ✓ Booking linked — vehicle, route and date auto-filled below
+                  ✓ Fleet booking linked — vehicle, route and date auto-filled below
+                </div>
+              )}
+              {form.mvd_booking_id && (
+                <div style={{ fontSize:'0.7rem', color:'#7c3aed', marginTop:4 }}>
+                  🚛 Market vehicle booking linked — enter vehicle reg no below
                 </div>
               )}
             </div>

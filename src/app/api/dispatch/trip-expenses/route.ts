@@ -12,6 +12,7 @@ export async function POST(req: NextRequest) {
         bill_no:          body.bill_no          || null,
         trip_no:          body.trip_no          || null,
         booking_id:       body.booking_id       || null,
+        mvd_booking_id:   body.mvd_booking_id   || null,
         vehicle_id:       body.vehicle_id       || null,
         vehicle_no:       body.vehicle_no,
         trip_date:        body.trip_date        || null,
