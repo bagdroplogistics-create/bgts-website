@@ -9,58 +9,48 @@ interface Booking {
 }
 
 interface TripExpForm {
-  bill_no:         string
-  trip_no:         string
-  booking_id:      string
-  vehicle_id:      string
-  vehicle_no:      string
-  trip_date:       string
+  bill_no:          string
+  trip_no:          string
+  booking_id:       string
+  vehicle_id:       string
+  vehicle_no:       string
+  trip_date:        string
   // Leg 1 – outward
-  leg1_date:       string
-  leg1_from:       string
-  leg1_to:         string
-  leg1_lr_no:      string
-  leg1_qty:        string
+  leg1_date:        string
+  leg1_from:        string
+  leg1_to:          string
+  leg1_lr_no:       string
+  leg1_qty:         string
   // Leg 2 – return
-  leg2_date:       string
-  leg2_from:       string
-  leg2_to:         string
-  leg2_lr_no:      string
-  leg2_qty:        string
-  // Odometer
-  opening_kms:     string
-  closing_kms:     string
-  // Expenses
-  diesel_amt:      string
-  diesel_notes:    string
-  driver_allowance:string
-  toll_1: string; toll_2: string; toll_3: string; toll_4: string; toll_5: string
-  rto_expense:     string
-  road_entry:      string
-  repairs_amt:     string
-  repairs_notes:   string
-  misc_exp:        string
-  loading_exp:     string
-  unloading_exp:   string
-  petrol:          string
-  extra_1_label:   string; extra_1_amt: string
-  extra_2_label:   string; extra_2_amt: string
+  leg2_date:        string
+  leg2_from:        string
+  leg2_to:          string
+  leg2_lr_no:       string
+  leg2_qty:         string
+  // Expenses — Excel order
+  diesel_amt:       string
+  driver_allowance: string
+  rto_expense:      string
+  road_entry:       string
+  repairs_amt:      string
+  repairs_notes:    string
+  misc_exp:         string
+  loading_exp:      string   // Loading / Unloading combined
+  extra_1_amt:      string   // Other Exp
+  petrol:           string
   // Settlement
-  advance_cash:    string
-  advance_bank:    string
-  notes:           string
+  advance_cash:     string
+  advance_bank:     string
+  notes:            string
 }
 
 const EMPTY: TripExpForm = {
   bill_no:'', trip_no:'', booking_id:'', vehicle_id:'', vehicle_no:'', trip_date:'',
   leg1_date:'', leg1_from:'', leg1_to:'', leg1_lr_no:'', leg1_qty:'',
   leg2_date:'', leg2_from:'', leg2_to:'', leg2_lr_no:'', leg2_qty:'',
-  opening_kms:'', closing_kms:'',
-  diesel_amt:'', diesel_notes:'', driver_allowance:'',
-  toll_1:'', toll_2:'', toll_3:'', toll_4:'', toll_5:'',
+  diesel_amt:'', driver_allowance:'',
   rto_expense:'', road_entry:'', repairs_amt:'', repairs_notes:'',
-  misc_exp:'', loading_exp:'', unloading_exp:'', petrol:'',
-  extra_1_label:'', extra_1_amt:'', extra_2_label:'', extra_2_amt:'',
+  misc_exp:'', loading_exp:'', extra_1_amt:'', petrol:'',
   advance_cash:'', advance_bank:'', notes:'',
 }
 
@@ -80,6 +70,7 @@ const SEC: React.CSSProperties = {
   letterSpacing:'0.1em', color:'#c45c28',
   borderBottom:'1px solid #e8e2d8', paddingBottom:3, marginBottom:10, marginTop:4,
 }
+const REQ: React.CSSProperties = { color:'#e03030', marginLeft:2 }
 
 export function TripExpenseForm() {
   const today = new Date().toISOString().slice(0, 10)
@@ -92,14 +83,13 @@ export function TripExpenseForm() {
 
   useEffect(() => {
     fetch('/api/vehicles').then(r => r.json()).then(j => setVehicles(j.data ?? j ?? []))
-    fetch('/api/bookings?limit=100').then(r => r.json()).then(j => setBookings(j.data ?? j ?? []))
+    fetch('/api/dispatch/bookings').then(r => r.json()).then(j => setBookings(j.data ?? j ?? []))
   }, [])
 
   const set = (k: keyof TripExpForm) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
       setForm(p => ({ ...p, [k]: e.target.value }))
 
-  // When a booking is selected — auto-fill vehicle + route
   const handleBookingSelect = (bookingId: string) => {
     const bk = bookings.find(b => b.id === bookingId)
     if (!bk) { setForm(p => ({ ...p, booking_id: '' })); return }
@@ -108,7 +98,7 @@ export function TripExpenseForm() {
       ...p,
       booking_id: bk.id,
       vehicle_id: bk.vehicle_id,
-      vehicle_no: veh?.reg_no ?? '',
+      vehicle_no: veh?.reg_no ?? bk.vehicle?.reg_no ?? '',
       trip_date:  bk.trip_date,
       leg1_date:  bk.trip_date,
       leg1_from:  bk.from_loc,
@@ -118,24 +108,21 @@ export function TripExpenseForm() {
     }))
   }
 
-  // When vehicle dropdown changes manually
   const handleVehicleSelect = (vehicleId: string) => {
     const veh = vehicles.find(v => v.id === vehicleId)
     setForm(p => ({ ...p, vehicle_id: vehicleId, vehicle_no: veh?.reg_no ?? '' }))
   }
 
-  // Derived totals
-  const totalToll       = n(form.toll_1)+n(form.toll_2)+n(form.toll_3)+n(form.toll_4)+n(form.toll_5)
-  const totalExp        = n(form.diesel_amt)+n(form.driver_allowance)+totalToll
-    +n(form.rto_expense)+n(form.road_entry)+n(form.repairs_amt)
-    +n(form.misc_exp)+n(form.loading_exp)+n(form.unloading_exp)
-    +n(form.petrol)+n(form.extra_1_amt)+n(form.extra_2_amt)
-  const totalKms        = n(form.closing_kms) - n(form.opening_kms)
-  // Excel settlement formulas:
-  // Bank advance covers diesel; cash advance covers everything else
-  const nonDieselExp    = totalExp - n(form.diesel_amt)
-  const balCash         = n(form.advance_cash) - nonDieselExp   // + driver returns cash / – company pays driver
-  const balBank         = n(form.advance_bank) - n(form.diesel_amt) // + driver returns bank / – company pays
+  // Totals — Excel field order
+  const totalExp =
+    n(form.diesel_amt) + n(form.driver_allowance) +
+    n(form.rto_expense) + n(form.road_entry) + n(form.repairs_amt) +
+    n(form.misc_exp) + n(form.loading_exp) + n(form.extra_1_amt) + n(form.petrol)
+
+  // Excel settlement formulas
+  const nonDieselExp = totalExp - n(form.diesel_amt)
+  const balCash      = n(form.advance_cash) - nonDieselExp
+  const balBank      = n(form.advance_bank) - n(form.diesel_amt)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,30 +133,40 @@ export function TripExpenseForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
-          opening_kms:      form.opening_kms ? Number(form.opening_kms) : null,
-          closing_kms:      form.closing_kms ? Number(form.closing_kms) : null,
-          total_kms:        totalKms > 0 ? totalKms : null,
+          bill_no:          form.bill_no      || null,
+          trip_no:          form.trip_no      || null,
+          booking_id:       form.booking_id   || null,
+          vehicle_id:       form.vehicle_id   || null,
+          vehicle_no:       form.vehicle_no,
+          trip_date:        form.trip_date    || null,
+          leg1_date:        form.leg1_date    || null,
+          leg1_from:        form.leg1_from    || null,
+          leg1_to:          form.leg1_to      || null,
+          leg1_lr_no:       form.leg1_lr_no   || null,
+          leg1_qty:         form.leg1_qty     || null,
+          leg2_date:        form.leg2_date    || null,
+          leg2_from:        form.leg2_from    || null,
+          leg2_to:          form.leg2_to      || null,
+          leg2_lr_no:       form.leg2_lr_no   || null,
+          leg2_qty:         form.leg2_qty     || null,
           diesel_amt:       n(form.diesel_amt),
           driver_allowance: n(form.driver_allowance),
-          toll_1: n(form.toll_1), toll_2: n(form.toll_2), toll_3: n(form.toll_3),
-          toll_4: n(form.toll_4), toll_5: n(form.toll_5), toll_total: totalToll,
-          rto_expense:  n(form.rto_expense),
-          road_entry:   n(form.road_entry),
-          repairs_amt:  n(form.repairs_amt),
-          misc_exp:     n(form.misc_exp),
-          loading_exp:  n(form.loading_exp),
-          unloading_exp:n(form.unloading_exp),
-          petrol:       n(form.petrol),
-          extra_1_amt:  n(form.extra_1_amt),
-          extra_2_amt:  n(form.extra_2_amt),
-          total_expense: totalExp,
-          advance_cash: n(form.advance_cash),
-          advance_bank: n(form.advance_bank),
-          bal_cash:     balCash,  // + = driver returns cash, - = company pays driver
-          bal_bank:     balBank,  // + = driver returns bank, - = company pays more
-          booking_id:   form.booking_id || null,
-          vehicle_id:   form.vehicle_id || null,
+          rto_expense:      n(form.rto_expense),
+          road_entry:       n(form.road_entry),
+          repairs_amt:      n(form.repairs_amt),
+          repairs_notes:    form.repairs_notes || null,
+          misc_exp:         n(form.misc_exp),
+          loading_exp:      n(form.loading_exp),
+          extra_1_label:    'Other Exp',
+          extra_1_amt:      n(form.extra_1_amt),
+          petrol:           n(form.petrol),
+          total_expense:    totalExp,
+          advance_cash:     n(form.advance_cash),
+          advance_bank:     n(form.advance_bank),
+          bal_cash:         balCash,
+          bal_bank:         balBank,
+          notes:            form.notes        || null,
+          status:           'SUBMITTED',
         }),
       })
       const json = await res.json()
@@ -200,7 +197,7 @@ export function TripExpenseForm() {
 
           <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:12 }}>
 
-            {/* Link to existing booking (optional) */}
+            {/* Link to existing booking */}
             <div style={{ background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:7, padding:'10px 14px' }}>
               <div style={{ fontSize:'0.68rem', fontWeight:700, color:'#1d4ed8', textTransform:'uppercase', marginBottom:6 }}>
                 Link to Existing Booking (optional)
@@ -211,7 +208,7 @@ export function TripExpenseForm() {
                 style={{ ...INP, background:'#fff' }}
               >
                 <option value="">— Select booking to auto-fill details —</option>
-                {bookings.slice(0, 80).map(b => (
+                {bookings.map(b => (
                   <option key={b.id} value={b.id}>
                     {b.trip_date} | {b.client_name}{b.company_name ? ` (${b.company_name})` : ''} | {b.from_loc} → {b.to_loc}
                   </option>
@@ -227,11 +224,11 @@ export function TripExpenseForm() {
             {/* Bill header */}
             <div style={SEC}>Bill Details</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 180px', gap:10 }}>
-              <div><label style={LBL}>Bill No</label>{inp('bill_no', 'text', 'e.g. 316')}</div>
-              <div><label style={LBL}>Trip No</label>{inp('trip_no', 'text', '')}</div>
-              <div><label style={LBL}>Date</label>{inp('trip_date', 'date')}</div>
+              <div><label style={LBL}>Bill No</label>{inp('bill_no','text','e.g. 316')}</div>
+              <div><label style={LBL}>Trip No</label>{inp('trip_no','text','')}</div>
+              <div><label style={LBL}>Date</label>{inp('trip_date','date')}</div>
               <div>
-                <label style={LBL}>Vehicle No</label>
+                <label style={LBL}>Vehicle No<span style={REQ}>*</span></label>
                 {vehicles.length > 0 ? (
                   <select value={form.vehicle_id} onChange={e => handleVehicleSelect(e.target.value)} style={{ ...INP, background:'#fff' }}>
                     <option value="">— Select vehicle —</option>
@@ -245,99 +242,55 @@ export function TripExpenseForm() {
 
             {/* Leg 1 — Outward */}
             <div style={SEC}>Leg 1 — Outward Trip</div>
-            <div style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr 1fr 1fr', gap:10 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr 120px 1fr', gap:10 }}>
               <div><label style={LBL}>Date</label>{inp('leg1_date','date')}</div>
               <div><label style={LBL}>From</label>{inp('leg1_from','text','GACL')}</div>
               <div><label style={LBL}>To</label>{inp('leg1_to','text','Rajkot')}</div>
-              <div><label style={LBL}>LR No</label>{inp('leg1_lr_no','text','6617')}</div>
               <div><label style={LBL}>Qty</label>{inp('leg1_qty','text','6 + 4')}</div>
+              <div><label style={LBL}>LR No<span style={REQ}>*</span></label>{inp('leg1_lr_no','text','e.g. 6617')}</div>
             </div>
 
             {/* Leg 2 — Return */}
             <div style={SEC}>Leg 2 — Return Trip</div>
-            <div style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr 1fr 1fr', gap:10 }}>
+            <div style={{ display:'grid', gridTemplateColumns:'120px 1fr 1fr 120px 1fr', gap:10 }}>
               <div><label style={LBL}>Date</label>{inp('leg2_date','date')}</div>
               <div><label style={LBL}>From</label>{inp('leg2_from','text','Rajkot')}</div>
               <div><label style={LBL}>To</label>{inp('leg2_to','text','GACL')}</div>
-              <div><label style={LBL}>LR No</label>{inp('leg2_lr_no','text','6618')}</div>
               <div><label style={LBL}>Qty</label>{inp('leg2_qty','text','6 + 4')}</div>
+              <div><label style={LBL}>LR No<span style={REQ}>*</span></label>{inp('leg2_lr_no','text','e.g. 6618')}</div>
             </div>
 
-            {/* Odometer */}
-            <div style={SEC}>Odometer</div>
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
-              <div><label style={LBL}>Opening Kms</label>{inp('opening_kms','number','e.g. 45000')}</div>
-              <div><label style={LBL}>Closing Kms</label>{inp('closing_kms','number','e.g. 45800')}</div>
-              <div>
-                <label style={LBL}>Total Kms (auto)</label>
-                <div style={{ ...INP, background:'#f5f5f5', color: totalKms > 0 ? '#111' : '#bbb', display:'flex', alignItems:'center' }}>
-                  {totalKms > 0 ? `${totalKms} km` : '—'}
-                </div>
-              </div>
-            </div>
-
-            {/* Expenses */}
+            {/* Expense Details — exactly matching Excel columns */}
             <div style={SEC}>Expense Details</div>
 
-            {/* 1. Diesel */}
+            {/* Row 1: Diesel | Driver Allowance */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-              <div>
-                <label style={LBL}>1. Diesel Amount (₹)</label>
-                {inp('diesel_amt','number','0')}
-              </div>
-              <div>
-                <label style={LBL}>Diesel Notes (litres breakdown)</label>
-                {inp('diesel_notes','text','e.g. 120 - 99 - 97 - 53')}
-              </div>
+              <div><label style={LBL}>1. Diesel (₹)</label>{inp('diesel_amt','number','0')}</div>
+              <div><label style={LBL}>2. Driver Allowance (₹)</label>{inp('driver_allowance','number','0')}</div>
             </div>
 
-            {/* 2. Driver */}
+            {/* Row 2: RTO Exp | Road Entry */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-              <div><label style={LBL}>2. Driver Allowance + Night (₹)</label>{inp('driver_allowance','number','0')}</div>
-              <div style={{ display:'flex', flexDirection:'column', justifyContent:'flex-end' }}>
-                <label style={LBL}>10. Petrol (₹)</label>{inp('petrol','number','0')}
-              </div>
+              <div><label style={LBL}>3. RTO Expense (₹)</label>{inp('rto_expense','number','0')}</div>
+              <div><label style={LBL}>4. Road Entry (₹)</label>{inp('road_entry','number','0')}</div>
             </div>
 
-            {/* 3. Toll — 5 slots */}
-            <div>
-              <label style={LBL}>3. Toll — up to 5 entries (₹)</label>
-              <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
-                {(['toll_1','toll_2','toll_3','toll_4','toll_5'] as const).map((k,i) => (
-                  <div key={k}>
-                    <label style={{ ...LBL, color:'#aaa' }}>Toll {i+1}</label>
-                    {inp(k,'number','0')}
-                  </div>
-                ))}
-              </div>
-              {totalToll > 0 && (
-                <div style={{ fontSize:'0.72rem', color:'#555', marginTop:4 }}>
-                  Toll total: <strong>₹{totalToll.toLocaleString('en-IN')}</strong>
-                </div>
-              )}
-            </div>
-
-            {/* 4–9 grid */}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10 }}>
-              <div><label style={LBL}>4. RTO Expense (₹)</label>{inp('rto_expense','number','0')}</div>
-              <div><label style={LBL}>5. Road Entry (₹)</label>{inp('road_entry','number','0')}</div>
-              <div><label style={LBL}>7. Misc Exp (₹)</label>{inp('misc_exp','number','0')}</div>
-              <div><label style={LBL}>8. Loading Exp (₹)</label>{inp('loading_exp','number','0')}</div>
-              <div><label style={LBL}>9. Unloading Exp (₹)</label>{inp('unloading_exp','number','0')}</div>
-            </div>
-
-            {/* 6. Repairs */}
+            {/* Row 3: Repairs + Notes */}
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
-              <div><label style={LBL}>6. Repairs / Others (₹)</label>{inp('repairs_amt','number','0')}</div>
+              <div><label style={LBL}>5. Repairs / Others (₹)</label>{inp('repairs_amt','number','0')}</div>
               <div><label style={LBL}>Repairs Notes</label>{inp('repairs_notes','text','e.g. Puncture')}</div>
             </div>
 
-            {/* 11 & 12 — free rows */}
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 80px 1fr 80px', gap:8 }}>
-              <div><label style={LBL}>11. Extra Item Label</label>{inp('extra_1_label','text','')}</div>
-              <div><label style={LBL}>Amount</label>{inp('extra_1_amt','number','0')}</div>
-              <div><label style={LBL}>12. Extra Item Label</label>{inp('extra_2_label','text','')}</div>
-              <div><label style={LBL}>Amount</label>{inp('extra_2_amt','number','0')}</div>
+            {/* Row 4: Misc | Loading/Unloading */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+              <div><label style={LBL}>6. Misc Exp (₹)</label>{inp('misc_exp','number','0')}</div>
+              <div><label style={LBL}>7. Loading / Unloading Exp (₹)</label>{inp('loading_exp','number','0')}</div>
+            </div>
+
+            {/* Row 5: Other Exp | Petrol */}
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+              <div><label style={LBL}>8. Other Exp (₹)</label>{inp('extra_1_amt','number','0')}</div>
+              <div><label style={LBL}>9. Petrol (₹)</label>{inp('petrol','number','0')}</div>
             </div>
 
             {/* Settlement */}
@@ -387,25 +340,25 @@ export function TripExpenseForm() {
               {(form.leg1_from && form.leg1_to) && (
                 <div style={{ fontSize:'0.8rem', color:'#555', marginTop:2 }}>{form.leg1_from} → {form.leg1_to}</div>
               )}
-              {totalKms > 0 && (
-                <div style={{ fontSize:'0.75rem', color:'#888', marginTop:2 }}>Total: {totalKms} km</div>
+              {(form.leg1_lr_no || form.leg2_lr_no) && (
+                <div style={{ fontSize:'0.72rem', color:'#888', marginTop:2 }}>
+                  LR: {[form.leg1_lr_no, form.leg2_lr_no].filter(Boolean).join(' / ')}
+                </div>
               )}
             </div>
           )}
 
+          {/* Expense breakdown */}
           {[
-            { label:'Diesel', val: n(form.diesel_amt) },
-            { label:'Driver Allowance', val: n(form.driver_allowance) },
-            { label:'Toll (total)', val: totalToll },
-            { label:'RTO Expense', val: n(form.rto_expense) },
-            { label:'Road Entry', val: n(form.road_entry) },
-            { label:'Repairs', val: n(form.repairs_amt) },
-            { label:'Misc Exp', val: n(form.misc_exp) },
-            { label:'Loading', val: n(form.loading_exp) },
-            { label:'Unloading', val: n(form.unloading_exp) },
-            { label:'Petrol', val: n(form.petrol) },
-            ...(form.extra_1_label ? [{ label: form.extra_1_label, val: n(form.extra_1_amt) }] : []),
-            ...(form.extra_2_label ? [{ label: form.extra_2_label, val: n(form.extra_2_amt) }] : []),
+            { label:'1. Diesel',                val: n(form.diesel_amt) },
+            { label:'2. Driver Allowance',       val: n(form.driver_allowance) },
+            { label:'3. RTO Expense',            val: n(form.rto_expense) },
+            { label:'4. Road Entry',             val: n(form.road_entry) },
+            { label:'5. Repairs / Others',       val: n(form.repairs_amt) },
+            { label:'6. Misc Exp',               val: n(form.misc_exp) },
+            { label:'7. Loading / Unloading',    val: n(form.loading_exp) },
+            { label:'8. Other Exp',              val: n(form.extra_1_amt) },
+            { label:'9. Petrol',                 val: n(form.petrol) },
           ].filter(r => r.val > 0).map(r => (
             <div key={r.label} style={{ display:'flex', justifyContent:'space-between', padding:'5px 0', borderBottom:'1px solid #ede8e0', fontSize:'0.82rem' }}>
               <span style={{ color:'#666' }}>{r.label}</span>
@@ -466,10 +419,11 @@ export function TripExpenseForm() {
 
           {form.booking_id && (
             <div style={{ marginTop:12, background:'#eff6ff', border:'1px solid #bfdbfe', borderRadius:6, padding:'8px 12px', fontSize:'0.72rem', color:'#1d4ed8' }}>
-              🔗 Linked to booking — actual expense will appear on Dispatch Board for margin comparison
+              Linked to booking — expense will appear on Dispatch Board for margin comparison
             </div>
           )}
         </div>
+
       </div>
     </div>
   )
