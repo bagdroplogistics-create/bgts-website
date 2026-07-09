@@ -27,6 +27,11 @@ interface TripExpForm {
   leg2_to:          string
   leg2_lr_no:       string
   leg2_qty:         string
+  // Odometer
+  opening_kms:      string
+  closing_kms:      string
+  // Toll
+  toll_1: string; toll_2: string; toll_3: string; toll_4: string; toll_5: string
   // Expenses — Excel order
   diesel_amt:       string
   driver_allowance: string
@@ -48,6 +53,8 @@ const EMPTY: TripExpForm = {
   bill_no:'', trip_no:'', booking_id:'', vehicle_id:'', vehicle_no:'', trip_date:'',
   leg1_date:'', leg1_from:'', leg1_to:'', leg1_lr_no:'', leg1_qty:'',
   leg2_date:'', leg2_from:'', leg2_to:'', leg2_lr_no:'', leg2_qty:'',
+  opening_kms:'', closing_kms:'',
+  toll_1:'', toll_2:'', toll_3:'', toll_4:'', toll_5:'',
   diesel_amt:'', driver_allowance:'',
   rto_expense:'', road_entry:'', repairs_amt:'', repairs_notes:'',
   misc_exp:'', loading_exp:'', extra_1_amt:'', petrol:'',
@@ -113,9 +120,15 @@ export function TripExpenseForm() {
     setForm(p => ({ ...p, vehicle_id: vehicleId, vehicle_no: veh?.reg_no ?? '' }))
   }
 
-  // Totals — Excel field order
+  // Odometer
+  const totalKms = n(form.closing_kms) - n(form.opening_kms)
+
+  // Toll total
+  const totalToll = n(form.toll_1)+n(form.toll_2)+n(form.toll_3)+n(form.toll_4)+n(form.toll_5)
+
+  // Total expense
   const totalExp =
-    n(form.diesel_amt) + n(form.driver_allowance) +
+    n(form.diesel_amt) + n(form.driver_allowance) + totalToll +
     n(form.rto_expense) + n(form.road_entry) + n(form.repairs_amt) +
     n(form.misc_exp) + n(form.loading_exp) + n(form.extra_1_amt) + n(form.petrol)
 
@@ -149,6 +162,11 @@ export function TripExpenseForm() {
           leg2_to:          form.leg2_to      || null,
           leg2_lr_no:       form.leg2_lr_no   || null,
           leg2_qty:         form.leg2_qty     || null,
+          opening_kms:      form.opening_kms  ? Number(form.opening_kms) : null,
+          closing_kms:      form.closing_kms  ? Number(form.closing_kms) : null,
+          total_kms:        totalKms > 0 ? totalKms : null,
+          toll_1: n(form.toll_1), toll_2: n(form.toll_2), toll_3: n(form.toll_3),
+          toll_4: n(form.toll_4), toll_5: n(form.toll_5), toll_total: totalToll,
           diesel_amt:       n(form.diesel_amt),
           driver_allowance: n(form.driver_allowance),
           rto_expense:      n(form.rto_expense),
@@ -260,6 +278,19 @@ export function TripExpenseForm() {
               <div><label style={LBL}>LR No<span style={REQ}>*</span></label>{inp('leg2_lr_no','text','e.g. 6618')}</div>
             </div>
 
+            {/* Odometer */}
+            <div style={SEC}>Odometer</div>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:10 }}>
+              <div><label style={LBL}>Opening Kms</label>{inp('opening_kms','number','e.g. 45000')}</div>
+              <div><label style={LBL}>Closing Kms</label>{inp('closing_kms','number','e.g. 45800')}</div>
+              <div>
+                <label style={LBL}>Total Kms (auto)</label>
+                <div style={{ ...INP, background:'#f5f5f5', color: totalKms > 0 ? '#111' : '#bbb', display:'flex', alignItems:'center' }}>
+                  {totalKms > 0 ? `${totalKms} km` : '—'}
+                </div>
+              </div>
+            </div>
+
             {/* Expense Details — exactly matching Excel columns */}
             <div style={SEC}>Expense Details</div>
 
@@ -267,6 +298,24 @@ export function TripExpenseForm() {
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
               <div><label style={LBL}>1. Diesel (₹)</label>{inp('diesel_amt','number','0')}</div>
               <div><label style={LBL}>2. Driver Allowance (₹)</label>{inp('driver_allowance','number','0')}</div>
+            </div>
+
+            {/* Toll — up to 5 entries */}
+            <div>
+              <label style={LBL}>3. Toll — up to 5 entries (₹)</label>
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(5,1fr)', gap:8 }}>
+                {(['toll_1','toll_2','toll_3','toll_4','toll_5'] as const).map((k,i) => (
+                  <div key={k}>
+                    <label style={{ ...LBL, color:'#aaa' }}>Toll {i+1}</label>
+                    {inp(k,'number','0')}
+                  </div>
+                ))}
+              </div>
+              {totalToll > 0 && (
+                <div style={{ fontSize:'0.72rem', color:'#555', marginTop:4 }}>
+                  Toll total: <strong>₹{totalToll.toLocaleString('en-IN')}</strong>
+                </div>
+              )}
             </div>
 
             {/* Row 2: RTO Exp | Road Entry */}
@@ -349,16 +398,23 @@ export function TripExpenseForm() {
           )}
 
           {/* Expense breakdown */}
+          {totalKms > 0 && (
+            <div style={{ display:'flex', justifyContent:'space-between', padding:'5px 0', borderBottom:'1px solid #ede8e0', fontSize:'0.82rem' }}>
+              <span style={{ color:'#666' }}>Total Kms</span>
+              <span style={{ fontWeight:600 }}>{totalKms} km</span>
+            </div>
+          )}
           {[
             { label:'1. Diesel',                val: n(form.diesel_amt) },
             { label:'2. Driver Allowance',       val: n(form.driver_allowance) },
-            { label:'3. RTO Expense',            val: n(form.rto_expense) },
-            { label:'4. Road Entry',             val: n(form.road_entry) },
-            { label:'5. Repairs / Others',       val: n(form.repairs_amt) },
-            { label:'6. Misc Exp',               val: n(form.misc_exp) },
-            { label:'7. Loading / Unloading',    val: n(form.loading_exp) },
-            { label:'8. Other Exp',              val: n(form.extra_1_amt) },
-            { label:'9. Petrol',                 val: n(form.petrol) },
+            { label:'3. Toll',                   val: totalToll },
+            { label:'4. RTO Expense',            val: n(form.rto_expense) },
+            { label:'5. Road Entry',             val: n(form.road_entry) },
+            { label:'6. Repairs / Others',       val: n(form.repairs_amt) },
+            { label:'7. Misc Exp',               val: n(form.misc_exp) },
+            { label:'8. Loading / Unloading',    val: n(form.loading_exp) },
+            { label:'9. Other Exp',              val: n(form.extra_1_amt) },
+            { label:'10. Petrol',                val: n(form.petrol) },
           ].filter(r => r.val > 0).map(r => (
             <div key={r.label} style={{ display:'flex', justifyContent:'space-between', padding:'5px 0', borderBottom:'1px solid #ede8e0', fontSize:'0.82rem' }}>
               <span style={{ color:'#666' }}>{r.label}</span>
