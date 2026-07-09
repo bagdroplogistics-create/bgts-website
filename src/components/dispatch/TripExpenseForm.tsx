@@ -89,8 +89,24 @@ export function TripExpenseForm() {
   const [success,  setSuccess]  = useState(false)
 
   useEffect(() => {
+    // Load vehicles + bookings
     fetch('/api/vehicles').then(r => r.json()).then(j => setVehicles(j.data ?? j ?? []))
     fetch('/api/dispatch/bookings').then(r => r.json()).then(j => setBookings(j.data ?? j ?? []))
+
+    // Auto-fill next sequential Bill No and LR Nos
+    fetch('/api/dispatch/trip-expenses?next=true')
+      .then(r => r.json())
+      .then(j => {
+        if (j.next_bill_no) {
+          setForm(p => ({
+            ...p,
+            bill_no:      j.next_bill_no,
+            leg1_lr_no:   j.next_leg1_lr_no,
+            leg2_lr_no:   j.next_leg2_lr_no,
+          }))
+        }
+      })
+      .catch(() => {/* non-fatal */})
   }, [])
 
   const set = (k: keyof TripExpForm) =>

@@ -69,7 +69,43 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const bookingId = req.nextUrl.searchParams.get('booking_id')
+    const next      = req.nextUrl.searchParams.get('next')
     const sb = getBgtsAdminClient()
+
+    // ── ?next=true  →  return next sequential bill_no and lr_no ─────────────
+    if (next === 'true') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (sb as any)
+        .from('trip_expenses')
+        .select('bill_no, leg1_lr_no, leg2_lr_no')
+        .range(0, 999)
+
+      const rows = (data ?? []) as { bill_no: string | null; leg1_lr_no: string | null; leg2_lr_no: string | null }[]
+
+      // Find max numeric bill_no
+      let maxBill = 0
+      for (const r of rows) {
+        const n = parseInt(r.bill_no ?? '', 10)
+        if (!isNaN(n) && n > maxBill) maxBill = n
+      }
+
+      // Find max 4-digit LR no across both legs (ignore typos like 65556)
+      let maxLr = 0
+      for (const r of rows) {
+        for (const v of [r.leg1_lr_no, r.leg2_lr_no]) {
+          const n = parseInt(v ?? '', 10)
+          if (!isNaN(n) && n >= 1000 && n <= 9999 && n > maxLr) maxLr = n
+        }
+      }
+
+      return NextResponse.json({
+        next_bill_no:   maxBill > 0 ? String(maxBill + 1) : '',
+        next_leg1_lr_no: maxLr  > 0 ? String(maxLr  + 1) : '',
+        next_leg2_lr_no: maxLr  > 0 ? String(maxLr  + 2) : '',
+      })
+    }
+
+    // ── Normal list ──────────────────────────────────────────────────────────
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let q = (sb as any)
       .from('trip_expenses')
