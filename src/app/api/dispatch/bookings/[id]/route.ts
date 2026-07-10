@@ -12,6 +12,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       'trip_date','client_name','company_name','phone','email',
       'from_loc','to_loc','distance_km','material','pcs_boxes',
       'weight_kg','vehicle_id','trip_type','margin_pct','rate_total','notes',
+      'driver_name','driver_phone','driver_license',
     ]
     const updates: Record<string, unknown> = {}
     for (const k of allowed) {

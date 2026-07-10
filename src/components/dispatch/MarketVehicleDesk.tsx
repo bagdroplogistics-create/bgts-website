@@ -268,11 +268,96 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
   const [msgGenerated, setMsgGenerated] = useState(false)
   const [saving,       setSaving]       = useState(false)
   const [copyStates,   setCopyStates]   = useState<Record<string, boolean>>({})
-  const [showModal,    setShowModal]    = useState(false)
-  const [activeBooking, setActiveBooking] = useState<MvdAutoBooking | null>(null)
-  const [outreachLog,  setOutreachLog]  = useState<Record<string, OutreachRecord[]>>({})
-  const [logSaving,    setLogSaving]    = useState<Record<string, boolean>>({})
+  const [showModal,      setShowModal]      = useState(false)
+  const [activeBooking,  setActiveBooking]  = useState<MvdAutoBooking | null>(null)
+  const [outreachLog,    setOutreachLog]    = useState<Record<string, OutreachRecord[]>>({})
+  const [logSaving,      setLogSaving]      = useState<Record<string, boolean>>({})
   const processedRef = useRef<string | null>(null)
+
+  // ── Add New Broker modal state ─────────────────────────────────────────────
+  const [showAddBroker,    setShowAddBroker]    = useState(false)
+  const [addBrokerSaving,  setAddBrokerSaving]  = useState(false)
+  const [addBrokerErr,     setAddBrokerErr]     = useState('')
+  const [addBrokerSuccess, setAddBrokerSuccess] = useState(false)
+  const [addBrokerForm,    setAddBrokerForm]    = useState({
+    company_name:   '',
+    contact_person: '',
+    mobile:         '',
+    city:           '',
+    fleet_type:     'BROKER',
+    vehicle_types:  [] as string[],
+    routes_covered: [] as string[],
+    new_route:      '',
+  })
+
+  const openAddBroker = () => {
+    const vt = form.vehicle_type === 'Any / All Types' ? [] : [form.vehicle_type]
+    const route = form.from_city && form.to_city ? `${form.from_city} - ${form.to_city}` : ''
+    setAddBrokerForm({
+      company_name:   form.name_search || '',
+      contact_person: '',
+      mobile:         '',
+      city:           form.from_city || '',
+      fleet_type:     'BROKER',
+      vehicle_types:  vt,
+      routes_covered: route ? [route] : [],
+      new_route:      '',
+    })
+    setAddBrokerErr('')
+    setAddBrokerSuccess(false)
+    setShowAddBroker(true)
+  }
+
+  const handleAddBroker = async () => {
+    if (!addBrokerForm.company_name.trim()) { setAddBrokerErr('Company name is required.'); return }
+    if (!addBrokerForm.mobile.trim())        { setAddBrokerErr('Mobile number is required.'); return }
+    if (!addBrokerForm.city.trim())          { setAddBrokerErr('City is required.'); return }
+    setAddBrokerSaving(true); setAddBrokerErr('')
+    try {
+      const res = await fetch('/api/dispatch/mvd/agents', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          company_name:   addBrokerForm.company_name.trim(),
+          contact_person: addBrokerForm.contact_person.trim() || null,
+          mobile:         addBrokerForm.mobile.trim(),
+          city:           addBrokerForm.city.trim(),
+          fleet_type:     addBrokerForm.fleet_type,
+          vehicle_types:  addBrokerForm.vehicle_types,
+          routes_covered: addBrokerForm.routes_covered,
+        }),
+      })
+      const json = await res.json()
+      if (json.error) throw new Error(json.error)
+      setAddBrokerSuccess(true)
+      // Re-run search so the new agent appears immediately
+      setTimeout(() => { setShowAddBroker(false); handleSearch() }, 1500)
+    } catch (e) {
+      setAddBrokerErr(e instanceof Error ? e.message : String(e))
+    } finally {
+      setAddBrokerSaving(false)
+    }
+  }
+
+  const toggleVehicleType = (vt: string) => {
+    setAddBrokerForm(f => ({
+      ...f,
+      vehicle_types: f.vehicle_types.includes(vt)
+        ? f.vehicle_types.filter(v => v !== vt)
+        : [...f.vehicle_types, vt],
+    }))
+  }
+
+  const addRoute = () => {
+    const r = addBrokerForm.new_route.trim()
+    if (r && !addBrokerForm.routes_covered.includes(r)) {
+      setAddBrokerForm(f => ({ ...f, routes_covered: [...f.routes_covered, r], new_route: '' }))
+    }
+  }
+
+  const removeRoute = (r: string) => {
+    setAddBrokerForm(f => ({ ...f, routes_covered: f.routes_covered.filter(x => x !== r) }))
+  }
 
   // Core search function that accepts params directly (avoids stale closure)
   const runSearch = useCallback(async (params: typeof DEFAULT_FORM) => {
@@ -540,8 +625,16 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
           </div>
 
           {agents.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '32px 0', color: '#888' }}>
-              No agents found for this route/vehicle combination. Try broadening your search or adding more agents via the Agent Portal.
+            <div style={{ textAlign: 'center', padding: '32px 20px', color: '#888' }}>
+              <div style={{ fontSize: 28, marginBottom: 10 }}>🔍</div>
+              <div style={{ fontWeight: 600, color: '#374151', marginBottom: 6 }}>No agents found for this route / vehicle combination</div>
+              <div style={{ fontSize: 13, marginBottom: 20 }}>This broker may not be in the system yet.</div>
+              <button
+                onClick={openAddBroker}
+                style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 22px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+              >
+                + Add New Broker to Agent Portal
+              </button>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -692,6 +785,150 @@ function FindAgent({ autoBooking, onAutoBookingConsumed }: FindAgentProps) {
                     )
               })}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Add New Broker Modal ──────────────────────────────────────────── */}
+      {showAddBroker && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 520, maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            {/* Header */}
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0 }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a' }}>Add New Broker to Agent Portal</div>
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 3 }}>This broker will appear in future agent searches for matching routes &amp; vehicle types.</div>
+              </div>
+              <button onClick={() => setShowAddBroker(false)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af' }}>✕</button>
+            </div>
+
+            {/* Body */}
+            <div style={{ padding: '20px 24px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {addBrokerSuccess ? (
+                <div style={{ textAlign: 'center', padding: '30px 0' }}>
+                  <div style={{ fontSize: 40, marginBottom: 10 }}>✅</div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: '#065f46' }}>Broker added successfully!</div>
+                  <div style={{ fontSize: 13, color: '#888', marginTop: 6 }}>Re-running search…</div>
+                </div>
+              ) : (
+                <>
+                  {/* Company + Contact */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Company Name *</label>
+                      <input type="text" value={addBrokerForm.company_name}
+                        onChange={e => setAddBrokerForm(f => ({ ...f, company_name: e.target.value }))}
+                        placeholder="e.g. Nanda Transport"
+                        style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 10px', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Contact Person</label>
+                      <input type="text" value={addBrokerForm.contact_person}
+                        onChange={e => setAddBrokerForm(f => ({ ...f, contact_person: e.target.value }))}
+                        placeholder="e.g. Ramesh Patel"
+                        style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 10px', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Mobile + City */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Mobile Number *</label>
+                      <input type="tel" value={addBrokerForm.mobile}
+                        onChange={e => setAddBrokerForm(f => ({ ...f, mobile: e.target.value }))}
+                        placeholder="e.g. 9824505540"
+                        style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 10px', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>City *</label>
+                      <input type="text" value={addBrokerForm.city}
+                        onChange={e => setAddBrokerForm(f => ({ ...f, city: e.target.value }))}
+                        placeholder="e.g. Vadodara"
+                        style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 10px', fontSize: 13, boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fleet type */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Type</label>
+                    <select value={addBrokerForm.fleet_type}
+                      onChange={e => setAddBrokerForm(f => ({ ...f, fleet_type: e.target.value }))}
+                      style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: 6, padding: '8px 10px', fontSize: 13 }}
+                    >
+                      <option value="BROKER">Broker</option>
+                      <option value="FLEET_OWNER">Fleet Owner</option>
+                      <option value="FLEET_OWNER_BROKER">Fleet Owner / Broker</option>
+                    </select>
+                  </div>
+
+                  {/* Vehicle types */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>Vehicle Types Handled</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {ROUTE_VEHICLE_OPTIONS.map(vt => (
+                        <button key={vt} onClick={() => toggleVehicleType(vt)}
+                          style={{ padding: '4px 10px', fontSize: 11, borderRadius: 20, border: '1px solid', cursor: 'pointer',
+                            background: addBrokerForm.vehicle_types.includes(vt) ? '#c45c28' : '#f3f4f6',
+                            color:      addBrokerForm.vehicle_types.includes(vt) ? '#fff'    : '#374151',
+                            borderColor: addBrokerForm.vehicle_types.includes(vt) ? '#c45c28' : '#e5e7eb',
+                          }}>
+                          {vt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Routes covered */}
+                  <div>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 6 }}>Routes Covered</label>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                      <input type="text" value={addBrokerForm.new_route}
+                        onChange={e => setAddBrokerForm(f => ({ ...f, new_route: e.target.value }))}
+                        onKeyDown={e => e.key === 'Enter' && addRoute()}
+                        placeholder="e.g. Vadodara - Mumbai"
+                        style={{ flex: 1, border: '1px solid #d1d5db', borderRadius: 6, padding: '7px 10px', fontSize: 13 }}
+                      />
+                      <button onClick={addRoute}
+                        style={{ background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 6, padding: '7px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                        + Add
+                      </button>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {addBrokerForm.routes_covered.map(r => (
+                        <span key={r} style={{ background: '#e0f2fe', color: '#0369a1', fontSize: 11, padding: '3px 8px', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 5 }}>
+                          {r}
+                          <button onClick={() => removeRoute(r)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#0369a1', fontWeight: 700, padding: 0, lineHeight: 1 }}>✕</button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {addBrokerErr && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '8px 12px', fontSize: 13, color: '#b91c1c' }}>
+                      {addBrokerErr}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Footer */}
+            {!addBrokerSuccess && (
+              <div style={{ padding: '14px 24px', borderTop: '1px solid #e5e7eb', display: 'flex', gap: 10, justifyContent: 'flex-end', flexShrink: 0 }}>
+                <button onClick={() => setShowAddBroker(false)}
+                  style={{ background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#374151' }}>
+                  Cancel
+                </button>
+                <button onClick={handleAddBroker} disabled={addBrokerSaving}
+                  style={{ background: addBrokerSaving ? '#6ee7b7' : '#059669', color: '#fff', border: 'none', borderRadius: 7, padding: '9px 20px', fontSize: 13, fontWeight: 700, cursor: addBrokerSaving ? 'not-allowed' : 'pointer' }}>
+                  {addBrokerSaving ? 'Saving…' : '+ Save Broker to Portal'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -860,14 +1097,28 @@ function AgentPortal() {
 }
 
 // ── Sub-tab 03: Pending Bookings ──────────────────────────────────────────────
-interface PendingBookingsProps {
-  onLoadBooking: (b: MvdAutoBooking) => void
+interface ConfirmForm {
+  confirmed_broker:      string
+  confirmed_amount:      string
+  confirmed_vehicle_no:  string
+  save_to_portal:        boolean
+  broker_mobile:         string
+  broker_city:           string
 }
 
-function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
-  const [bookings,  setBookings]  = useState<MvdBookingRecord[]>([])
-  const [loading,   setLoading]   = useState(false)
-  const [refreshed, setRefreshed] = useState(false)
+interface PendingBookingsProps {
+  onLoadBooking:      (b: MvdAutoBooking) => void
+  onBookingConfirmed?: () => void
+}
+
+function PendingBookings({ onLoadBooking, onBookingConfirmed }: PendingBookingsProps) {
+  const [bookings,    setBookings]    = useState<MvdBookingRecord[]>([])
+  const [loading,     setLoading]     = useState(false)
+  const [refreshed,   setRefreshed]   = useState(false)
+  const [confirmTarget, setConfirmTarget] = useState<MvdBookingRecord | null>(null)
+  const [confirmForm, setConfirmForm] = useState<ConfirmForm>({ confirmed_broker: '', confirmed_amount: '', confirmed_vehicle_no: '', save_to_portal: false, broker_mobile: '', broker_city: '' })
+  const [confirming,  setConfirming]  = useState(false)
+  const [confirmErr,  setConfirmErr]  = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -881,10 +1132,67 @@ function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
 
   useEffect(() => { load() }, [load])
 
+  const openConfirm = (b: MvdBookingRecord) => {
+    setConfirmTarget(b)
+    setConfirmForm({ confirmed_broker: b.company_name || '', confirmed_amount: '', confirmed_vehicle_no: '', save_to_portal: false, broker_mobile: '', broker_city: b.from_loc.split(',')[0].trim() })
+    setConfirmErr('')
+  }
+
+  const handleConfirm = async () => {
+    if (!confirmTarget) return
+    if (!confirmForm.confirmed_broker.trim()) { setConfirmErr('Broker / Agent name is required.'); return }
+    if (confirmForm.save_to_portal && !confirmForm.broker_mobile.trim()) { setConfirmErr('Mobile number is required to save broker to agent portal.'); return }
+    setConfirming(true); setConfirmErr('')
+    try {
+      // 1. Confirm the booking
+      const res = await fetch(`/api/dispatch/mvd/bookings/${confirmTarget.id}/confirm`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          confirmed_broker:      confirmForm.confirmed_broker.trim(),
+          confirmed_amount:      confirmForm.confirmed_amount ? Number(confirmForm.confirmed_amount) : null,
+          confirmed_vehicle_no:  confirmForm.confirmed_vehicle_no.trim() || null,
+        }),
+      })
+      const json = await res.json()
+      if (json.error) throw new Error(json.error)
+
+      // 2. Optionally save broker to agent portal
+      if (confirmForm.save_to_portal && confirmForm.broker_mobile.trim()) {
+        await fetch('/api/dispatch/mvd/agents', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({
+            company_name:   confirmForm.confirmed_broker.trim(),
+            mobile:         confirmForm.broker_mobile.trim(),
+            city:           confirmForm.broker_city.trim() || confirmTarget.from_loc,
+            fleet_type:     'BROKER',
+            vehicle_types:  [confirmTarget.vehicle_type],
+            routes_covered: [`${confirmTarget.from_loc} - ${confirmTarget.to_loc}`],
+          }),
+        })
+        // non-blocking: if agent save fails, booking is still confirmed
+      }
+
+      setConfirmTarget(null)
+      await load()
+      onBookingConfirmed?.()
+    } catch (e) {
+      setConfirmErr(e instanceof Error ? e.message : String(e))
+    } finally {
+      setConfirming(false)
+    }
+  }
+
   const stageColor: Record<string, string> = {
-    BOOKING_RECEIVED: '#fef3c7',
+    BOOKING_RECEIVED:  '#fef3c7',
     BOOKING_CONFIRMED: '#d1fae5',
-    CANCELLED: '#fee2e2',
+    CANCELLED:         '#fee2e2',
+  }
+
+  const INP: React.CSSProperties = {
+    width: '100%', border: '1px solid #d1d5db', borderRadius: 6,
+    padding: '8px 12px', fontSize: 14, boxSizing: 'border-box',
   }
 
   return (
@@ -892,7 +1200,9 @@ function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1a1a1a', margin: 0 }}>Market Vehicle Booking Queue</h3>
-          <p style={{ fontSize: 12, color: '#888', margin: '4px 0 0' }}>All bookings submitted via the Market Vehicle Booking tab. Click “Open in Find Agent” to auto-load the booking into the agent search.</p>
+          <p style={{ fontSize: 12, color: '#888', margin: '4px 0 0' }}>
+            Click <strong>Find Agent</strong> to search brokers, then <strong>Confirm Booking</strong> once a vehicle is arranged — confirmed bookings appear instantly in the Dispatch Board.
+          </p>
         </div>
         <button onClick={load} disabled={loading} style={{ background: '#f3f4f6', border: '1px solid #d1d5db', borderRadius: 6, padding: '7px 14px', fontSize: 12, cursor: 'pointer' }}>
           {loading ? 'Loading…' : '↻ Refresh'}
@@ -919,7 +1229,7 @@ function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
                 <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Vehicle</th>
                 <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Material</th>
                 <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Status</th>
-                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Action</th>
+                <th style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 700, color: '#374151' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -944,27 +1254,104 @@ function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
                     </span>
                   </td>
                   <td style={{ padding: '10px 14px' }}>
-                    <button
-                      onClick={() => onLoadBooking({
-                        id:           b.id,
-                        from_loc:     b.from_loc,
-                        to_loc:       b.to_loc,
-                        vehicle_type: b.vehicle_type,
-                        material:     b.material,
-                        trip_date:    b.trip_date,
-                        client_name:  b.client_name,
-                        phone:        b.phone,
-                        company_name: b.company_name,
-                      })}
-                      style={{ background: '#c45c28', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                    >
-                      Open in Find Agent →
-                    </button>
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                      {b.stage !== 'BOOKING_CONFIRMED' && (
+                        <button
+                          onClick={() => openConfirm(b)}
+                          style={{ background: '#059669', color: '#fff', border: 'none', borderRadius: 6, padding: '5px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                        >
+                          ✓ Confirm
+                        </button>
+                      )}
+                      {b.stage === 'BOOKING_CONFIRMED' && (
+                        <span style={{ background: '#d1fae5', color: '#065f46', fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: 6 }}>
+                          ✓ In Dispatch Board
+                        </span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* ── Confirm Booking Modal ──────────────────────────────────────────── */}
+      {confirmTarget && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: '#fff', borderRadius: 14, width: '100%', maxWidth: 480, boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: '#1a1a1a' }}>Confirm Market Vehicle Booking</div>
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 3 }}>
+                  {fmtRef(confirmTarget.id)} — {confirmTarget.client_name} — {confirmTarget.from_loc} → {confirmTarget.to_loc}
+                </div>
+                <div style={{ fontSize: 12, color: '#6b7280', marginTop: 1 }}>
+                  {confirmTarget.vehicle_type} · {confirmTarget.trip_date}
+                </div>
+              </div>
+              <button onClick={() => setConfirmTarget(null)} style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#9ca3af', lineHeight: 1 }}>✕</button>
+            </div>
+
+            <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#065f46' }}>
+                Once confirmed: this booking will appear in the <strong>Dispatch Board</strong> and an email will be sent to info@bgts.in.
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Broker / Agent Company Name *</label>
+                <input
+                  type="text"
+                  value={confirmForm.confirmed_broker}
+                  onChange={e => setConfirmForm(f => ({ ...f, confirmed_broker: e.target.value }))}
+                  placeholder="e.g. Patel Transport Pvt Ltd"
+                  style={INP}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Agreed Amount (₹)</label>
+                <input
+                  type="number"
+                  value={confirmForm.confirmed_amount}
+                  onChange={e => setConfirmForm(f => ({ ...f, confirmed_amount: e.target.value }))}
+                  placeholder="e.g. 28000"
+                  style={INP}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Vehicle Reg No. (if known)</label>
+                <input
+                  type="text"
+                  value={confirmForm.confirmed_vehicle_no}
+                  onChange={e => setConfirmForm(f => ({ ...f, confirmed_vehicle_no: e.target.value }))}
+                  placeholder="e.g. GJ06 AB 1234"
+                  style={INP}
+                />
+              </div>
+
+              {confirmErr && (
+                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, padding: '8px 12px', fontSize: 13, color: '#b91c1c' }}>
+                  {confirmErr}
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '14px 24px', borderTop: '1px solid #e5e7eb', display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setConfirmTarget(null)}
+                style={{ background: '#f3f4f6', border: 'none', borderRadius: 7, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#374151' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                disabled={confirming}
+                style={{ background: confirming ? '#6ee7b7' : '#059669', color: '#fff', border: 'none', borderRadius: 7, padding: '9px 20px', fontSize: 13, fontWeight: 700, cursor: confirming ? 'not-allowed' : 'pointer' }}
+              >
+                {confirming ? 'Confirming…' : '✓ Confirm & Push to Dispatch Board'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -975,11 +1362,12 @@ function PendingBookings({ onLoadBooking }: PendingBookingsProps) {
 interface MarketVehicleDeskProps {
   autoBooking?:           MvdAutoBooking | null
   onAutoBookingConsumed?: () => void
+  onBookingConfirmed?:    () => void
 }
 
-export default function MarketVehicleDesk({ autoBooking, onAutoBookingConsumed }: MarketVehicleDeskProps) {
-  const [activeTab,  setActiveTab]  = useState<'flow' | 'find' | 'portal' | 'queue'>('flow')
-  const [agentCount, setAgentCount] = useState<number | null>(null)
+export default function MarketVehicleDesk({ autoBooking, onAutoBookingConsumed, onBookingConfirmed }: MarketVehicleDeskProps) {
+  const [activeTab,        setActiveTab]        = useState<'flow' | 'find' | 'portal' | 'queue'>('flow')
+  const [agentCount,       setAgentCount]       = useState<number | null>(null)
   const [findAgentBooking, setFindAgentBooking] = useState<MvdAutoBooking | null>(null)
   const ROUTE_COUNT = 44
 
@@ -987,63 +1375,77 @@ export default function MarketVehicleDesk({ autoBooking, onAutoBookingConsumed }
     fetch('/api/dispatch/mvd/agents')
       .then(r => r.json())
       .then(j => setAgentCount((j.data ?? []).length))
-      .catch(() => setAgentCount(0))
+      .catch(() => {})
   }, [])
 
-  // When autoBooking arrives from DispatchShell, switch to Find Agent tab
   useEffect(() => {
-    if (!autoBooking) return
-    setFindAgentBooking(autoBooking)
-    setActiveTab('find')
+    if (autoBooking) {
+      setFindAgentBooking(autoBooking)
+      setActiveTab('find')
+    }
   }, [autoBooking])
 
-  const handleLoadFromQueue = (b: MvdAutoBooking) => {
+  const handleLoadFromQueue = useCallback((b: MvdAutoBooking) => {
     setFindAgentBooking(b)
     setActiveTab('find')
-  }
+  }, [])
 
-  const tabs: { id: 'flow' | 'find' | 'portal' | 'queue'; label: string }[] = [
-    { id: 'flow',   label: '00  Process Flow' },
-    { id: 'find',   label: '01  Find Agent (Ops)' },
-    { id: 'portal', label: '02  Agent Portal' },
-    { id: 'queue',  label: '03  Booking Queue' },
+  const TABS: { key: 'flow' | 'find' | 'portal' | 'queue'; label: string }[] = [
+    { key: 'flow',   label: '📋 How it Works' },
+    { key: 'find',   label: '🔍 Find Agent' },
+    { key: 'portal', label: '🏢 Agent Portal' },
+    { key: 'queue',  label: '📦 Pending Bookings' },
   ]
 
   return (
-    <div style={{ padding: '0 0 40px 0' }}>
-      {/* Header */}
-      <div style={{ background: '#1a1a1a', color: '#fff', borderRadius: 10, padding: '16px 24px', marginBottom: 20, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-        <div>
-          <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: '-0.5px' }}>BGTS Market Vehicle Desk</div>
-          <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>Agent Sourcing &amp; Allocation Console</div>
+    <div>
+      <div style={{ marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#1a1a1a', margin: 0 }}>Market Vehicle Desk</h2>
+            <p style={{ fontSize: 12, color: '#888', margin: '4px 0 0' }}>
+              {agentCount !== null ? `${agentCount} agents empanelled` : 'Loading agents…'} · {ROUTE_COUNT} routes covered
+            </p>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: '#ccc' }}>
-          <span style={{ color: agentCount === 0 ? '#f87171' : '#86efac', fontWeight: 600 }}>
-            {agentCount === null ? '…' : agentCount.toLocaleString()} agents loaded
-          </span>
-          <span style={{ color: '#86efac', fontWeight: 600 }}>{ROUTE_COUNT} routes mapped</span>
+        <div style={{ display: 'flex', gap: 4, borderBottom: '2px solid #e5e7eb' }}>
+          {TABS.map(t => (
+            <button
+              key={t.key}
+              onClick={() => setActiveTab(t.key)}
+              style={{
+                padding: '8px 18px',
+                fontSize: 13,
+                fontWeight: activeTab === t.key ? 700 : 500,
+                color: activeTab === t.key ? '#c45c28' : '#6b7280',
+                background: 'none',
+                border: 'none',
+                borderBottom: `2px solid ${activeTab === t.key ? '#c45c28' : 'transparent'}`,
+                marginBottom: -2,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Sub-tabs */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: 20 }}>
-        {tabs.map(t => (
-          <button key={t.id} onClick={() => setActiveTab(t.id)} style={{ background: 'none', border: 'none', borderBottom: activeTab === t.id ? '2px solid #c45c28' : '2px solid transparent', marginBottom: -2, padding: '10px 20px', fontSize: 13, fontWeight: activeTab === t.id ? 700 : 500, color: activeTab === t.id ? '#c45c28' : '#666', cursor: 'pointer', transition: 'color 0.15s' }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Content */}
-      {activeTab === 'flow'   && <ProcessFlow />}
-      {activeTab === 'find'   && (
+      {activeTab === 'flow' && <ProcessFlow />}
+      {activeTab === 'find' && (
         <FindAgent
-          autoBooking={findAgentBooking}
+          initialBooking={findAgentBooking}
           onAutoBookingConsumed={() => { setFindAgentBooking(null); onAutoBookingConsumed?.() }}
         />
       )}
       {activeTab === 'portal' && <AgentPortal />}
-      {activeTab === 'queue'  && <PendingBookings onLoadBooking={handleLoadFromQueue} />}
+      {activeTab === 'queue'  && (
+        <PendingBookings
+          onLoadBooking={handleLoadFromQueue}
+          onBookingConfirmed={onBookingConfirmed}
+        />
+      )}
     </div>
   )
 }

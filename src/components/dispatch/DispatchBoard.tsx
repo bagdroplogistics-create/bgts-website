@@ -1,7 +1,13 @@
 'use client'
 import { useState } from 'react'
 import { buildWhatsAppMessage, openWhatsApp, STAGE_LABELS } from '@/lib/whatsapp'
-import type { Booking, BookingStage } from '@/types/dispatch'
+import type { Booking, BookingStage, MaterialType, TripType, Vehicle } from '@/types/dispatch'
+
+const MATERIALS: MaterialType[] = [
+  'General Cargo','Steel / Metal','Cement / Building Material',
+  'Chemicals','FMCG / Packaged Goods','Machinery / Equipment',
+  'Agricultural Produce','Other',
+]
 
 // Active stages shown in dropdown
 const STAGE_ORDER: BookingStage[] = [
@@ -29,6 +35,7 @@ type FilterStatus = 'ALL' | BookingStage
 
 interface Props {
   bookings:    Booking[]
+  vehicles?:   Vehicle[]
   onStageChange: (id: string, stage: BookingStage) => Promise<void>
   loading:     boolean
   onRefresh?:  () => void
@@ -39,32 +46,50 @@ function rs(n: number | null) {
   return '₹' + n.toLocaleString('en-IN', { maximumFractionDigits: 0 })
 }
 
-// ── Edit modal form state
+// ── Edit modal form state — mirrors all BookingForm fields
 interface EditForm {
-  trip_date:    string
-  client_name:  string
-  company_name: string
-  phone:        string
-  from_loc:     string
-  to_loc:       string
-  distance_km:  string
-  material:     string
-  rate_total:   string
-  notes:        string
+  trip_date:      string
+  client_name:    string
+  company_name:   string
+  phone:          string
+  email:          string
+  from_loc:       string
+  to_loc:         string
+  distance_km:    string
+  material:       MaterialType
+  pcs_boxes:      string
+  weight_kg:      string
+  vehicle_id:     string
+  trip_type:      TripType
+  margin_pct:     string
+  rate_total:     string
+  notes:          string
+  driver_name:    string
+  driver_phone:   string
+  driver_license: string
 }
 
 function bookingToForm(b: Booking): EditForm {
   return {
-    trip_date:    b.trip_date    ?? '',
-    client_name:  b.client_name  ?? '',
-    company_name: b.company_name ?? '',
-    phone:        b.phone        ?? '',
-    from_loc:     b.from_loc     ?? '',
-    to_loc:       b.to_loc       ?? '',
-    distance_km:  String(b.distance_km ?? ''),
-    material:     b.material     ?? '',
-    rate_total:   String(b.rate_total ?? ''),
-    notes:        b.notes        ?? '',
+    trip_date:      b.trip_date      ?? '',
+    client_name:    b.client_name    ?? '',
+    company_name:   b.company_name   ?? '',
+    phone:          b.phone          ?? '',
+    email:          b.email          ?? '',
+    from_loc:       b.from_loc       ?? '',
+    to_loc:         b.to_loc         ?? '',
+    distance_km:    String(b.distance_km ?? ''),
+    material:       b.material       ?? 'General Cargo',
+    pcs_boxes:      String(b.pcs_boxes  ?? ''),
+    weight_kg:      String(b.weight_kg  ?? ''),
+    vehicle_id:     b.vehicle_id     ?? '',
+    trip_type:      b.trip_type      ?? 'INTERCITY',
+    margin_pct:     String(b.margin_pct ?? 20),
+    rate_total:     String(b.rate_total ?? ''),
+    notes:          b.notes          ?? '',
+    driver_name:    b.driver_name    ?? '',
+    driver_phone:   b.driver_phone   ?? '',
+    driver_license: b.driver_license ?? '',
   }
 }
 
@@ -90,7 +115,7 @@ function IconTrash() {
   )
 }
 
-export function DispatchBoard({ bookings, onStageChange, loading, onRefresh }: Props) {
+export function DispatchBoard({ bookings, vehicles = [], onStageChange, loading, onRefresh }: Props) {
   const [filter,        setFilter]        = useState<FilterStatus>('ALL')
   const [vehicleFilter, setVehicleFilter] = useState<string>('ALL')
   const [pending,       setPending]       = useState<string | null>(null)
@@ -154,8 +179,14 @@ export function DispatchBoard({ bookings, onStageChange, loading, onRefresh }: P
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           ...editForm,
-          distance_km: editForm.distance_km ? Number(editForm.distance_km) : undefined,
-          rate_total:  editForm.rate_total  ? Number(editForm.rate_total)  : undefined,
+          distance_km:    editForm.distance_km    ? Number(editForm.distance_km)    : undefined,
+          pcs_boxes:      editForm.pcs_boxes      ? Number(editForm.pcs_boxes)      : null,
+          weight_kg:      editForm.weight_kg      ? Number(editForm.weight_kg)      : null,
+          margin_pct:     editForm.margin_pct     ? Number(editForm.margin_pct)     : 20,
+          rate_total:     editForm.rate_total     ? Number(editForm.rate_total)     : null,
+          driver_name:    editForm.driver_name    || null,
+          driver_phone:   editForm.driver_phone   || null,
+          driver_license: editForm.driver_license || null,
         }),
       })
       const json = await res.json()
@@ -324,56 +355,193 @@ export function DispatchBoard({ bookings, onStageChange, loading, onRefresh }: P
       {/* ── Edit Modal ── */}
       {editBooking && editForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="font-bold text-gray-900">Edit Booking — {editBooking.client_name}</h3>
-              <button onClick={() => setEditBooking(null)} className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">&times;</button>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl" style={{ maxHeight: '92vh', display: 'flex', flexDirection: 'column' }}>
+
+            {/* Header — sticky */}
+            <div className="p-5 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+              <div>
+                <h3 className="font-bold text-gray-900 text-base">Edit Booking</h3>
+                <p className="text-xs text-gray-500 mt-0.5">{editBooking.client_name} — {editBooking.from_loc} → {editBooking.to_loc}</p>
+              </div>
+              <button onClick={() => setEditBooking(null)} className="text-gray-400 hover:text-gray-600 text-2xl font-bold leading-none">&times;</button>
             </div>
-            <div className="p-5 grid grid-cols-2 gap-4">
-              {[
-                { key: 'trip_date',    label: 'Trip Date',    type: 'date' },
-                { key: 'client_name',  label: 'Client Name',  type: 'text' },
-                { key: 'company_name', label: 'Company',      type: 'text' },
-                { key: 'phone',        label: 'Phone',        type: 'text' },
-                { key: 'from_loc',     label: 'From',         type: 'text' },
-                { key: 'to_loc',       label: 'To',           type: 'text' },
-                { key: 'distance_km',  label: 'Distance (km)',type: 'number' },
-                { key: 'material',     label: 'Material',     type: 'text' },
-                { key: 'rate_total',   label: 'Rate (₹)',     type: 'number' },
-              ].map(({ key, label, type }) => (
-                <div key={key} className={key === 'notes' ? 'col-span-2' : ''}>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
-                  <input
-                    type={type}
-                    value={(editForm as unknown as Record<string, string>)[key] ?? ''}
-                    onChange={e => setEditForm(f => f ? { ...f, [key]: e.target.value } : f)}
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-                  />
+
+            {/* Scrollable body */}
+            <div className="overflow-y-auto flex-1 p-5" style={{ minHeight: 0 }}>
+
+              {/* ─ Client Info ─────────────────────────────── */}
+              <div className="text-xs font-bold uppercase tracking-widest text-orange-600 border-b border-orange-100 pb-1 mb-3">Client Info</div>
+              <div className="grid grid-cols-4 gap-3 mb-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Trip Date</label>
+                  <input type="date" value={editForm.trip_date}
+                    onChange={e => setEditForm(f => f ? { ...f, trip_date: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
                 </div>
-              ))}
-              <div className="col-span-2">
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Notes</label>
-                <textarea
-                  value={editForm.notes}
-                  onChange={e => setEditForm(f => f ? { ...f, notes: e.target.value } : f)}
-                  rows={2}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none"
-                />
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Client Name *</label>
+                  <input type="text" value={editForm.client_name}
+                    onChange={e => setEditForm(f => f ? { ...f, client_name: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Company Name</label>
+                  <input type="text" value={editForm.company_name}
+                    onChange={e => setEditForm(f => f ? { ...f, company_name: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Phone *</label>
+                  <input type="tel" value={editForm.phone}
+                    onChange={e => setEditForm(f => f ? { ...f, phone: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Email</label>
+                  <input type="email" value={editForm.email}
+                    onChange={e => setEditForm(f => f ? { ...f, email: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+              </div>
+
+              {/* ─ Route & Cargo ────────────────────────────── */}
+              <div className="text-xs font-bold uppercase tracking-widest text-orange-600 border-b border-orange-100 pb-1 mb-3">Route &amp; Cargo</div>
+              <div className="grid grid-cols-4 gap-3 mb-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">From *</label>
+                  <input type="text" value={editForm.from_loc}
+                    onChange={e => setEditForm(f => f ? { ...f, from_loc: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">To *</label>
+                  <input type="text" value={editForm.to_loc}
+                    onChange={e => setEditForm(f => f ? { ...f, to_loc: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Distance (km) *</label>
+                  <input type="number" value={editForm.distance_km}
+                    onChange={e => setEditForm(f => f ? { ...f, distance_km: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Material *</label>
+                  <select value={editForm.material}
+                    onChange={e => setEditForm(f => f ? { ...f, material: e.target.value as MaterialType } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    {MATERIALS.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Pcs / Boxes</label>
+                  <input type="number" value={editForm.pcs_boxes}
+                    onChange={e => setEditForm(f => f ? { ...f, pcs_boxes: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Weight (kg)</label>
+                  <input type="number" value={editForm.weight_kg}
+                    onChange={e => setEditForm(f => f ? { ...f, weight_kg: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+              </div>
+
+              {/* ─ Vehicle & Rate ───────────────────────────── */}
+              <div className="text-xs font-bold uppercase tracking-widest text-orange-600 border-b border-orange-100 pb-1 mb-3">Vehicle &amp; Rate</div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div className="col-span-2">
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Vehicle *</label>
+                  <select value={editForm.vehicle_id}
+                    onChange={e => setEditForm(f => f ? { ...f, vehicle_id: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <option value="">— Select vehicle —</option>
+                    {vehicles.map(v => (
+                      <option key={v.id} value={v.id}>{v.reg_no} — {v.make_model}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Trip Type</label>
+                  <select value={editForm.trip_type}
+                    onChange={e => setEditForm(f => f ? { ...f, trip_type: e.target.value as TripType } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400">
+                    <option value="INTRACITY">Intracity</option>
+                    <option value="INTERCITY">Intercity</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Margin %</label>
+                  <input type="number" value={editForm.margin_pct}
+                    onChange={e => setEditForm(f => f ? { ...f, margin_pct: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+              </div>
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Rate (₹)</label>
+                  <input type="number" value={editForm.rate_total}
+                    onChange={e => setEditForm(f => f ? { ...f, rate_total: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+              </div>
+
+              {/* ─ Driver Details ───────────────────────────── */}
+              <div className="text-xs font-bold uppercase tracking-widest text-orange-600 border-b border-orange-100 pb-1 mb-3">Driver Details</div>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Driver Name</label>
+                  <input type="text" value={editForm.driver_name}
+                    onChange={e => setEditForm(f => f ? { ...f, driver_name: e.target.value } : f)}
+                    placeholder="Full name"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Driver Contact No.</label>
+                  <input type="tel" value={editForm.driver_phone}
+                    onChange={e => setEditForm(f => f ? { ...f, driver_phone: e.target.value } : f)}
+                    placeholder="10-digit number"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Driver License No.</label>
+                  <input type="text" value={editForm.driver_license}
+                    onChange={e => setEditForm(f => f ? { ...f, driver_license: e.target.value } : f)}
+                    placeholder="DL-XXXXXXXXXXXXXX"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+              </div>
+
+              {/* ─ Notes ───────────────────────────────────── */}
+              <div className="text-xs font-bold uppercase tracking-widest text-orange-600 border-b border-orange-100 pb-1 mb-3">Notes</div>
+              <textarea value={editForm.notes}
+                onChange={e => setEditForm(f => f ? { ...f, notes: e.target.value } : f)}
+                rows={2}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 resize-none" />
+
+            </div>
+
+            {/* Footer — sticky */}
+            <div className="p-4 border-t border-gray-200 flex-shrink-0">
+              {editErr && (
+                <div className="mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{editErr}</div>
+              )}
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setEditBooking(null)}
+                  className="px-5 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200">
+                  Cancel
+                </button>
+                <button onClick={saveEdit} disabled={editSaving}
+                  className="px-5 py-2 rounded-lg bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 disabled:opacity-50">
+                  {editSaving ? 'Saving…' : 'Save Changes'}
+                </button>
               </div>
             </div>
-            {editErr && (
-              <div className="mx-5 mb-3 px-3 py-2 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{editErr}</div>
-            )}
-            <div className="p-5 border-t border-gray-200 flex gap-3 justify-end">
-              <button onClick={() => setEditBooking(null)}
-                className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200">
-                Cancel
-              </button>
-              <button onClick={saveEdit} disabled={editSaving}
-                className="px-4 py-2 rounded-lg bg-orange-500 text-white text-sm font-semibold hover:bg-orange-600 disabled:opacity-50">
-                {editSaving ? 'Saving…' : 'Save Changes'}
-              </button>
-            </div>
+
           </div>
         </div>
       )}

@@ -149,7 +149,7 @@ export function DispatchShell() {
             <TripExpenseForm />
           </div>
         )}
-        {tab === 'dispatch'  && <DispatchBoard bookings={bookings} onStageChange={handleStageChange} loading={bLoading} onRefresh={refreshBookings} />}
+        {tab === 'dispatch'  && <DispatchBoard bookings={bookings} vehicles={vehicles} onStageChange={handleStageChange} loading={bLoading} onRefresh={refreshBookings} />}
         {tab === 'vehicles'  && <VehicleMaster vehicles={vehicles} onAdd={addVehicle} onUpdate={updateVehicle} onStatusChange={handleStatusChange} loading={vLoading} />}
         {tab === 'rates'     && <RateSettings />}
         {tab === 'inquiries'   && <WebsiteInquiries />}
@@ -161,6 +161,7 @@ export function DispatchShell() {
             <MarketVehicleDesk
               autoBooking={mvdAutoBooking}
               onAutoBookingConsumed={() => setMvdAutoBooking(null)}
+              onBookingConfirmed={refreshBookings}
             />
           </div>
         )}

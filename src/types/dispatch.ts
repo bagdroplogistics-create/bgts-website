@@ -135,7 +135,10 @@ export interface Booking {
   rate_total:    number | null   // calculated rate ₹
   stage:         BookingStage
   source:        BookingSource
-  notes:         string | null
+  notes:          string | null
+  driver_name:    string | null
+  driver_phone:   string | null
+  driver_license: string | null
   created_at:    string
   updated_at:    string
   // joined
