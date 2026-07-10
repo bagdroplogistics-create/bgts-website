@@ -1435,7 +1435,7 @@ export default function MarketVehicleDesk({ autoBooking, onAutoBookingConsumed, 
       {activeTab === 'flow' && <ProcessFlow />}
       {activeTab === 'find' && (
         <FindAgent
-          initialBooking={findAgentBooking}
+          autoBooking={findAgentBooking}
           onAutoBookingConsumed={() => { setFindAgentBooking(null); onAutoBookingConsumed?.() }}
         />
       )}
