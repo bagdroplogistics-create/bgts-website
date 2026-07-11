@@ -1134,7 +1134,7 @@ function PendingBookings({ onLoadBooking, onBookingConfirmed }: PendingBookingsP
 
   const openConfirm = (b: MvdBookingRecord) => {
     setConfirmTarget(b)
-    setConfirmForm({ confirmed_broker: b.company_name || '', confirmed_amount: '', confirmed_vehicle_no: '', save_to_portal: false, broker_mobile: '', broker_city: b.from_loc.split(',')[0].trim() })
+    setConfirmForm({ confirmed_broker: '', confirmed_amount: '', confirmed_vehicle_no: '', save_to_portal: false, broker_mobile: '', broker_city: b.from_loc.split(',')[0].trim() })
     setConfirmErr('')
   }
 
@@ -1295,16 +1295,33 @@ function PendingBookings({ onLoadBooking, onBookingConfirmed }: PendingBookingsP
             </div>
 
             <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {/* Client context — shows who the client is so the broker field is never confused */}
+              <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '10px 14px', fontSize: 12 }}>
+                <div style={{ color: '#64748b', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: 10 }}>Client (do NOT repeat below)</div>
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <div><span style={{ color: '#94a3b8' }}>Client: </span><strong style={{ color: '#1e293b' }}>{confirmTarget.client_name}</strong></div>
+                  {confirmTarget.company_name && <div><span style={{ color: '#94a3b8' }}>Company: </span><strong style={{ color: '#1e293b' }}>{confirmTarget.company_name}</strong></div>}
+                </div>
+              </div>
               <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', fontSize: 12, color: '#065f46' }}>
-                Once confirmed: this booking will appear in the <strong>Dispatch Board</strong> and an email will be sent to info@bgts.in.
+                Once confirmed: this booking will appear in the <strong>Dispatch Board</strong> and an email will be sent.
               </div>
               <div>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Broker / Agent Company Name *</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 2 }}>
+                  Transporter / Broker Name <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <div style={{ fontSize: 11, color: '#6b7280', marginBottom: 6 }}>
+                  Who agreed to carry this load — e.g. Nanda Transport, Patel Logistics. <strong>Not the client&apos;s company.</strong>
+                </div>
                 <input
                   type="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   value={confirmForm.confirmed_broker}
                   onChange={e => setConfirmForm(f => ({ ...f, confirmed_broker: e.target.value }))}
-                  placeholder="e.g. Patel Transport Pvt Ltd"
+                  placeholder="e.g. Nanda Transport"
                   style={INP}
                 />
               </div>
@@ -1322,6 +1339,7 @@ function PendingBookings({ onLoadBooking, onBookingConfirmed }: PendingBookingsP
                 <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', marginBottom: 4 }}>Vehicle Reg No. (if known)</label>
                 <input
                   type="text"
+                  autoComplete="off"
                   value={confirmForm.confirmed_vehicle_no}
                   onChange={e => setConfirmForm(f => ({ ...f, confirmed_vehicle_no: e.target.value }))}
                   placeholder="e.g. GJ06 AB 1234"

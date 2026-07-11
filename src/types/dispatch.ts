@@ -117,12 +117,13 @@ export type BookingStage =
 export type BookingSource = 'ADMIN' | 'CUSTOMER'
 
 export interface Booking {
-  id:            string
-  trip_date:     string          // ISO date string
-  client_name:   string
-  company_name:  string | null
-  phone:         string
-  email:         string | null
+  id:               string
+  trip_date:        string          // ISO date string
+  client_name:      string
+  company_name:     string | null   // client's company
+  confirmed_broker: string | null   // broker/agent who arranged a market vehicle
+  phone:            string
+  email:            string | null
   from_loc:      string
   to_loc:        string
   distance_km:   number

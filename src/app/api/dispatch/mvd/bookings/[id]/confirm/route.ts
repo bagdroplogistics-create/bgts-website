@@ -94,27 +94,28 @@ export async function POST(
     const { data: newBooking, error: bookErr } = await (sb as any)
       .from('bookings')
       .insert({
-        trip_date:    mvd.trip_date,
-        client_name:  mvd.client_name,
-        company_name: confirmed_broker || mvd.company_name || null,
-        phone:        mvd.phone,
-        email:        mvd.email        || null,
-        from_loc:     mvd.from_loc,
-        to_loc:       mvd.to_loc,
-        distance_km:  mvd.distance_km  || 0,
-        material:     mvd.material,
-        pcs_boxes:    mvd.pcs_boxes    || null,
-        weight_kg:    mvd.weight_kg    || null,
-        vehicle_id:   null,                       // market vehicle — no fleet FK
-        trip_type:    mvd.trip_type    || 'INTERCITY',
-        margin_pct:   mvd.margin_pct   || 20,
-        rate_total:   confirmed_amount || null,
-        stage:        'BOOKING_CONFIRMED',
-        source:       'ADMIN',
+        trip_date:         mvd.trip_date,
+        client_name:       mvd.client_name,
+        company_name:      mvd.company_name      || null,   // client's company — never overwritten
+        confirmed_broker:  confirmed_broker       || null,   // the broker who arranged the vehicle
+        phone:             mvd.phone,
+        email:             mvd.email              || null,
+        from_loc:          mvd.from_loc,
+        to_loc:            mvd.to_loc,
+        distance_km:       mvd.distance_km        || 0,
+        material:          mvd.material,
+        pcs_boxes:         mvd.pcs_boxes          || null,
+        weight_kg:         mvd.weight_kg          || null,
+        vehicle_id:        null,                             // market vehicle — no fleet FK
+        trip_type:         mvd.trip_type          || 'INTERCITY',
+        margin_pct:        mvd.margin_pct         || 20,
+        rate_total:        confirmed_amount        || null,
+        stage:             'BOOKING_CONFIRMED',
+        source:            'ADMIN',
         notes: [
           `🚛 Market Vehicle Booking`,
-          confirmed_broker  ? `Broker: ${confirmed_broker}`         : null,
-          confirmed_vehicle_no ? `Vehicle: ${confirmed_vehicle_no}` : null,
+          confirmed_broker     ? `Broker: ${confirmed_broker}`           : null,
+          confirmed_vehicle_no ? `Vehicle: ${confirmed_vehicle_no}`      : null,
           `MVD Ref: MVD-${id.slice(0, 8).toUpperCase()}`,
         ].filter(Boolean).join(' · '),
       })

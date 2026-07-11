@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   }
 
   const headers = [
-    'Date', 'Client', 'Company', 'Phone', 'Vehicle',
+    'Date', 'Client', 'Company', 'Confirmed Broker / Agent', 'Phone', 'Vehicle',
     'From', 'To', 'Distance (km)', 'Material', 'Weight (kg)',
     'Trip Type', 'Rate (₹)', 'Stage'
   ]
@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
   const rows = (data ?? []).map((b: Record<string,unknown> & { vehicle?: {reg_no:string}|null }) => [
     b.trip_date,
     b.client_name,
-    b.company_name ?? '',
+    b.company_name        ?? '',
+    b.confirmed_broker    ?? '',
     b.phone,
     b.vehicle?.reg_no ?? b.vehicle_id,
     b.from_loc,

@@ -48,11 +48,12 @@ function rs(n: number | null) {
 
 // ── Edit modal form state — mirrors all BookingForm fields
 interface EditForm {
-  trip_date:      string
-  client_name:    string
-  company_name:   string
-  phone:          string
-  email:          string
+  trip_date:        string
+  client_name:      string
+  company_name:     string
+  confirmed_broker: string
+  phone:            string
+  email:            string
   from_loc:       string
   to_loc:         string
   distance_km:    string
@@ -71,11 +72,12 @@ interface EditForm {
 
 function bookingToForm(b: Booking): EditForm {
   return {
-    trip_date:      b.trip_date      ?? '',
-    client_name:    b.client_name    ?? '',
-    company_name:   b.company_name   ?? '',
-    phone:          b.phone          ?? '',
-    email:          b.email          ?? '',
+    trip_date:        b.trip_date        ?? '',
+    client_name:      b.client_name      ?? '',
+    company_name:     b.company_name     ?? '',
+    confirmed_broker: b.confirmed_broker ?? '',
+    phone:            b.phone            ?? '',
+    email:            b.email            ?? '',
     from_loc:       b.from_loc       ?? '',
     to_loc:         b.to_loc         ?? '',
     distance_km:    String(b.distance_km ?? ''),
@@ -273,7 +275,8 @@ export function DispatchBoard({ bookings, vehicles = [], onStageChange, loading,
                   <td className="px-3 py-3 whitespace-nowrap text-gray-700 text-xs font-medium">{b.trip_date}</td>
                   <td className="px-3 py-3">
                     <div className="font-medium text-gray-900">{b.client_name}</div>
-                    {b.company_name && <div className="text-xs text-gray-500">{b.company_name}</div>}
+                    {b.company_name     && <div className="text-xs text-gray-500">{b.company_name}</div>}
+                    {b.confirmed_broker && <div className="text-xs text-blue-600 font-medium">🚛 {b.confirmed_broker}</div>}
                   </td>
                   <td className="px-3 py-3 text-gray-600 text-xs whitespace-nowrap">{b.phone}</td>
                   <td className="px-3 py-3 font-mono text-xs text-gray-700">{b.vehicle?.reg_no ?? '—'}</td>
@@ -388,6 +391,14 @@ export function DispatchBoard({ bookings, vehicles = [], onStageChange, loading,
                   <label className="block text-xs font-semibold text-gray-500 mb-1">Company Name</label>
                   <input type="text" value={editForm.company_name}
                     onChange={e => setEditForm(f => f ? { ...f, company_name: e.target.value } : f)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 mb-1">Confirmed Broker / Agent</label>
+                  <div className="text-xs text-gray-400 mb-1">Transporter/broker who arranged this vehicle — not the client&apos;s company</div>
+                  <input type="text" autoComplete="off" value={editForm.confirmed_broker}
+                    onChange={e => setEditForm(f => f ? { ...f, confirmed_broker: e.target.value } : f)}
+                    placeholder="e.g. Nanda Transport"
                     className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
                 </div>
                 <div>
