@@ -428,7 +428,7 @@ function StepSummary({ data, selectedId, onBack, onSubmit, submitting }: {
       </div>
 
       <div className="px-6 py-4 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
-        <p className="text-xs text-gray-400">Response within 30 min · GST invoice guaranteed</p>
+        <p className="text-xs text-gray-400">Our team will call you as soon as possible · GST invoice guaranteed</p>
         <button type="submit" disabled={submitting}
           className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-eko text-white font-bold text-sm hover:bg-eko-700 transition-all disabled:opacity-60 shadow-lg shadow-eko/20 hover:-translate-y-0.5">
           {submitting ? 'Submitting…' : 'Confirm EV Booking →'}
@@ -449,7 +449,7 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
       </div>
       <h3 className="font-display font-black text-2xl text-gray-900 mb-2">EV Booking Confirmed!</h3>
       <p className="text-gray-500 text-sm mb-6 max-w-md">
-        Thank you for choosing BGTS EV. Our team will confirm your booking within 30 minutes on {data.email}.
+        Thank you for choosing BGTS EV. Our team will call you as soon as possible.
       </p>
       <div className="inline-flex items-center gap-3 bg-eko/5 border border-eko/20 rounded-xl px-6 py-3.5 mb-6">
         <Hash size={16} className="text-eko" />

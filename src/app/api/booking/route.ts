@@ -138,7 +138,7 @@ function buildHtml(data: Record<string, unknown>, available: boolean, availCount
   <div style="max-width:600px;margin:32px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
     <div style="background:linear-gradient(135deg,#C2410C 0%,#EA580C 100%);padding:28px 32px">
       <div style="font-size:22px;font-weight:900;color:#ffffff">📦 BGTS — New ${serviceLabel}</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.80);margin-top:4px">Booking received — follow up within 30 minutes</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.80);margin-top:4px">Booking received — call customer as soon as possible</div>
     </div>
     <div style="background:#fff7ed;border-bottom:2px solid #fed7aa;padding:16px 32px">
       <span style="font-size:11px;color:#c2410c;font-weight:700;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px">Booking Reference</span>

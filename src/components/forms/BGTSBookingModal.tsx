@@ -672,7 +672,7 @@ function StepSummary({ data, onBack, onSubmit, submitting }: {
 
       {/* Footer */}
       <div className="px-5 py-3.5 border-t border-gray-100 bg-white flex items-center justify-between shrink-0">
-        <p className="text-xs text-gray-400">Response within 30 min · GST invoice guaranteed</p>
+        <p className="text-xs text-gray-400">Our team will call you as soon as possible · GST invoice guaranteed</p>
         <button type="submit" disabled={submitting}
           className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-brand text-white font-bold text-sm hover:bg-brand/90 transition-all disabled:opacity-60 shadow-lg shadow-brand/20 hover:-translate-y-0.5">
           {submitting ? 'Submitting…' : 'Confirm Booking →'}
@@ -693,7 +693,7 @@ function SuccessScreen({ bookingRef, data, emailWarning, onClose }: { bookingRef
       </div>
       <h3 className="font-display font-black text-2xl text-gray-900 mb-2">Booking Confirmed!</h3>
       <p className="text-gray-500 text-sm mb-4 max-w-md">
-        Thank you for booking with BGTS. Our team will confirm within 30 minutes on {data.email}.
+        Thank you for booking with BGTS. Our team will call you as soon as possible.
       </p>
       {emailWarning && (
         <div className="mb-4 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs max-w-sm text-center">

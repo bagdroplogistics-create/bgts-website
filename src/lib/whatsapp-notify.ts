@@ -208,6 +208,6 @@ export function buildAdminNotificationMsg(params: {
     `📦 *Goods:* ${goods || 'Not specified'}\n` +
     `📅 *Date:* ${date || 'Not specified'}\n\n` +
     availStatus + `\n\n` +
-    `⏰ Please contact the customer within 30 minutes.`
+    `📞 Please call the customer as soon as possible.`
   )
 }

@@ -632,7 +632,7 @@ function Confirmation({ bookingRef, watch }: { bookingRef: string; watch: any })
         Thank You for Choosing BGTS EV!
       </h2>
       <p className="text-ink-muted mb-8 max-w-md mx-auto">
-        Your booking has been received. Our team will confirm within 30 minutes.
+        Your booking has been received. Our team will call you as soon as possible.
       </p>
 
       {/* Booking ref */}

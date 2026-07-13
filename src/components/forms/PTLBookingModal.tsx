@@ -60,7 +60,7 @@ function SuccessView({ bookingRef, onClose }: { bookingRef: string; onClose: () 
       </div>
       <h3 className="font-display font-black text-2xl text-gray-900 mb-2">Booking Received!</h3>
       <p className="text-gray-500 text-sm mb-6 max-w-xs leading-relaxed">
-        Our team will contact you within 30 minutes to confirm your PTL shipment.
+        Our team will call you as soon as possible to confirm your PTL shipment.
       </p>
       <div className="bg-brand/5 border border-brand/20 rounded-xl px-8 py-5 mb-6">
         <p className="text-xs text-brand font-bold uppercase tracking-widest mb-1">Reference Number</p>

@@ -415,7 +415,7 @@ function StepForm({ control, register, errors, isSubmitting, selectedVehicleId, 
       {/* Footer */}
       <div className="px-6 py-4 border-t border-ink-ghost/10 bg-white flex items-center justify-between gap-4 shrink-0">
         <p className="text-xs text-ink-muted hidden sm:block">
-          Confirmation sent to your email · Response within 30 min · GST invoice guaranteed
+          Confirmation sent to your email · Our team will call you as soon as possible · GST invoice guaranteed
         </p>
         <button type="submit" disabled={isSubmitting}
           className="ml-auto shrink-0 inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-eko text-white font-bold text-sm hover:bg-eko-700 transition-all disabled:opacity-60 shadow-lg shadow-eko/20 hover:-translate-y-0.5 active:translate-y-0">
@@ -437,7 +437,7 @@ function SuccessScreen({ bookingRef, data, onClose }: { bookingRef: string; data
       </div>
       <h3 className="font-display font-black text-2xl text-ink-strong mb-2">Thank You for Choosing BGTS!</h3>
       <p className="text-ink-muted text-sm mb-6 max-w-md">
-        Your booking inquiry is received. Our team will confirm within 30 minutes on {data.email}.
+        Your booking inquiry is received. Our team will call you as soon as possible.
       </p>
       <div className="inline-flex items-center gap-3 bg-eko/5 border border-eko/20 rounded-xl px-6 py-3.5 mb-6">
         <Hash size={16} className="text-eko" />
