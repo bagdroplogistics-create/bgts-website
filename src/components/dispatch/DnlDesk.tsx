@@ -912,7 +912,7 @@ export function DnlDesk(){
                   {[{l:'Diesel ltrs',k:'dl'},{l:'Toll (Rs)',k:'toll'},{l:'Driver + cleaner (Rs)',k:'drv'}].map(f=>(
                     <div key={f.k} style={{display:'flex',flexDirection:'column',gap:3}}>
                       <label style={{fontSize:10.5,color:MUT,textTransform:'uppercase',letterSpacing:.4}}>{f.l}</label>
-                      <input type="number" value={(fd as Record<string,number>)[f.k]}
+                      <input type="number" value={(fd as unknown as Record<string,number>)[f.k]}
                         onChange={e=>sf(f.k,parseFloat(e.target.value)||0)}
                         style={{font:'13px inherit',padding:'6px 8px',border:'1px solid #c3ccd8',borderRadius:4,textAlign:'right',fontVariantNumeric:'tabular-nums'}}/>
                     </div>
