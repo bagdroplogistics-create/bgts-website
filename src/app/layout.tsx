@@ -5,6 +5,7 @@ import '@/styles/globals.css'
 import { BookingModalProvider } from '@/contexts/BookingModalContext'
 import { BGTSBookingModal } from '@/components/forms/BGTSBookingModal'
 import { BGTSEVBookingModal } from '@/components/forms/BGTSEVBookingModal'
+import { VehicleInquiryPopup } from '@/components/forms/VehicleInquiryPopup'
 
 // ─── Font loading ─────────────────────────────────────────────────────────
 const archivo = Archivo({
@@ -115,6 +116,8 @@ export default function RootLayout({
         <BookingModalProvider>
           <BGTSBookingModal />
           <BGTSEVBookingModal />
+          {/* Vehicle inquiry floating CTA + popup — sitewide lead gen */}
+          <VehicleInquiryPopup />
 
           {/* Main content — Navbar and Footer are added per-layout */}
           <main id="main-content">

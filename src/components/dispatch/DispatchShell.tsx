@@ -17,6 +17,15 @@ import MarketVehicleDesk                   from './MarketVehicleDesk'
 import { MarketVehicleBookingForm }        from './MarketVehicleBookingForm'
 import { TripExpenseForm }                 from './TripExpenseForm'
 import { DnlDesk }                         from './DnlDesk'
+import { LRModule }                        from './LRModule'
+import { AccountingModule }                from './AccountingModule'
+import { MastersModule }                   from './MastersModule'
+import { RenewalsModule }                  from './RenewalsModule'
+import { HiredVehiclesModule }             from './HiredVehiclesModule'
+import { ContractsModule }                 from './ContractsModule'
+import { FleetModule }                     from './FleetModule'
+import { ReportsModule }                   from './ReportsModule'
+import { SettingsModule }                  from './SettingsModule'
 import type { BookingStage, VehicleStatus, MvdAutoBooking } from '@/types/dispatch'
 
 type Tab =
@@ -27,6 +36,8 @@ type Tab =
   | 'invoice' | 'rates'
   | 'dnl'
   | 'tender'
+  | 'lr' | 'accounting' | 'fleet' | 'hired' | 'renewals' | 'contracts'
+  | 'bgts-reports' | 'masters' | 'settings'
 
 interface NavDirect { type: 'direct'; id: Tab; label: string }
 interface NavGroup  { type: 'group';  label: string; items: { id: Tab; label: string }[] }
@@ -65,7 +76,21 @@ const NAV: NavEntry[] = [
       { id: 'rates',   label: 'Rate Settings' },
     ],
   },
-  { type: 'direct', id: 'dnl', label: 'Reports' },
+  {
+    type: 'group', label: 'BGTS-OS',
+    items: [
+      { id: 'lr',           label: 'LR / Consignment Notes' },
+      { id: 'accounting',   label: 'Accounting'             },
+      { id: 'fleet',        label: 'Fleet P&L'              },
+      { id: 'hired',        label: 'Hired Vehicles'         },
+      { id: 'renewals',     label: 'Renewals & Docs'        },
+      { id: 'contracts',    label: 'Contracts'              },
+      { id: 'bgts-reports', label: 'Business Reports'       },
+      { id: 'masters',      label: 'Masters'                },
+      { id: 'settings',     label: 'Settings'               },
+    ],
+  },
+  { type: 'direct', id: 'dnl', label: 'DNL Analytics' },
   {
     type: 'group', label: 'More',
     items: [
@@ -367,6 +392,15 @@ export function DispatchShell() {
         {tab === 'rates'        && <RateSettings />}
         {tab === 'dnl'          && <DnlDesk />}
         {tab === 'tender'       && <TenderAnalyser />}
+        {tab === 'lr'           && <LRModule />}
+        {tab === 'accounting'   && <AccountingModule />}
+        {tab === 'fleet'        && <FleetModule />}
+        {tab === 'hired'        && <HiredVehiclesModule />}
+        {tab === 'renewals'     && <RenewalsModule />}
+        {tab === 'contracts'    && <ContractsModule />}
+        {tab === 'bgts-reports' && <ReportsModule />}
+        {tab === 'masters'      && <MastersModule />}
+        {tab === 'settings'     && <SettingsModule />}
       </main>
 
       {/* ════════════ FOOTER ════════════ */}
