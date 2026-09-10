@@ -38,15 +38,6 @@ export default function TrailerFleetPage() {
       <Navbar />
 
       <main className="pt-header min-h-screen bg-surface-page">
-        {/* Breadcrumb */}
-        <div className="bg-white border-b border-ink-ghost/10">
-          <div className="container-xl py-3 flex items-center gap-2 text-sm text-ink-muted">
-            <Link href="/fleet" className="hover:text-brand transition-colors">Fleet</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-ink-strong font-medium">Trailer</span>
-          </div>
-        </div>
-
         {/* Hero */}
         <FleetSubPageHero
           image="/bgts-hero-3.jpg"
@@ -55,6 +46,7 @@ export default function TrailerFleetPage() {
           headlineLine1="Trailer Fleet"
           headlineAccent="Built for the heaviest loads."
           subtitle="BGTS trailers and flatbeds move ODC, infrastructure, and project cargo that standard trucks cannot — 49-ft Flatbed, Low-Bed, and Semi Low-Bed."
+          category="Trailer"
         />
         {/* CTA below hero */}
         <div className="bg-white border-b border-ink-ghost/10 py-4">

@@ -38,15 +38,6 @@ export default function TruckFleetPage() {
       <Navbar />
 
       <main className="pt-header min-h-screen bg-surface-page">
-        {/* Breadcrumb */}
-        <div className="bg-white border-b border-ink-ghost/10">
-          <div className="container-xl py-3 flex items-center gap-2 text-sm text-ink-muted">
-            <Link href="/fleet" className="hover:text-brand transition-colors">Fleet</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-ink-strong font-medium">Truck</span>
-          </div>
-        </div>
-
         {/* Hero */}
         <FleetSubPageHero
           image="/bgts-hero-1.jpg"
@@ -55,6 +46,7 @@ export default function TruckFleetPage() {
           headlineLine1="Truck Fleet"
           headlineAccent="High capacity. Primary lanes."
           subtitle="BGTS multi-axle trucks carry 10–20 MT loads on primary FTL routes across Gujarat and Maharashtra — Tata LPS 4018, Bharat Benz 3523, Ashok Leyland 4923."
+          category="Truck"
         />
         {/* CTA below hero */}
         <div className="bg-white border-b border-ink-ghost/10 py-4">

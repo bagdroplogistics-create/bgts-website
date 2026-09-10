@@ -38,15 +38,6 @@ export default function TempoFleetPage() {
       <Navbar />
 
       <main className="pt-header min-h-screen bg-surface-page">
-        {/* Breadcrumb */}
-        <div className="bg-white border-b border-ink-ghost/10">
-          <div className="container-xl py-3 flex items-center gap-2 text-sm text-ink-muted">
-            <Link href="/fleet" className="hover:text-brand transition-colors">Fleet</Link>
-            <span aria-hidden="true">/</span>
-            <span className="text-ink-strong font-medium">Tempo</span>
-          </div>
-        </div>
-
         {/* Hero */}
         <FleetSubPageHero
           image="/bgts-hero-5.jpg"
@@ -55,6 +46,7 @@ export default function TempoFleetPage() {
           headlineLine1="Tempo Fleet"
           headlineAccent="Reliable intercity hauls."
           subtitle="BGTS Tempo vehicles cover intercity PTL runs and corridor freight across Gujarat — Tata 407, Eicher Pro 2049, and Ashok Leyland Dost+."
+          category="Tempo"
         />
         {/* CTA below hero */}
         <div className="bg-white border-b border-ink-ghost/10 py-4">

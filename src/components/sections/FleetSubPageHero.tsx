@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { Tag } from '@/components/ui/Tag'
 
 interface FleetSubPageHeroProps {
@@ -8,6 +9,7 @@ interface FleetSubPageHeroProps {
   headlineLine1: string
   headlineAccent: string
   subtitle: string
+  category: string // breadcrumb label e.g. "Pickup"
 }
 
 export function FleetSubPageHero({
@@ -17,11 +19,12 @@ export function FleetSubPageHero({
   headlineLine1,
   headlineAccent,
   subtitle,
+  category,
 }: FleetSubPageHeroProps) {
   return (
     <div
       className="relative w-full overflow-hidden"
-      style={{ height: 'clamp(340px, 46vw, 540px)' }}
+      style={{ height: 'clamp(380px, 52vw, 580px)' }}
     >
       {/* Background image */}
       <Image
@@ -33,18 +36,31 @@ export function FleetSubPageHero({
         priority
       />
 
-      {/* Dark gradient overlay */}
+      {/* Dark gradient — top light for breadcrumb, bottom heavy for text */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.50) 50%, rgba(0,0,0,0.82) 100%)',
+            'linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.38) 35%, rgba(0,0,0,0.75) 75%, rgba(0,0,0,0.88) 100%)',
         }}
         aria-hidden="true"
       />
 
-      {/* Text overlay */}
-      <div className="absolute inset-0 flex flex-col justify-end pb-12 md:pb-16">
+      {/* Breadcrumb — top of image */}
+      <div className="absolute top-0 left-0 right-0 pt-5">
+        <div className="container-xl">
+          <nav className="flex items-center gap-2 text-sm text-white/70" aria-label="Breadcrumb">
+            <Link href="/fleet" className="hover:text-white transition-colors">
+              Fleet
+            </Link>
+            <span aria-hidden="true" className="text-white/40">/</span>
+            <span className="text-white font-medium">{category}</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* Main text — bottom of image */}
+      <div className="absolute inset-0 flex flex-col justify-end pb-10 md:pb-14">
         <div className="container-xl">
           <Tag
             variant="brand"
