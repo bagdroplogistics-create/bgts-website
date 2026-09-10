@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
+import { FleetSubPageHero } from '@/components/sections/FleetSubPageHero'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
@@ -47,26 +48,23 @@ export default function PickupFleetPage() {
         </div>
 
         {/* Hero */}
-        <div className="py-16 md:py-24 relative overflow-hidden bg-[#FAFAF8] border-b border-ink-ghost/10">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-transparent pointer-events-none" />
-          <div className="container-xl relative z-10">
-            <Tag variant="brand" size="sm" className="mb-4">Light Commercial</Tag>
-            <h1 className="font-display font-black text-5xl md:text-6xl text-ink-strong tracking-tight mb-4">
-              Pickup Fleet<br />
-              <span className="text-gradient-energy">Fast. Agile. City-ready.</span>
-            </h1>
-            <p className="text-ink-muted text-xl max-w-2xl mb-8">
-              BGTS Pickup vehicles handle city express, last-mile, and same-day delivery
-              runs across Gujarat and Maharashtra — Bolero Pickup, Tata Ace, and Mahindra Jeeto.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button variant="primary" size="md" icon={<Truck size={15} />} iconPosition="left" asChild>
-                <Link href="/quote">Get a Quote</Link>
-              </Button>
-              <Button variant="outline" size="md" asChild>
-                <Link href="/fleet">← All Fleet</Link>
-              </Button>
-            </div>
+        <FleetSubPageHero
+          image="/bgts-hero-6.jpg"
+          imageAlt="BGTS Vadodara depot — city express and last-mile pickup vehicles Gujarat Maharashtra"
+          tagLabel="Light Commercial"
+          headlineLine1="Pickup Fleet"
+          headlineAccent="Fast. Agile. City-ready."
+          subtitle="BGTS Pickup vehicles handle city express, last-mile, and same-day delivery runs across Gujarat and Maharashtra — Bolero Pickup, Tata Ace, and Mahindra Jeeto."
+        />
+        {/* CTA below hero */}
+        <div className="bg-white border-b border-ink-ghost/10 py-4">
+          <div className="container-xl flex flex-wrap gap-3">
+            <Button variant="primary" size="md" icon={<Truck size={15} />} iconPosition="left" asChild>
+              <Link href="/quote">Get a Quote</Link>
+            </Button>
+            <Button variant="outline" size="md" asChild>
+              <Link href="/fleet">← All Fleet</Link>
+            </Button>
           </div>
         </div>
 

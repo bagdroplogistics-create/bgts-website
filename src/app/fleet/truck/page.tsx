@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
+import { FleetSubPageHero } from '@/components/sections/FleetSubPageHero'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
@@ -47,26 +48,23 @@ export default function TruckFleetPage() {
         </div>
 
         {/* Hero */}
-        <div className="py-16 md:py-24 relative overflow-hidden bg-[#FAFAF8] border-b border-ink-ghost/10">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-transparent pointer-events-none" />
-          <div className="container-xl relative z-10">
-            <Tag variant="brand" size="sm" className="mb-4">Heavy Commercial</Tag>
-            <h1 className="font-display font-black text-5xl md:text-6xl text-ink-strong tracking-tight mb-4">
-              Truck Fleet<br />
-              <span className="text-gradient-energy">High capacity. Primary lanes.</span>
-            </h1>
-            <p className="text-ink-muted text-xl max-w-2xl mb-8">
-              BGTS multi-axle trucks carry 10–20 MT loads on primary FTL routes across
-              Gujarat and Maharashtra — Tata LPS 4018, Bharat Benz 3523, Ashok Leyland 4923.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button variant="primary" size="md" icon={<Truck size={15} />} iconPosition="left" asChild>
-                <Link href="/quote">Get a Quote</Link>
-              </Button>
-              <Button variant="outline" size="md" asChild>
-                <Link href="/fleet">← All Fleet</Link>
-              </Button>
-            </div>
+        <FleetSubPageHero
+          image="/bgts-hero-1.jpg"
+          imageAlt="BGTS trucks on national highway — high-capacity FTL freight Gujarat Maharashtra"
+          tagLabel="Heavy Commercial"
+          headlineLine1="Truck Fleet"
+          headlineAccent="High capacity. Primary lanes."
+          subtitle="BGTS multi-axle trucks carry 10–20 MT loads on primary FTL routes across Gujarat and Maharashtra — Tata LPS 4018, Bharat Benz 3523, Ashok Leyland 4923."
+        />
+        {/* CTA below hero */}
+        <div className="bg-white border-b border-ink-ghost/10 py-4">
+          <div className="container-xl flex flex-wrap gap-3">
+            <Button variant="primary" size="md" icon={<Truck size={15} />} iconPosition="left" asChild>
+              <Link href="/quote">Get a Quote</Link>
+            </Button>
+            <Button variant="outline" size="md" asChild>
+              <Link href="/fleet">← All Fleet</Link>
+            </Button>
           </div>
         </div>
 

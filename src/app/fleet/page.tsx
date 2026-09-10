@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
+import { FleetHeroSlider } from '@/components/sections/FleetHeroSlider'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
@@ -108,21 +109,8 @@ export default function FleetPage() {
       <Navbar />
 
       <main className="pt-header min-h-screen bg-surface-page">
-        {/* Header */}
-        <div className="py-16 md:py-24 relative overflow-hidden bg-[#FAFAF8] border-b border-ink-ghost/10">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-transparent pointer-events-none" />
-          <div className="container-xl relative z-10">
-            <Tag variant="brand" size="sm" className="mb-4">2,000+ Vehicles</Tag>
-            <h1 className="font-display font-black text-5xl md:text-6xl text-ink-strong tracking-tight mb-4">
-              Built for India&apos;s<br />
-              <span className="text-gradient-energy">toughest corridors.</span>
-            </h1>
-            <p className="text-ink-muted text-xl max-w-2xl">
-              From last-mile LCVs to 40-tonne multi-axle trailers — BGTS operates
-              the right vehicle for every freight type, route, and service level.
-            </p>
-          </div>
-        </div>
+        {/* Hero — full-bleed image slider */}
+        <FleetHeroSlider />
 
         {/* Fleet category cards — links to dedicated pages */}
         <section className="section-py bg-surface-page">
