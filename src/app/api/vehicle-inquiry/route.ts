@@ -123,33 +123,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: 'Invalid vehicle selection.' }, { status: 422 })
   }
 
-  // Email notification
-  try {
-    const SMTP_USER = process.env.SMTP_USER
-    const SMTP_PASS = process.env.SMTP_PASS
-    const SMTP_HOST = process.env.SMTP_HOST ?? 'smtp.gmail.com'
-    const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587)
-    const TO_EMAIL  = process.env.SERVICE_INQUIRY_EMAIL ?? process.env.TO_EMAIL ?? 'info@bgts.in'
+  // Email notification (non-fatal — inquiry is always saved to DB regardless)
+  const SMTP_USER = process.env.SMTP_USER
+  const SMTP_PASS = process.env.SMTP_PASS
+  const SMTP_HOST = process.env.SMTP_HOST ?? 'smtp.gmail.com'
+  const SMTP_PORT = Number(process.env.SMTP_PORT ?? 587)
+  const TO_EMAIL  = process.env.SERVICE_INQUIRY_EMAIL ?? process.env.TO_EMAIL ?? 'info@bgts.in'
 
-    if (!SMTP_USER || !SMTP_PASS) throw new Error('SMTP credentials not configured')
-
-    const transporter = nodemailer.createTransport({
-      host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465,
-      auth: { user: SMTP_USER, pass: SMTP_PASS.replace(/\s/g, '') },
-      tls: { rejectUnauthorized: false },
-    })
-    await transporter.verify()
-    await transporter.sendMail({
-      from:    `"BGTS Website" <${SMTP_USER}>`,
-      to:      TO_EMAIL,
-      replyTo: body.email || undefined,
-      subject: `New Vehicle Inquiry — BGTS Website | ${vehicle} | ${name}`,
-      html:    buildEmailHtml(body),
-    })
-    console.log('[vehicle-inquiry] ✅ Email sent to', TO_EMAIL)
-  } catch (err) {
-    console.error('[vehicle-inquiry] ❌ Email failed:', err)
-    return NextResponse.json({ success: false, error: 'Could not send notification. Please try again.' }, { status: 500 })
+  if (!SMTP_USER || !SMTP_PASS) {
+    console.warn('[vehicle-inquiry] SMTP not configured — skipping email')
+  } else {
+    try {
+      const transporter = nodemailer.createTransport({
+        host: SMTP_HOST, port: SMTP_PORT, secure: SMTP_PORT === 465,
+        auth: { user: SMTP_USER, pass: SMTP_PASS.replace(/\s/g, '') },
+        tls: { rejectUnauthorized: false },
+      })
+      await transporter.sendMail({
+        from:    `"BGTS Website" <${SMTP_USER}>`,
+        to:      TO_EMAIL,
+        replyTo: body.email || undefined,
+        subject: `New Vehicle Inquiry — BGTS Website | ${vehicle} | ${name}`,
+        html:    buildEmailHtml(body),
+      })
+      console.log('[vehicle-inquiry] ✅ Email sent to', TO_EMAIL)
+    } catch (err) {
+      console.error('[vehicle-inquiry] ❌ Email failed (non-fatal):', err)
+    }
   }
 
   // WhatsApp (non-fatal)
