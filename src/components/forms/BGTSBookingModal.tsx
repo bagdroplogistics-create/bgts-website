@@ -35,6 +35,7 @@ const VEHICLES: Vehicle[] = [
   { id: 'vehicle-16t',         name: 'Vehicle 16T',            category: 'Heavy',     maxLoad: '16 Ton'  },
   { id: 'vehicle-21t',         name: 'Vehicle 21T',            category: 'Heavy',     maxLoad: '21 Ton'  },
   { id: 'vehicle-25t',         name: 'Vehicle 25T',            category: 'Heavy',     maxLoad: '25 Ton'  },
+  { id: 'vehicle-40t',         name: 'Vehicle 40T',            category: 'Heavy',     maxLoad: '40 Ton'  },
   // Container
   { id: 'container-20ft',      name: 'Container 20 FT',        category: 'Container', size: '20×8 ft',   maxLoad: '6.5 Ton' },
   { id: 'container-32ft-sxl',  name: 'Container 32 FT SXL',   category: 'Container', size: '32×8 ft',   maxLoad: '7 Ton'   },
@@ -59,6 +60,7 @@ const VEHICLE_WEIGHT_AUTO: Record<string, string> = {
   'vehicle-16t':        '10–20 Ton',
   'vehicle-21t':        'Above 20 Ton',
   'vehicle-25t':        'Above 20 Ton',
+  'vehicle-40t':        'Above 20 Ton',
   'container-20ft':     '5–10 Ton',
   'container-32ft-sxl': '5–10 Ton',
   'container-32ft-mxl': '10–20 Ton',
@@ -108,11 +110,11 @@ const TABS = [
   },
   {
     id: 'heavy',
-    label: 'Heavy Commercial',
+    label: 'Heavy Commercial / Trailer',
     short: 'Heavy',
     color: 'from-orange-600 to-orange-400',
     dot: 'bg-orange-500',
-    ids: ['vehicle-9t', 'vehicle-16t', 'vehicle-21t', 'vehicle-25t'],
+    ids: ['vehicle-9t', 'vehicle-16t', 'vehicle-21t', 'vehicle-25t', 'vehicle-40t'],
   },
   {
     id: 'container',
@@ -171,7 +173,7 @@ function VehicleSVG({ id, className }: { id: string; className?: string }) {
     )
   }
   // Heavy truck (multi-axle)
-  if (['vehicle-9t','vehicle-16t','vehicle-21t','vehicle-25t'].includes(id)) {
+  if (['vehicle-9t','vehicle-16t','vehicle-21t','vehicle-25t','vehicle-40t'].includes(id)) {
     return (
       <svg viewBox="0 0 150 56" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect x="4" y="18" width="80" height="26" rx="2" fill="white" fillOpacity="0.22"/>
