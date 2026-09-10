@@ -1,7 +1,18 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import { X, Truck, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
+
+// Derive inquiry source label from pathname
+function fleetSource(pathname: string): string | null {
+  if (pathname.startsWith('/fleet/pickup'))  return 'Fleet → Pickup'
+  if (pathname.startsWith('/fleet/tempo'))   return 'Fleet → Tempo'
+  if (pathname.startsWith('/fleet/truck'))   return 'Fleet → Truck'
+  if (pathname.startsWith('/fleet/trailer')) return 'Fleet → Trailer'
+  if (pathname.startsWith('/fleet'))         return 'Fleet'
+  return null
+}
 
 // ── gtag helper (Google Ads tag already loaded in layout) ─────────────────
 function gtag(...args: unknown[]) {
@@ -36,6 +47,7 @@ function validatePhone(p: string) {
 }
 
 export function VehicleInquiryPopup() {
+  const pathname                  = usePathname()
   const [open, setOpen]           = useState(false)
   const [form, setForm]           = useState<FormData>(EMPTY)
   const [errors, setErrors]       = useState<Partial<Record<keyof FormData, string>>>({})
@@ -105,10 +117,15 @@ export function VehicleInquiryPopup() {
     trackEvent('vehicle_inquiry_form_submitted')
 
     try {
+      const source = fleetSource(pathname)
       const res = await fetch('/api/vehicle-inquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, phone: form.phone.replace(/\s/g, '') }),
+        body: JSON.stringify({
+          ...form,
+          phone: form.phone.replace(/\s/g, ''),
+          ...(source ? { source_page: source } : {}),
+        }),
       })
       const json = await res.json()
       if (json.success) {

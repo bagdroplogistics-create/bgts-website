@@ -5,15 +5,54 @@ import { Footer } from '@/components/layout/Footer'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { Button } from '@/components/ui/Button'
-import { Truck, Leaf, Shield, Gauge } from 'lucide-react'
+import { Truck, Leaf, Shield, Gauge, ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Our Fleet',
+  title: 'Our Fleet | BGTS Transport',
   description:
-    'BGTS operates 2,000+ vehicles across road freight: FTL trucks, PTL vans, ODC trailers, and the BGTS EV cargo fleet — Gujarat and Maharashtra.',
+    'BGTS operates 2,000+ vehicles across road freight: Pickup, Tempo, Truck, and Trailer — Gujarat, Maharashtra and beyond.',
 }
 
 const fleetCategories = [
+  {
+    slug: 'pickup',
+    name: 'Pickup',
+    range: '500 kg – 1.5 MT',
+    desc: 'Light commercial vehicles for city express, last-mile, and same-day parcel delivery.',
+    vehicles: ['Bolero Pickup', 'Tata Ace', 'Mahindra Jeeto'],
+    icon: '🛻',
+    color: 'border-brand/20 hover:border-brand/40',
+  },
+  {
+    slug: 'tempo',
+    name: 'Tempo',
+    range: '1.5 MT – 5 MT',
+    desc: 'Medium-duty tempos for intercity PTL freight and corridor runs across Gujarat.',
+    vehicles: ['Tata 407', 'Eicher Pro 2049', 'Ashok Leyland Dost+'],
+    icon: '🚐',
+    color: 'border-brand/20 hover:border-brand/40',
+  },
+  {
+    slug: 'truck',
+    name: 'Truck',
+    range: '10 MT – 20 MT',
+    desc: 'High-capacity trucks for FTL and primary distribution across Gujarat and Maharashtra.',
+    vehicles: ['Tata LPS 4018', 'Bharat Benz 3523', 'Ashok Leyland 4923'],
+    icon: '🚛',
+    color: 'border-brand/20 hover:border-brand/40',
+  },
+  {
+    slug: 'trailer',
+    name: 'Trailer',
+    range: '20 MT – 40 MT',
+    desc: 'Multi-axle trailers and flatbeds for ODC, infrastructure, and project cargo.',
+    vehicles: ['49-ft Flatbed', 'Low-Bed Trailer', 'Semi Low-Bed'],
+    icon: '🏗️',
+    color: 'border-brand/20 hover:border-brand/40',
+  },
+]
+
+const legacyFleetCategories = [
   {
     name: 'Light Commercial Vehicles',
     range: '500 kg – 1.5 MT',
@@ -85,18 +124,58 @@ export default function FleetPage() {
           </div>
         </div>
 
-        {/* Fleet categories */}
+        {/* Fleet category cards — links to dedicated pages */}
         <section className="section-py bg-surface-page">
           <div className="container-xl">
-            <div className="mb-12">
+            <div className="mb-10">
               <SectionHeading
-                eyebrow="Fleet Categories"
+                eyebrow="Explore by Category"
                 title="Right vehicle for every load"
                 align="left"
               />
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
               {fleetCategories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/fleet/${cat.slug}`}
+                  className={`group rounded-2xl border bg-white p-6 transition-all duration-200 hover:shadow-hover ${cat.color}`}
+                >
+                  <div className="text-3xl mb-3" aria-hidden="true">{cat.icon}</div>
+                  <h2 className="font-display font-bold text-ink-strong text-lg mb-1 group-hover:text-brand transition-colors">
+                    {cat.name}
+                  </h2>
+                  <p className="text-xs font-mono text-brand font-semibold mb-2">{cat.range}</p>
+                  <p className="text-sm text-ink-muted leading-relaxed mb-4">{cat.desc}</p>
+                  <ul className="space-y-1.5 mb-5">
+                    {cat.vehicles.map((v) => (
+                      <li key={v} className="flex items-center gap-2 text-xs text-ink-body">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0 bg-brand" aria-hidden="true" />
+                        {v}
+                      </li>
+                    ))}
+                  </ul>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-brand group-hover:gap-2 transition-all">
+                    View Fleet <ArrowRight size={12} />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Full fleet detail */}
+        <section className="section-py bg-white border-t border-ink-ghost/10">
+          <div className="container-xl">
+            <div className="mb-12">
+              <SectionHeading
+                eyebrow="Fleet Overview"
+                title="All vehicle categories"
+                align="left"
+              />
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {legacyFleetCategories.map((cat) => (
                 <div
                   key={cat.name}
                   className={`rounded-2xl border p-6 bg-white ${cat.tag === 'eko' ? 'border-eko/25 bg-eko-50' : 'border-ink-ghost/10'}`}

@@ -10,10 +10,10 @@ import { useBookingModal } from '@/contexts/BookingModalContext'
 import { Button } from '@/components/ui/Button'
 
 const navLinks = [
-  { label: 'Services',  href: '/services',  hasDropdown: true  },
-  { label: 'Fleet',     href: '/fleet',     hasDropdown: false },
-  { label: 'Industries', href: '/industries', hasDropdown: true },
-  { label: 'About',     href: '/about',     hasDropdown: false },
+  { label: 'Services',   href: '/services',   hasDropdown: true  },
+  { label: 'Fleet',      href: '/fleet',      hasDropdown: true  },
+  { label: 'Industries', href: '/industries', hasDropdown: true  },
+  { label: 'About',      href: '/about',      hasDropdown: false },
 ]
 
 const serviceLinks = [
@@ -22,6 +22,13 @@ const serviceLinks = [
   { label: 'Warehousing',              href: '/services/warehousing'      },
   { label: 'Heavy & ODC',             href: '/services/heavy-odc'        },
   { label: 'Multimodal Logistics',    href: '/services/multimodal'       },
+]
+
+const fleetLinks = [
+  { label: 'Pickup',  href: '/fleet/pickup'  },
+  { label: 'Tempo',   href: '/fleet/tempo'   },
+  { label: 'Truck',   href: '/fleet/truck'   },
+  { label: 'Trailer', href: '/fleet/trailer' },
 ]
 
 const industryLinks = [
@@ -140,6 +147,32 @@ export function Navbar() {
                 </div>
               )}
 
+              {/* Dropdown — Fleet */}
+              {link.label === 'Fleet' && activeDropdown === 'Fleet' && (
+                <div
+                  className="absolute top-full left-0 mt-1 w-48 bg-white rounded-xl shadow-hover border border-ink-ghost/10 py-2 z-50"
+                  role="menu"
+                >
+                  <Link
+                    href="/fleet"
+                    className="block px-4 py-2 text-xs font-semibold text-ink-muted uppercase tracking-wider border-b border-ink-ghost/10 mb-1"
+                    role="menuitem"
+                  >
+                    All Fleet
+                  </Link>
+                  {fleetLinks.map((f) => (
+                    <Link
+                      key={f.href}
+                      href={f.href}
+                      className="block px-4 py-2.5 text-sm text-ink-body hover:bg-brand-subtle hover:text-brand transition-colors"
+                      role="menuitem"
+                    >
+                      {f.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+
               {/* Dropdown — Industries */}
               {link.label === 'Industries' && activeDropdown === 'Industries' && (
                 <div
@@ -230,13 +263,12 @@ export function Navbar() {
                       ? 'bg-brand-subtle text-brand font-semibold'
                       : 'text-ink-body hover:bg-surface-mid'
                   )}
-                  onClick={() =>
-                    link.hasDropdown
-                      ? setActiveDropdown(
-                          activeDropdown === link.label ? null : link.label
-                        )
-                      : undefined
-                  }
+                  onClick={(e) => {
+                    if (link.hasDropdown) {
+                      e.preventDefault()
+                      setActiveDropdown(activeDropdown === link.label ? null : link.label)
+                    }
+                  }}
                 >
                   {link.label}
                   {link.hasDropdown && (
@@ -253,7 +285,12 @@ export function Navbar() {
                 {/* Mobile dropdown */}
                 {link.hasDropdown && activeDropdown === link.label && (
                   <div className="ml-4 mt-1 flex flex-col gap-1">
-                    {(link.label === 'Services' ? serviceLinks : industryLinks).map((sub) => (
+                    {(link.label === 'Services'
+                      ? serviceLinks
+                      : link.label === 'Fleet'
+                      ? fleetLinks
+                      : industryLinks
+                    ).map((sub) => (
                       <Link
                         key={sub.href}
                         href={sub.href}

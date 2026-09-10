@@ -25,7 +25,7 @@ function buildEmailHtml(data: Record<string, string>): string {
     ['Phone',            data.phone            ?? '—'],
     ['Email',            data.email            || '—'],
     ['Vehicle Required', data.vehicle_required ?? '—'],
-    ['Source',           'BGTS Website'],
+    ['Source',           data.source_page ? `BGTS Website — ${data.source_page}` : 'BGTS Website'],
     ['Submitted At',     now + ' IST'],
   ]
   const rowsHtml = rows.map(([k, v], i) => `
@@ -64,7 +64,7 @@ async function sendWhatsApp(data: Record<string, string>) {
     `*Phone:* ${data.phone ?? '—'}`,
     `*Email:* ${data.email || '—'}`,
     `*Vehicle Required:* ${data.vehicle_required ?? '—'}`,
-    `*Source:* Website`,
+    `*Source:* ${data.source_page ? `Website — ${data.source_page}` : 'Website'}`,
     `*Time:* ${now} IST`,
   ].join('\n')
 
