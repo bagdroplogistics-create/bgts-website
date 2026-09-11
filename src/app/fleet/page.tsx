@@ -18,7 +18,7 @@ const fleetCategories = [
   {
     slug: 'pickup',
     name: 'Pickup',
-    range: '500 kg – 1.5 MT',
+    range: '500 kg – 2 MT',
     desc: 'Light commercial vehicles for city express, last-mile, and same-day parcel delivery.',
     vehicles: ['Bolero Pickup', 'Tata Ace', 'Mahindra Jeeto'],
     icon: '🛻',
@@ -27,7 +27,7 @@ const fleetCategories = [
   {
     slug: 'tempo',
     name: 'Tempo',
-    range: '1.5 MT – 5 MT',
+    range: '2 MT – 5 MT',
     desc: 'Medium-duty tempos for intercity PTL freight and corridor runs across Gujarat.',
     vehicles: ['Tata 407', 'Eicher Pro 2049', 'Ashok Leyland Dost+'],
     icon: '🚐',
@@ -129,7 +129,6 @@ export default function FleetPage() {
                   href={`/fleet/${cat.slug}`}
                   className={`group rounded-2xl border bg-white p-6 transition-all duration-200 hover:shadow-hover ${cat.color}`}
                 >
-                  <div className="text-3xl mb-3" aria-hidden="true">{cat.icon}</div>
                   <h2 className="font-display font-bold text-ink-strong text-lg mb-1 group-hover:text-brand transition-colors">
                     {cat.name}
                   </h2>
@@ -168,7 +167,6 @@ export default function FleetPage() {
                   key={cat.name}
                   className={`rounded-2xl border p-6 bg-white ${cat.tag === 'eko' ? 'border-eko/25 bg-eko-50' : 'border-ink-ghost/10'}`}
                 >
-                  <div className="text-3xl mb-3" aria-hidden="true">{cat.icon}</div>
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-display font-bold text-ink-strong">{cat.name}</h3>
                     {cat.tag === 'eko' && <Tag variant="eko" size="sm">EV</Tag>}
