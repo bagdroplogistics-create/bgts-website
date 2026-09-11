@@ -56,7 +56,7 @@ const fleetCategories = [
 const legacyFleetCategories = [
   {
     name: 'Light Commercial Vehicles',
-    range: '500 kg – 1.5 MT',
+    range: '500 kg – 2 MT',
     desc: 'Bolero Pickups, Tata Ace for city-to-city express parcel and same-day deliveries.',
     types: ['Bolero Pickup', 'Tata Ace', 'Mahindra Jeeto'],
     icon: '🛻',
